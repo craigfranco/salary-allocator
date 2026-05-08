@@ -25,26 +25,33 @@ export default function OrgChart() {
     return order.indexOf(a.short_code) - order.indexOf(b.short_code);
   });
 
+  const suppressedCount = employees.filter(e => e.suppressed).length;
   const departments = ['REVENUE', 'ECOMM', 'SALES'];
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold">Organization Chart</h2>
-        <p className="text-sm text-muted-foreground mt-1">Team structure grouped by department</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Team structure grouped by department
+          {suppressedCount > 0 && <span className="ml-2 text-amber-600 font-medium">· {suppressedCount} employee(s) suppressed</span>}
+        </p>
       </div>
 
       <div className="space-y-8">
         {departments.map(dept => {
           const deptEmployees = employees.filter(e => e.department === dept);
           if (deptEmployees.length === 0) return null;
+          const activeCount = deptEmployees.filter(e => !e.suppressed).length;
           return (
             <div key={dept}>
               <div className={`bg-gradient-to-r ${getDeptBgColor(dept)} rounded-xl p-4 mb-4`}>
                 <div className="flex items-center gap-2 text-white">
                   <Users className="w-5 h-5" />
                   <h3 className="text-lg font-display font-bold">{deptLabels[dept]}</h3>
-                  <span className="ml-auto text-sm opacity-80">{deptEmployees.length} members</span>
+                  <span className="ml-auto text-sm opacity-80">
+                    {activeCount} active{deptEmployees.length !== activeCount ? ` · ${deptEmployees.length - activeCount} suppressed` : ''}
+                  </span>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">

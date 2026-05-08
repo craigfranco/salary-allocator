@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/helpers';
-import { User } from 'lucide-react';
+import { User, EyeOff } from 'lucide-react';
 
 const barColors = {
   AURA: 'bg-blue-500',
@@ -14,11 +14,12 @@ const barColors = {
 };
 
 export default function OrgEmployeeCard({ employee, onClick }) {
+  const suppressed = !!employee.suppressed;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
 
   return (
     <Card
-      className="p-3 cursor-pointer hover:shadow-md transition-all hover:-translate-y-0.5 border border-border/60"
+      className={`p-3 cursor-pointer transition-all border border-border/60 ${suppressed ? 'opacity-40 bg-muted/30' : 'hover:shadow-md hover:-translate-y-0.5'}`}
       onClick={() => onClick(employee)}
     >
       <div className="flex items-start gap-3">
@@ -26,7 +27,10 @@ export default function OrgEmployeeCard({ employee, onClick }) {
           <User className="w-4 h-4 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold truncate">{employee.name}</p>
+          <div className="flex items-center gap-1">
+            {suppressed && <EyeOff className="w-3 h-3 text-muted-foreground flex-shrink-0" />}
+            <p className={`text-sm font-semibold truncate ${suppressed ? 'line-through text-muted-foreground' : ''}`}>{employee.name}</p>
+          </div>
           <p className="text-[11px] text-muted-foreground truncate">{employee.title}</p>
           <p className="text-xs font-bold text-secondary mt-1">{formatCurrency(employee.annual_salary)}</p>
         </div>

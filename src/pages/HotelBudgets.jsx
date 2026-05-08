@@ -17,6 +17,8 @@ export default function HotelBudgets() {
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
 
+  const activeEmployees = employees.filter(e => !e.suppressed);
+
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Hotel.update(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hotels'] }),
@@ -33,14 +35,18 @@ export default function HotelBudgets() {
   });
 
   const totalBudget = hotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
-  const totalAllocated = hotels.reduce((s, h) => s + getHotelAllocatedTotal(employees, h.short_code), 0);
+  const totalAllocated = hotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
+  const suppressedCount = employees.length - activeEmployees.length;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold">Hotel Budgets</h2>
-          <p className="text-sm text-muted-foreground mt-1">2026 Room Revenue & S&M Payroll Budgets</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            2026 Room Revenue & S&M Payroll Budgets
+            {suppressedCount > 0 && <span className="ml-2 text-amber-600 font-medium">· {suppressedCount} employee(s) suppressed</span>}
+          </p>
         </div>
         <Button onClick={() => setAddOpen(true)} className="gap-2">
           <Plus className="w-4 h-4" /> Add Hotel
@@ -65,7 +71,7 @@ export default function HotelBudgets() {
           <HotelBudgetCard
             key={hotel.id}
             hotel={hotel}
-            allocatedTotal={getHotelAllocatedTotal(employees, hotel.short_code)}
+            allocatedTotal={getHotelAllocatedTotal(activeEmployees, hotel.short_code)}
             onUpdate={(data) => updateMutation.mutate({ id: hotel.id, data })}
           />
         ))}

@@ -10,7 +10,10 @@ export default function Alerts() {
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
-  const allocAlerts = employees.map(emp => {
+  const activeEmployees = employees.filter(e => !e.suppressed);
+  const suppressedCount = employees.length - activeEmployees.length;
+
+  const allocAlerts = activeEmployees.map(emp => {
     const total = getTotalAllocation(emp.allocations);
     const status = getAllocationStatus(total);
     if (status === 'exact') return null;
@@ -18,7 +21,7 @@ export default function Alerts() {
   }).filter(Boolean);
 
   const budgetAlerts = hotels.filter(h => h.short_code !== 'CORP' && h.sm_payroll_budget > 0).map(hotel => {
-    const allocated = getHotelAllocatedTotal(employees, hotel.short_code);
+    const allocated = getHotelAllocatedTotal(activeEmployees, hotel.short_code);
     const budget = hotel.sm_payroll_budget;
     const pctUsed = (allocated / budget) * 100;
     if (pctUsed > 100) return { hotel, allocated, budget, type: 'over', amount: allocated - budget };
@@ -32,7 +35,10 @@ export default function Alerts() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-display font-bold">Alerts & Issues</h2>
-        <p className="text-sm text-muted-foreground mt-1">Real-time allocation and budget monitoring</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          Real-time allocation and budget monitoring
+          {suppressedCount > 0 && <span className="ml-2 text-amber-600 font-medium">· {suppressedCount} employee(s) suppressed</span>}
+        </p>
       </div>
 
       {!hasIssues && (
