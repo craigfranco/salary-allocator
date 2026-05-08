@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 
-export default function AllocationCell({ value, salary, onSave }) {
+export default function AllocationCell({ value, salary, onSave, disabled }) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const inputRef = useRef(null);
@@ -17,6 +17,7 @@ export default function AllocationCell({ value, salary, onSave }) {
   const dollars = pct * salary;
 
   const handleStart = () => {
+    if (disabled) return;
     setEditValue(Math.round(pct * 100).toString());
     setEditing(true);
   };
@@ -54,7 +55,7 @@ export default function AllocationCell({ value, salary, onSave }) {
 
   return (
     <td
-      className="px-2 py-1.5 cursor-pointer hover:bg-secondary/30 transition-colors group"
+      className={`px-2 py-1.5 transition-colors ${disabled ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-secondary/30 group'}`}
       onClick={handleStart}
     >
       <div className="flex flex-col items-center">

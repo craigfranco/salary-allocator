@@ -69,10 +69,17 @@ export default function SalaryTable() {
     return status !== 'exact';
   });
 
-  // Compute hotel totals
+  const handleToggleSuppress = (emp) => {
+    updateMutation.mutate({ id: emp.id, data: { suppressed: !emp.suppressed } });
+  };
+
+  const activeEmployees = employees.filter(e => !e.suppressed);
+  const suppressedCount = employees.length - activeEmployees.length;
+
+  // Compute hotel totals (active only)
   const hotelTotals = {};
   sortedHotels.forEach(h => {
-    hotelTotals[h.short_code] = employees.reduce((sum, emp) => {
+    hotelTotals[h.short_code] = activeEmployees.reduce((sum, emp) => {
       return sum + ((emp.allocations?.[h.short_code] || 0) * emp.annual_salary);
     }, 0);
   });
@@ -87,7 +94,10 @@ export default function SalaryTable() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Salary Allocations</h2>
-          <p className="text-sm text-muted-foreground mt-1">{employees.length} employees across {hotels.length} properties</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {employees.length} employees across {hotels.length} properties
+            {suppressedCount > 0 && <span className="ml-2 text-amber-600 font-medium">· {suppressedCount} suppressed</span>}
+          </p>
         </div>
         <Button onClick={() => { setEditEmp(null); setFormOpen(true); }} className="gap-2">
           <Plus className="w-4 h-4" /> Add Employee
@@ -131,6 +141,7 @@ export default function SalaryTable() {
                   onAllocChange={handleAllocChange}
                   onEdit={handleEdit}
                   onDelete={setDeleteEmp}
+                  onToggleSuppress={handleToggleSuppress}
                 />
               ))}
             </tbody>

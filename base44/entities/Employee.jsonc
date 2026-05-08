@@ -26,6 +26,11 @@
     "allocations": {
       "type": "object",
       "description": "Hotel allocation percentages as decimals (e.g. 0.40 = 40%). Keys are hotel short codes."
+    },
+    "suppressed": {
+      "type": "boolean",
+      "description": "If true, exclude this employee from all calculations",
+      "default": false
     }
   },
   "required": [
