@@ -169,6 +169,26 @@ export default function SalaryTable() {
               </tr>
               <tr className="bg-primary/5 border-t border-primary/10">
                 <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">
+                  Over / (Short) Budget
+                </td>
+                <td className="px-2 py-2" />
+                {sortedHotels.map(h => {
+                  const budget = h.sm_payroll_budget || 0;
+                  const allocated = hotelTotals[h.short_code] || 0;
+                  const diff = allocated - budget;
+                  if (budget === 0) return <td key={h.short_code} className="px-2 py-2 text-center"><span className="text-xs text-muted-foreground">—</span></td>;
+                  return (
+                    <td key={h.short_code} className="px-2 py-2 text-center">
+                      <span className={`text-xs font-bold ${diff > 0 ? 'text-red-600' : 'text-emerald-700'}`}>
+                        {diff > 0 ? '+' : ''}{formatCurrency(diff)}
+                      </span>
+                    </td>
+                  );
+                })}
+                <td />
+              </tr>
+              <tr className="bg-primary/5 border-t border-primary/10">
+                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">
                   Room Revenue Budget
                 </td>
                 <td className="px-2 py-2" />
