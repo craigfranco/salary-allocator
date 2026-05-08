@@ -137,7 +137,7 @@ export default function SalaryTable() {
             <tfoot>
               <tr className="bg-muted/60 border-t-2 border-primary/20">
                 <td colSpan={4} className="px-3 py-3 text-sm font-bold text-foreground sticky left-0 bg-muted/60 z-10">
-                  Hotel Totals
+                  Total Salary Allocated
                 </td>
                 <td className="px-2 py-3" />
                 {sortedHotels.map(h => (
@@ -145,6 +145,59 @@ export default function SalaryTable() {
                     <span className="text-xs font-bold text-foreground">{formatCurrency(hotelTotals[h.short_code])}</span>
                   </td>
                 ))}
+                <td />
+              </tr>
+              <tr className="bg-primary/5 border-t border-primary/10">
+                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">
+                  S&M Payroll Budget
+                </td>
+                <td className="px-2 py-2" />
+                {sortedHotels.map(h => {
+                  const budget = h.sm_payroll_budget || 0;
+                  const allocated = hotelTotals[h.short_code] || 0;
+                  const isOver = budget > 0 && allocated > budget;
+                  const isNear = budget > 0 && allocated / budget > 0.95 && allocated <= budget;
+                  return (
+                    <td key={h.short_code} className="px-2 py-2 text-center">
+                      <span className={`text-xs font-semibold ${isOver ? 'text-red-600' : isNear ? 'text-amber-600' : 'text-emerald-700'}`}>
+                        {budget > 0 ? formatCurrency(budget) : '—'}
+                      </span>
+                    </td>
+                  );
+                })}
+                <td />
+              </tr>
+              <tr className="bg-primary/5 border-t border-primary/10">
+                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">
+                  Room Revenue Budget
+                </td>
+                <td className="px-2 py-2" />
+                {sortedHotels.map(h => (
+                  <td key={h.short_code} className="px-2 py-2 text-center">
+                    <span className="text-xs font-semibold text-foreground">
+                      {h.room_revenue_budget > 0 ? formatCurrency(h.room_revenue_budget) : '—'}
+                    </span>
+                  </td>
+                ))}
+                <td />
+              </tr>
+              <tr className="bg-primary/5 border-t border-primary/10">
+                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">
+                  Payroll as % of Room Rev
+                </td>
+                <td className="px-2 py-2" />
+                {sortedHotels.map(h => {
+                  const roomRev = h.room_revenue_budget || 0;
+                  const allocated = hotelTotals[h.short_code] || 0;
+                  const pct = roomRev > 0 ? (allocated / roomRev) * 100 : null;
+                  return (
+                    <td key={h.short_code} className="px-2 py-2 text-center">
+                      <span className={`text-xs font-bold ${pct === null ? 'text-muted-foreground' : pct > 5 ? 'text-red-600' : pct > 3 ? 'text-amber-600' : 'text-emerald-700'}`}>
+                        {pct !== null ? `${pct.toFixed(1)}%` : '—'}
+                      </span>
+                    </td>
+                  );
+                })}
                 <td />
               </tr>
             </tfoot>
