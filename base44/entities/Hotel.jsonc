@@ -1,0 +1,26 @@
+{
+  "name": "Hotel",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Hotel display name"
+    },
+    "short_code": {
+      "type": "string",
+      "description": "Short identifier for the hotel"
+    },
+    "room_revenue_budget": {
+      "type": "number",
+      "description": "2026 Room Revenue Budget"
+    },
+    "sm_payroll_budget": {
+      "type": "number",
+      "description": "2026 S&M Payroll Budget"
+    }
+  },
+  "required": [
+    "name",
+    "short_code"
+  ]
+}

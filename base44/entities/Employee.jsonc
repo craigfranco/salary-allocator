@@ -1,0 +1,37 @@
+{
+  "name": "Employee",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the employee"
+    },
+    "title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "REVENUE",
+        "ECOMM",
+        "SALES"
+      ],
+      "description": "Department"
+    },
+    "annual_salary": {
+      "type": "number",
+      "description": "Annual salary in dollars"
+    },
+    "allocations": {
+      "type": "object",
+      "description": "Hotel allocation percentages as decimals (e.g. 0.40 = 40%). Keys are hotel short codes."
+    }
+  },
+  "required": [
+    "name",
+    "title",
+    "department",
+    "annual_salary"
+  ]
+}
