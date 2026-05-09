@@ -65,6 +65,11 @@ export default function SalaryTable() {
     hotelTotals[h.short_code] = activeEmployees.reduce((sum, emp) => sum + ((emp.allocations?.[h.short_code] || 0) * emp.annual_salary), 0);
   });
 
+  const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
+  const totalPayroll = propertyHotels.reduce((s, h) => s + (hotelTotals[h.short_code] || 0), 0);
+  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
+  const totalPayrollPct = totalRoomRev > 0 ? (totalPayroll / totalRoomRev) * 100 : null;
+
   const sortedEmployees = [...employees].sort((a, b) => {
     const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
     const d = deptOrder.indexOf(a.department) - deptOrder.indexOf(b.department);
@@ -228,6 +233,29 @@ export default function SalaryTable() {
                     </td>
                   );
                 })}
+                <td />
+              </tr>
+              <tr className="bg-primary/10 border-t-2 border-primary/20">
+                <td colSpan={4} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
+                  Total Payroll % of Room Rev
+                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(all properties excl. CORP)</span>
+                </td>
+                <td />
+                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
+                  <span className={`text-sm font-bold tabular-nums ${
+                    totalPayrollPct === null ? 'text-muted-foreground'
+                    : totalPayrollPct > 5 ? 'text-red-500'
+                    : totalPayrollPct > 3 ? 'text-amber-500'
+                    : 'text-emerald-600 dark:text-emerald-400'
+                  }`}>
+                    {totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—'}
+                    {totalPayrollPct !== null && (
+                      <span className="ml-2 text-[10px] font-normal text-muted-foreground">
+                        ({formatCurrency(totalPayroll)} / {formatCurrency(totalRoomRev)})
+                      </span>
+                    )}
+                  </span>
+                </td>
                 <td />
               </tr>
             </tfoot>
