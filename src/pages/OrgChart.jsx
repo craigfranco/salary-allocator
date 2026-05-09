@@ -14,23 +14,16 @@ const DEPT_STYLES = {
   SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-l-purple-500' },
 };
 
-function EmployeeCard({ employee, provided, snapshot, onClick }) {
+function EmployeeCard({ employee, onClick }) {
   const dept = DEPT_STYLES[employee.department] || {};
   const suppressed = !!employee.suppressed;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
 
   return (
     <div
-      ref={provided.innerRef}
-      {...provided.draggableProps}
-      {...provided.dragHandleProps}
       onClick={() => onClick(employee)}
-      className={`rounded-xl border-l-2 ${dept.border} border border-border bg-card p-3 cursor-grab active:cursor-grabbing transition-all duration-150 select-none ${
-        snapshot.isDragging
-          ? 'shadow-2xl scale-105 rotate-1 opacity-95 z-50'
-          : suppressed
-          ? 'opacity-40'
-          : 'hover:shadow-md hover:border-primary/30'
+      className={`rounded-xl border-l-2 ${dept.border} border border-border bg-card p-3 cursor-pointer transition-all duration-150 select-none w-48 flex-shrink-0 ${
+        suppressed ? 'opacity-40' : 'hover:shadow-md hover:border-primary/30'
       }`}
     >
       <div className="flex items-center gap-2.5">
@@ -41,8 +34,8 @@ function EmployeeCard({ employee, provided, snapshot, onClick }) {
           <p className={`text-xs font-semibold truncate ${suppressed ? 'line-through text-muted-foreground' : ''}`}>{employee.name}</p>
           <p className="text-[10px] text-muted-foreground truncate leading-tight">{employee.title}</p>
         </div>
-        <span className="text-[10px] font-bold text-muted-foreground shrink-0">{formatCurrency(employee.annual_salary)}</span>
       </div>
+      <div className="mt-1 text-[10px] font-bold text-muted-foreground">{formatCurrency(employee.annual_salary)}</div>
       {allocEntries.length > 0 && (
         <div className="mt-2 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
           {allocEntries.map(([code, pct]) => (
@@ -54,60 +47,57 @@ function EmployeeCard({ employee, provided, snapshot, onClick }) {
   );
 }
 
-function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle, inGrid = false }) {
+// Renders a node and all its subtree in a top-down horizontal layout
+function OrgNode({ employee, allEmployees, onEdit, collapsed, onToggle }) {
   const directReports = allEmployees.filter(e => e.manager_id === employee.id);
   const isCollapsed = collapsed[employee.id];
-  const isSuppressed = !!employee.suppressed;
 
   return (
-    <div className={inGrid ? '' : depth > 0 ? 'ml-5 pl-4 border-l-2 border-dashed border-border mt-2' : 'mt-2'}>
-      <Draggable draggableId={employee.id} index={0}>
-        {(provided, snapshot) => (
-          <EmployeeCard employee={employee} provided={provided} snapshot={snapshot} onClick={onEdit} />
-        )}
-      </Draggable>
+    <div className="flex flex-col items-center">
+      {/* Card */}
+      <EmployeeCard employee={employee} onClick={onEdit} />
 
+      {/* Toggle + children */}
       {directReports.length > 0 && (
-        <button
-          className="flex items-center gap-1 mt-1 mb-1 ml-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
-          onClick={() => onToggle(employee.id)}
-        >
-          {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-          {directReports.length} direct report{directReports.length !== 1 ? 's' : ''}
-        </button>
-      )}
+        <>
+          <button
+            className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            onClick={() => onToggle(employee.id)}
+          >
+            {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            {directReports.length} report{directReports.length !== 1 ? 's' : ''}
+          </button>
 
-      {!isCollapsed && (
-        <Droppable droppableId={employee.id} type="EMPLOYEE">
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className={`min-h-[8px] rounded-lg transition-all duration-150 ${
-                snapshot.isDraggingOver ? 'bg-primary/5 ring-1 ring-primary/20 p-2' : ''
-              } ${isSuppressed && directReports.length > 1 ? 'grid grid-cols-2 gap-2' : 'space-y-1'}`}
-            >
-              {directReports.map((report, idx) => (
-                <Draggable key={report.id} draggableId={`child-${report.id}`} index={idx}>
-                  {(prov, snap) => (
-                    <div ref={prov.innerRef} {...prov.draggableProps} {...prov.dragHandleProps}>
-                      <OrgNode
-                        employee={report}
-                        allEmployees={allEmployees}
-                        depth={depth + 1}
-                        onEdit={onEdit}
-                        collapsed={collapsed}
-                        onToggle={onToggle}
-                        inGrid={isSuppressed && directReports.length > 1}
-                      />
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
+          {!isCollapsed && (
+            <>
+              {/* Vertical connector line */}
+              <div className="w-px h-4 bg-border" />
+              {/* Horizontal row of children */}
+              <div className="flex flex-row items-start gap-4 relative">
+                {/* Horizontal line spanning children */}
+                {directReports.length > 1 && (
+                  <div
+                    className="absolute top-0 left-0 right-0 h-px bg-border"
+                    style={{ top: 0 }}
+                  />
+                )}
+                {directReports.map((report) => (
+                  <div key={report.id} className="flex flex-col items-center">
+                    {/* Small vertical stub down to child card */}
+                    <div className="w-px h-4 bg-border" />
+                    <OrgNode
+                      employee={report}
+                      allEmployees={allEmployees}
+                      onEdit={onEdit}
+                      collapsed={collapsed}
+                      onToggle={onToggle}
+                    />
+                  </div>
+                ))}
+              </div>
+            </>
           )}
-        </Droppable>
+        </>
       )}
     </div>
   );
@@ -130,40 +120,12 @@ export default function OrgChart() {
   const suppressedCount = employees.filter(e => e.suppressed).length;
   const rawTopLevel = employees.filter(e => !e.manager_id);
 
-  // If a top-level employee is suppressed (e.g. Craig), skip their card and
-  // promote their direct reports to appear at the top level instead.
-  const topLevel = rawTopLevel.flatMap(emp => {
-    if (emp.suppressed) {
-      return employees.filter(e => e.manager_id === emp.id);
-    }
-    return [emp];
-  });
+  // Promote direct reports of suppressed top-level employees to the top level
+  const topLevel = rawTopLevel.flatMap(emp =>
+    emp.suppressed ? employees.filter(e => e.manager_id === emp.id) : [emp]
+  );
 
   const toggleCollapse = (id) => setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
-
-  const onDragEnd = (result) => {
-    const { draggableId, destination } = result;
-    if (!destination) return;
-
-    // Strip the "child-" prefix used on nested draggables
-    const employeeId = draggableId.startsWith('child-') ? draggableId.slice(6) : draggableId;
-    const newManagerId = destination.droppableId === 'UNASSIGNED' || destination.droppableId === 'ROOT'
-      ? ''
-      : destination.droppableId;
-
-    if (newManagerId === employeeId) return; // Can't be own manager
-
-    // Prevent circular reference: new manager can't be a direct report of the dragged employee
-    const wouldCreateCycle = (managerId, targetId) => {
-      if (!managerId) return false;
-      if (managerId === targetId) return true;
-      const mgr = employees.find(e => e.id === managerId);
-      return mgr ? wouldCreateCycle(mgr.manager_id, targetId) : false;
-    };
-    if (wouldCreateCycle(newManagerId, employeeId)) return;
-
-    updateMutation.mutate({ id: employeeId, data: { manager_id: newManagerId } });
-  };
 
   return (
     <div className="space-y-6">
@@ -177,72 +139,25 @@ export default function OrgChart() {
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
           <GitBranch className="w-3.5 h-3.5" />
-          Drag to reassign · Click to edit
+          Click to edit
         </div>
       </div>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Hierarchy tree */}
-          <div className="lg:col-span-2 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Reporting Structure</p>
-            <Droppable droppableId="ROOT" type="EMPLOYEE">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={`space-y-2 min-h-[40px] rounded-xl transition-all duration-150 ${
-                    snapshot.isDraggingOver ? 'bg-primary/5 ring-1 ring-primary/20 p-3' : ''
-                  }`}
-                >
-                  {topLevel.map((emp, idx) => (
-                    <Draggable key={emp.id} draggableId={emp.id} index={idx}>
-                      {(prov, snap) => (
-                        <div ref={prov.innerRef} {...prov.draggableProps} {...prov.dragHandleProps}>
-                          <OrgNode
-                            employee={emp}
-                            allEmployees={employees}
-                            depth={0}
-                            onEdit={setEditEmp}
-                            collapsed={collapsed}
-                            onToggle={toggleCollapse}
-                          />
-                        </div>
-                      )}
-                    </Draggable>
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
-
-          {/* Unassigned drop zone */}
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              No Manager (Top Level)
-            </p>
-            <Droppable droppableId="UNASSIGNED" type="EMPLOYEE">
-              {(provided, snapshot) => (
-                <div
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  className={`min-h-[120px] rounded-xl border-2 border-dashed transition-all duration-150 p-3 space-y-2 ${
-                    snapshot.isDraggingOver
-                      ? 'border-primary/50 bg-primary/5'
-                      : 'border-border bg-muted/20'
-                  }`}
-                >
-                  {!snapshot.isDraggingOver && topLevel.length === 0 && (
-                    <p className="text-xs text-muted-foreground text-center py-4">Drop here to remove manager</p>
-                  )}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </div>
+      <div className="rounded-2xl border border-border bg-card/50 p-6 overflow-auto">
+        {/* Top-level row */}
+        <div className="flex flex-row items-start gap-6 justify-start min-w-max">
+          {topLevel.map((emp) => (
+            <OrgNode
+              key={emp.id}
+              employee={emp}
+              allEmployees={employees}
+              onEdit={setEditEmp}
+              collapsed={collapsed}
+              onToggle={toggleCollapse}
+            />
+          ))}
         </div>
-      </DragDropContext>
+      </div>
 
       {editEmp && (
         <EmployeeForm
