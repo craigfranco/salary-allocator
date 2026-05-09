@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { formatCurrency, HOTEL_COLORS } from '@/lib/helpers';
-import { User, EyeOff, ChevronDown, ChevronRight, GitBranch } from 'lucide-react';
+import { User, EyeOff, GitBranch } from 'lucide-react';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 const DEPT_STYLES = {
-  REVENUE: { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400', border: 'border-l-teal-500' },
-  ECOMM:   { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400', border: 'border-l-orange-500' },
-  SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-l-purple-500' },
+  REVENUE: { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400', border: 'border-l-teal-500', label: 'Revenue' },
+  ECOMM:   { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400', border: 'border-l-orange-500', label: 'E-Commerce' },
+  SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-l-purple-500', label: 'Sales & Marketing' },
 };
+
+const TIER_ORDER = ['Executive', 'Director', 'Manager', 'Coordinator / Associate', 'Other'];
+
+function getTier(title) {
+  const t = title.toLowerCase();
+  if (t.includes('executive') || t.includes('vp') || t.includes('chief')) return 'Executive';
+  if (t.includes('director')) return 'Director';
+  if (t.includes('manager')) return 'Manager';
+  if (t.includes('coordinator') || t.includes('associate') || t.includes('specialist') || t.includes('analyst')) return 'Coordinator / Associate';
+  return 'Other';
+}
 
 function EmployeeCard({ employee, onClick }) {
   const dept = DEPT_STYLES[employee.department] || {};
-  // Craig Franco is always shown as a normal leader, never faded
   const suppressed = !!employee.suppressed && employee.name !== 'Craig Franco';
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
 
@@ -47,65 +56,8 @@ function EmployeeCard({ employee, onClick }) {
   );
 }
 
-// Renders a node and all its subtree in a top-down horizontal layout
-function OrgNode({ employee, allEmployees, onEdit, collapsed, onToggle }) {
-  const directReports = allEmployees.filter(e => e.manager_id === employee.id);
-  const isCollapsed = collapsed[employee.id];
-
-  return (
-    <div className="flex flex-col items-center">
-      {/* Card */}
-      <EmployeeCard employee={employee} onClick={onEdit} />
-
-      {/* Toggle + children */}
-      {directReports.length > 0 && (
-        <>
-          <button
-            className="flex items-center gap-1 mt-0.5 text-[9px] text-muted-foreground hover:text-foreground transition-colors"
-            onClick={() => onToggle(employee.id)}
-          >
-            {isCollapsed ? <ChevronRight className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
-            {directReports.length}
-          </button>
-
-          {!isCollapsed && (
-            <>
-              {/* Vertical connector line */}
-              <div className="w-px h-3 bg-border" />
-              {/* Horizontal row of children */}
-              <div className="flex flex-row items-start gap-2 relative">
-                {/* Horizontal line spanning children */}
-                {directReports.length > 1 && (
-                  <div
-                    className="absolute top-0 left-0 right-0 h-px bg-border"
-                    style={{ top: 0 }}
-                  />
-                )}
-                {directReports.map((report) => (
-                  <div key={report.id} className="flex flex-col items-center">
-                    {/* Small vertical stub down to child card */}
-                    <div className="w-px h-3 bg-border" />
-                    <OrgNode
-                      employee={report}
-                      allEmployees={allEmployees}
-                      onEdit={onEdit}
-                      collapsed={collapsed}
-                      onToggle={onToggle}
-                    />
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
 export default function OrgChart() {
   const [editEmp, setEditEmp] = useState(null);
-  const [collapsed, setCollapsed] = useState({});
   const qc = useQueryClient();
 
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
@@ -117,27 +69,32 @@ export default function OrgChart() {
   });
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
-  const suppressedCount = employees.filter(e => e.suppressed).length;
-  const rawTopLevel = employees.filter(e => !e.manager_id);
+  const suppressedCount = employees.filter(e => e.suppressed && e.name !== 'Craig Franco').length;
 
-  // Craig Franco is always shown as department leader regardless of suppressed status
-  // Other suppressed top-level employees have their reports promoted up
-  const topLevel = rawTopLevel.flatMap(emp => {
-    if (emp.suppressed && emp.name !== 'Craig Franco') {
-      return employees.filter(e => e.manager_id === emp.id);
+  // Build tiered groups: tier → dept → employees
+  const tiers = {};
+  TIER_ORDER.forEach(t => { tiers[t] = { REVENUE: [], ECOMM: [], SALES: [] }; });
+
+  employees.forEach(emp => {
+    if (emp.suppressed && emp.name !== 'Craig Franco') return;
+    const tier = getTier(emp.title);
+    if (tiers[tier] && tiers[tier][emp.department]) {
+      tiers[tier][emp.department].push(emp);
     }
-    return [emp];
   });
 
-  const toggleCollapse = (id) => setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
+  // Only show tiers that have at least one employee
+  const activeTiers = TIER_ORDER.filter(t => Object.values(tiers[t]).some(arr => arr.length > 0));
+
+  const DEPTS = ['REVENUE', 'ECOMM', 'SALES'];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold">Organization Chart</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Built from reporting relationships set in Salary Allocations
+            Grouped by seniority tier and department
             {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed</span>}
           </p>
         </div>
@@ -147,20 +104,41 @@ export default function OrgChart() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card/50 p-4 overflow-auto">
-        {/* Top-level row */}
-        <div className="flex flex-row items-start gap-3 justify-start min-w-max">
-          {topLevel.map((emp) => (
-            <OrgNode
-              key={emp.id}
-              employee={emp}
-              allEmployees={employees}
-              onEdit={setEditEmp}
-              collapsed={collapsed}
-              onToggle={toggleCollapse}
-            />
+      <div className="rounded-2xl border border-border bg-card/50 overflow-hidden">
+        {/* Department header */}
+        <div className="grid grid-cols-[120px_1fr_1fr_1fr] border-b border-border bg-muted/30">
+          <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground" />
+          {DEPTS.map(dept => (
+            <div key={dept} className={`px-3 py-2 text-[10px] font-bold uppercase tracking-wider ${DEPT_STYLES[dept].text}`}>
+              {DEPT_STYLES[dept].label}
+            </div>
           ))}
         </div>
+
+        {/* Tier rows */}
+        {activeTiers.map((tier, i) => (
+          <div
+            key={tier}
+            className={`grid grid-cols-[120px_1fr_1fr_1fr] border-b border-border/50 last:border-b-0 ${i % 2 === 0 ? 'bg-card' : 'bg-muted/10'}`}
+          >
+            {/* Tier label */}
+            <div className="px-3 py-3 flex items-start">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground leading-tight">{tier}</span>
+            </div>
+
+            {/* Dept columns */}
+            {DEPTS.map(dept => (
+              <div key={dept} className="px-2 py-3 flex flex-wrap gap-2 border-l border-border/30">
+                {tiers[tier][dept].map(emp => (
+                  <EmployeeCard key={emp.id} employee={emp} onClick={setEditEmp} />
+                ))}
+                {tiers[tier][dept].length === 0 && (
+                  <span className="text-[10px] text-muted-foreground/40 italic">—</span>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
 
       {editEmp && (
