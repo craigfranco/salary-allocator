@@ -292,7 +292,7 @@ export default function SalaryTable() {
                   }
                 ].map((item, idx) => (
                   <td key={idx} className="px-6 py-2.5 text-center">
-                    <div className="text-[10px] text-muted-foreground">{item.label}</div>
+                    <div className="text-[10px] text-muted-foreground max-w-[65px] mx-auto leading-tight">{item.label}</div>
                     <div className={`text-sm font-bold tabular-nums ${item.color}`}>{item.value}</div>
                   </td>
                 ))}
