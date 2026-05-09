@@ -191,90 +191,40 @@ export default function SalaryTable() {
                 </td>
                 <td />
               </tr>
-              <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">S&M Payroll Budget</td>
+              <tr className="bg-primary/10 border-t-2 border-primary/20">
+                <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
+                  S&M Payroll Budget
+                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property hotels only, excl. CORP)</span>
+                </td>
                 <td />
-                {sortedHotels.map(h => {
-                  if (h.short_code === 'CORP') return <td key={h.short_code} />;
-                  const budget = h.sm_payroll_budget || 0;
-                  const allocated = hotelTotals[h.short_code] || 0;
-                  const isOver = budget > 0 && allocated > budget;
-                  const isNear = budget > 0 && allocated / budget > 0.95 && allocated <= budget;
-                  return (
-                    <td key={h.short_code} className="px-2 py-2 text-center">
-                      <span className={`text-xs font-semibold tabular-nums ${isOver ? 'text-red-500' : isNear ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {budget > 0 ? formatCurrency(budget) : '—'}
-                      </span>
-                    </td>
-                  );
-                })}
-                <td className="px-2 py-2 text-center">
-                  <span className="text-xs font-bold tabular-nums text-foreground">{totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—'}</span>
+                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
+                  <span className="text-sm font-bold tabular-nums text-foreground">{totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—'}</span>
                 </td>
                 <td />
               </tr>
-              <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Over / (Short) Budget</td>
+              <tr className="bg-primary/10 border-t-2 border-primary/20">
+                <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
+                  Over / (Short) Budget
+                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property hotels only, excl. CORP)</span>
+                </td>
                 <td />
-                {sortedHotels.map(h => {
-                  if (h.short_code === 'CORP') return <td key={h.short_code} />;
-                  const budget = h.sm_payroll_budget || 0;
-                  const allocated = hotelTotals[h.short_code] || 0;
-                  const diff = allocated - budget;
-                  if (budget === 0) return <td key={h.short_code} className="px-2 py-2 text-center"><span className="text-xs text-muted-foreground">—</span></td>;
-                  return (
-                    <td key={h.short_code} className="px-2 py-2 text-center">
-                      <span className={`text-xs font-bold tabular-nums ${diff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {diff > 0 ? '+' : ''}{formatCurrency(diff)}
-                      </span>
-                    </td>
-                  );
-                })}
-                <td className="px-2 py-2 text-center">
+                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
                   {totalBudgetDiff !== null && (
-                    <span className={`text-xs font-bold tabular-nums ${totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    <span className={`text-sm font-bold tabular-nums ${totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
                       {totalBudgetDiff > 0 ? '+' : ''}{formatCurrency(totalBudgetDiff)}
                     </span>
                   )}
                 </td>
                 <td />
               </tr>
-              <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Revenue Budget</td>
-                <td />
-                {sortedHotels.map(h => {
-                  if (h.short_code === 'CORP') return <td key={h.short_code} />;
-                  return (
-                    <td key={h.short_code} className="px-2 py-2 text-center">
-                      <span className="text-xs font-semibold tabular-nums">{h.room_revenue_budget > 0 ? formatCurrency(h.room_revenue_budget) : '—'}</span>
-                    </td>
-                  );
-                })}
-                <td className="px-2 py-2 text-center">
-                  <span className="text-xs font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</span>
+              <tr className="bg-primary/10 border-t-2 border-primary/20">
+                <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
+                  Room Revenue Budget
+                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property hotels only, excl. CORP)</span>
                 </td>
                 <td />
-              </tr>
-              <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Payroll as % of Room Rev</td>
-                <td />
-                {sortedHotels.map(h => {
-                  if (h.short_code === 'CORP') return <td key={h.short_code} />;
-                  const roomRev = h.room_revenue_budget || 0;
-                  const allocated = hotelTotals[h.short_code] || 0;
-                  const pct = roomRev > 0 ? (allocated / roomRev) * 100 : null;
-                  return (
-                    <td key={h.short_code} className="px-2 py-2 text-center">
-                      <span className={`text-xs font-bold tabular-nums ${pct === null ? 'text-muted-foreground' : pct > 5 ? 'text-red-500' : pct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {pct !== null ? `${pct.toFixed(1)}%` : '—'}
-                      </span>
-                    </td>
-                  );
-                })}
-                <td className="px-2 py-2 text-center">
-                  <span className={`text-xs font-bold tabular-nums ${totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                    {totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—'}
-                  </span>
+                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
+                  <span className="text-sm font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</span>
                 </td>
                 <td />
               </tr>
