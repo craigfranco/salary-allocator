@@ -271,48 +271,34 @@ export default function SalaryTable() {
               </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
                 <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
-                  Total Room Revenue Budget
+                  Summary
                   <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property hotels only, excl. CORP)</span>
                 </td>
                 <td />
-                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
-                  <span className="text-sm font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</span>
-                </td>
-                <td />
-              </tr>
-              <tr className="bg-primary/10 border-t-2 border-primary/20">
-                <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
-                  Total Allocated
-                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property hotels only, excl. CORP)</span>
-                </td>
-                <td />
-                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
-                  <span className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(totalPayroll)}</span>
-                </td>
-                <td />
-              </tr>
-              <tr className="bg-primary/10 border-t-2 border-primary/20">
-                <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
-                  Total Payroll % of Room Rev
-                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property salaries only, excl. CORP)</span>
-                </td>
-                <td />
-                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
-                  <span className={`text-sm font-bold tabular-nums ${
-                    totalPayrollPct === null ? 'text-muted-foreground'
-                    : totalPayrollPct > 5 ? 'text-red-500'
-                    : totalPayrollPct > 3 ? 'text-amber-500'
-                    : 'text-emerald-600 dark:text-emerald-400'
-                  }`}>
-                    {totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—'}
-                    {totalPayrollPct !== null && (
-                      <span className="ml-2 text-[10px] font-normal text-muted-foreground">
-                        ({formatCurrency(totalPayroll)} / {formatCurrency(totalRoomRev)})
+                <td className="px-2 py-2.5">
+                  <div className="flex flex-col gap-1 text-center">
+                    <div>
+                      <div className="text-[10px] text-muted-foreground">Total Room Revenue</div>
+                      <div className="text-sm font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</div>
+                    </div>
+                    <div className="border-t border-primary/20 pt-1">
+                      <div className="text-[10px] text-muted-foreground">Total Allocated</div>
+                      <div className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(totalPayroll)}</div>
+                    </div>
+                    <div className="border-t border-primary/20 pt-1">
+                      <div className="text-[10px] text-muted-foreground">% of Room Rev</div>
+                      <span className={`text-sm font-bold tabular-nums ${
+                        totalPayrollPct === null ? 'text-muted-foreground'
+                        : totalPayrollPct > 5 ? 'text-red-500'
+                        : totalPayrollPct > 3 ? 'text-amber-500'
+                        : 'text-emerald-600 dark:text-emerald-400'
+                      }`}>
+                        {totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—'}
                       </span>
-                    )}
-                  </span>
+                    </div>
+                  </div>
                 </td>
-                <td />
+                <td colSpan={sortedHotels.length - 1} />
               </tr>
             </tfoot>
           </table>
