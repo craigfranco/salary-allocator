@@ -37,9 +37,9 @@ export default function HotelBudgets() {
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
-  const totalBudget = hotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
-  const totalAllocated = hotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
-  const totalRoomRev = hotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
+  const totalBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
+  const totalAllocated = propertyHotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
+  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
   const overBudgetCount = propertyHotels.filter(h => getHotelAllocatedTotal(activeEmployees, h.short_code) > (h.sm_payroll_budget || 0)).length;
 
   return (
