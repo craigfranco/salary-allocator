@@ -57,6 +57,7 @@ function EmployeeCard({ employee, provided, snapshot, onClick }) {
 function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle }) {
   const directReports = allEmployees.filter(e => e.manager_id === employee.id);
   const isCollapsed = collapsed[employee.id];
+  const isSuppressed = !!employee.suppressed;
 
   return (
     <div className={depth > 0 ? 'ml-5 pl-4 border-l-2 border-dashed border-border mt-2' : 'mt-2'}>
@@ -82,9 +83,9 @@ function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle })
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
-              className={`space-y-1 min-h-[8px] rounded-lg transition-all duration-150 ${
+              className={`min-h-[8px] rounded-lg transition-all duration-150 ${
                 snapshot.isDraggingOver ? 'bg-primary/5 ring-1 ring-primary/20 p-2' : ''
-              }`}
+              } ${isSuppressed && directReports.length > 1 ? 'grid grid-cols-2 gap-2' : 'space-y-1'}`}
             >
               {directReports.map((report, idx) => (
                 <Draggable key={report.id} draggableId={`child-${report.id}`} index={idx}>
