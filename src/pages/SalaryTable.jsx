@@ -222,9 +222,13 @@ export default function SalaryTable() {
                   <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property hotels only, excl. CORP)</span>
                 </td>
                 <td />
-                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
-                  <span className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(totalPayroll)}</span>
-                </td>
+                {sortedHotels.map(h => (
+                  <td key={h.short_code} className="px-2 py-2.5 text-center">
+                    <div className="text-[10px] text-muted-foreground font-semibold mb-1">{h.short_code}</div>
+                    <span className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(hotelTotals[h.short_code])}</span>
+                  </td>
+                ))}
+                <td />
                 <td />
               </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
