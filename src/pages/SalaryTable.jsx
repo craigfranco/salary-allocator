@@ -28,6 +28,7 @@ export default function SalaryTable() {
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const tableHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Employee.create(data),
@@ -132,7 +133,7 @@ export default function SalaryTable() {
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Reports To</th>
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-right">Salary</th>
                 <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center">Total</th>
-                {sortedHotels.map(h => (
+                {tableHotels.map(h => (
                   <th key={h.short_code} className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center min-w-[88px]">
                     {h.short_code}
                   </th>
@@ -145,7 +146,7 @@ export default function SalaryTable() {
                 <SalaryTableRow
                   key={emp.id}
                   employee={emp}
-                  hotels={sortedHotels}
+                  hotels={tableHotels}
                   onAllocChange={handleAllocChange}
                   onEdit={(e) => { setEditEmp(e); setFormOpen(true); }}
                   onDelete={setDeleteEmp}
@@ -157,7 +158,7 @@ export default function SalaryTable() {
               ))}
               {filteredEmployees.length === 0 && (
                 <tr>
-                  <td colSpan={6 + sortedHotels.length + 1} className="text-center py-12 text-muted-foreground text-sm">
+                  <td colSpan={6 + tableHotels.length + 1} className="text-center py-12 text-muted-foreground text-sm">
                     No employees match your filters.
                   </td>
                 </tr>
@@ -167,7 +168,7 @@ export default function SalaryTable() {
               <tr className="bg-muted/60 border-t-2 border-border">
                 <td colSpan={5} className="px-3 py-3 text-sm font-bold sticky left-0 bg-muted/60 z-10">Total Allocated</td>
                 <td />
-                {sortedHotels.map(h => (
+                {tableHotels.map(h => (
                   <td key={h.short_code} className="px-2 py-3 text-center">
                     <span className="text-xs font-bold tabular-nums">{formatCurrency(hotelTotals[h.short_code])}</span>
                   </td>

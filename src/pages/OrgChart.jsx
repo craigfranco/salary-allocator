@@ -6,27 +6,27 @@ import EmployeeForm from '@/components/salary/EmployeeForm';
 import { formatCurrency, HOTEL_COLORS } from '@/lib/helpers';
 import { User, EyeOff, ChevronDown, ChevronRight, GitBranch } from 'lucide-react';
 
+const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+
 const DEPT_STYLES = {
   REVENUE: { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400', border: 'border-l-teal-500' },
   ECOMM:   { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400', border: 'border-l-orange-500' },
   SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-l-purple-500' },
 };
 
-const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
-
-function EmployeeCard({ employee, dragProvided, dragSnapshot, onClick }) {
+function EmployeeCard({ employee, provided, snapshot, onClick }) {
   const dept = DEPT_STYLES[employee.department] || {};
   const suppressed = !!employee.suppressed;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
 
   return (
     <div
-      ref={dragProvided.innerRef}
-      {...dragProvided.draggableProps}
-      {...dragProvided.dragHandleProps}
+      ref={provided.innerRef}
+      {...provided.draggableProps}
+      {...provided.dragHandleProps}
       onClick={() => onClick(employee)}
-      className={`rounded-xl border-l-2 ${dept.border} border border-border bg-card p-3 cursor-pointer transition-all duration-150 select-none ${
-        dragSnapshot.isDragging
+      className={`rounded-xl border-l-2 ${dept.border} border border-border bg-card p-3 cursor-grab active:cursor-grabbing transition-all duration-150 select-none ${
+        snapshot.isDragging
           ? 'shadow-2xl scale-105 rotate-1 opacity-95 z-50'
           : suppressed
           ? 'opacity-40'
@@ -59,10 +59,10 @@ function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle })
   const isCollapsed = collapsed[employee.id];
 
   return (
-    <div className={`${depth > 0 ? 'ml-5 pl-4 border-l-2 border-dashed border-border' : ''} mt-2`}>
+    <div className={depth > 0 ? 'ml-5 pl-4 border-l-2 border-dashed border-border mt-2' : 'mt-2'}>
       <Draggable draggableId={employee.id} index={0}>
         {(provided, snapshot) => (
-          <EmployeeCard employee={employee} dragProvided={provided} dragSnapshot={snapshot} onClick={onEdit} />
+          <EmployeeCard employee={employee} provided={provided} snapshot={snapshot} onClick={onEdit} />
         )}
       </Draggable>
 
@@ -83,11 +83,11 @@ function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle })
               ref={provided.innerRef}
               {...provided.droppableProps}
               className={`space-y-1 min-h-[8px] rounded-lg transition-all duration-150 ${
-                snapshot.isDraggingOver ? 'bg-primary/5 ring-1 ring-primary/20 p-2' : 'p-0'
+                snapshot.isDraggingOver ? 'bg-primary/5 ring-1 ring-primary/20 p-2' : ''
               }`}
             >
               {directReports.map((report, idx) => (
-                <Draggable key={report.id} draggableId={report.id} index={idx}>
+                <Draggable key={report.id} draggableId={`child-${report.id}`} index={idx}>
                   {(prov, snap) => (
                     <div ref={prov.innerRef} {...prov.draggableProps} {...prov.dragHandleProps}>
                       <OrgNode
@@ -125,21 +125,33 @@ export default function OrgChart() {
   });
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const suppressedCount = employees.filter(e => e.suppressed).length;
+  const topLevel = employees.filter(e => !e.manager_id);
 
   const toggleCollapse = (id) => setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
-
-  // Employees with no manager = top-level
-  const topLevel = employees.filter(e => !e.manager_id);
-  // Unassigned drop zone employees (no manager)
-  const suppressedCount = employees.filter(e => e.suppressed).length;
 
   const onDragEnd = (result) => {
     const { draggableId, destination } = result;
     if (!destination) return;
-    const newManagerId = destination.droppableId === 'UNASSIGNED' ? '' : destination.droppableId;
-    // Prevent assigning someone as their own manager
-    if (newManagerId === draggableId) return;
-    updateMutation.mutate({ id: draggableId, data: { manager_id: newManagerId } });
+
+    // Strip the "child-" prefix used on nested draggables
+    const employeeId = draggableId.startsWith('child-') ? draggableId.slice(6) : draggableId;
+    const newManagerId = destination.droppableId === 'UNASSIGNED' || destination.droppableId === 'ROOT'
+      ? ''
+      : destination.droppableId;
+
+    if (newManagerId === employeeId) return; // Can't be own manager
+
+    // Prevent circular reference: new manager can't be a direct report of the dragged employee
+    const wouldCreateCycle = (managerId, targetId) => {
+      if (!managerId) return false;
+      if (managerId === targetId) return true;
+      const mgr = employees.find(e => e.id === managerId);
+      return mgr ? wouldCreateCycle(mgr.manager_id, targetId) : false;
+    };
+    if (wouldCreateCycle(newManagerId, employeeId)) return;
+
+    updateMutation.mutate({ id: employeeId, data: { manager_id: newManagerId } });
   };
 
   return (
@@ -148,7 +160,7 @@ export default function OrgChart() {
         <div>
           <h2 className="text-2xl font-display font-bold">Organization Chart</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Drag employees onto a manager to assign reporting relationships
+            Built from reporting relationships set in Salary Allocations
             {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed</span>}
           </p>
         </div>
@@ -197,7 +209,7 @@ export default function OrgChart() {
           {/* Unassigned drop zone */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-              Unassigned (No Manager)
+              No Manager (Top Level)
             </p>
             <Droppable droppableId="UNASSIGNED" type="EMPLOYEE">
               {(provided, snapshot) => (
@@ -210,7 +222,7 @@ export default function OrgChart() {
                       : 'border-border bg-muted/20'
                   }`}
                 >
-                  {topLevel.length === 0 && !snapshot.isDraggingOver && (
+                  {!snapshot.isDraggingOver && topLevel.length === 0 && (
                     <p className="text-xs text-muted-foreground text-center py-4">Drop here to remove manager</p>
                   )}
                   {provided.placeholder}
