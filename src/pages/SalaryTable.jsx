@@ -67,9 +67,15 @@ export default function SalaryTable() {
   });
 
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
-  const totalPayroll = propertyHotels.reduce((s, h) => s + (hotelTotals[h.short_code] || 0), 0);
+
+  // Total payroll: only count salary portions allocated to non-CORP hotels
+  const totalPayroll = activeEmployees.reduce((sum, emp) => {
+    return sum + propertyHotels.reduce((s, h) => s + ((emp.allocations?.[h.short_code] || 0) * emp.annual_salary), 0);
+  }, 0);
   const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
   const totalPayrollPct = totalRoomRev > 0 ? (totalPayroll / totalRoomRev) * 100 : null;
+  const totalSmBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
+  const totalBudgetDiff = totalSmBudget > 0 ? totalPayroll - totalSmBudget : null;
 
   const sortedEmployees = [...employees].sort((a, b) => {
     // Suppressed (non-Craig) float to top
@@ -144,6 +150,7 @@ export default function SalaryTable() {
                     {h.short_code}
                   </th>
                 ))}
+                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center">Total</th>
                 <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Actions</th>
               </tr>
             </thead>
@@ -179,6 +186,9 @@ export default function SalaryTable() {
                     <span className="text-xs font-bold tabular-nums">{formatCurrency(hotelTotals[h.short_code])}</span>
                   </td>
                 ))}
+                <td className="px-2 py-3 text-center">
+                  <span className="text-xs font-bold tabular-nums">{formatCurrency(totalPayroll)}</span>
+                </td>
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
@@ -197,7 +207,9 @@ export default function SalaryTable() {
                      </td>
                    );
                  })}
-                <td />
+                <td className="px-2 py-2 text-center">
+                  <span className="text-xs font-bold tabular-nums text-foreground">{totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—'}</span>
+                </td>
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
                 <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Over / (Short) Budget</td>
@@ -215,7 +227,13 @@ export default function SalaryTable() {
                     </td>
                   );
                 })}
-                <td />
+                <td className="px-2 py-2 text-center">
+                  {totalBudgetDiff !== null && (
+                    <span className={`text-xs font-bold tabular-nums ${totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                      {totalBudgetDiff > 0 ? '+' : ''}{formatCurrency(totalBudgetDiff)}
+                    </span>
+                  )}
+                </td>
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
                 <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Revenue Budget</td>
@@ -225,7 +243,9 @@ export default function SalaryTable() {
                      <span className="text-xs font-semibold tabular-nums">{h.room_revenue_budget > 0 ? formatCurrency(h.room_revenue_budget) : '—'}</span>
                    </td>
                  ))}
-                <td />
+                <td className="px-2 py-2 text-center">
+                  <span className="text-xs font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</span>
+                </td>
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
                 <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Payroll as % of Room Rev</td>
@@ -242,12 +262,16 @@ export default function SalaryTable() {
                     </td>
                   );
                 })}
-                <td />
+                <td className="px-2 py-2 text-center">
+                  <span className={`text-xs font-bold tabular-nums ${totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                    {totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—'}
+                  </span>
+                </td>
               </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
                 <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
                   Total Payroll % of Room Rev
-                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(all properties excl. CORP)</span>
+                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property salaries only, excl. CORP)</span>
                 </td>
                 <td />
                 <td colSpan={tableHotels.length} className="px-2 py-2.5 text-center">
