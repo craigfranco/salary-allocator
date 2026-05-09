@@ -79,6 +79,7 @@ export default function SalaryTable() {
 
   const q = search.toLowerCase();
   const filteredEmployees = sortedEmployees.filter(emp => {
+    if (emp.suppressed && allocFilter !== 'suppressed') return false;
     if (q && !emp.name.toLowerCase().includes(q) && !emp.title.toLowerCase().includes(q) && !emp.department.toLowerCase().includes(q)) return false;
     if (deptFilter && emp.department !== deptFilter) return false;
     if (allocFilter === 'exact' && getAllocationStatus(getTotalAllocation(emp.allocations)) !== 'exact') return false;
