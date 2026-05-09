@@ -83,7 +83,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
           <div>
             <Label className="mb-2 block">Hotel Allocations (%)</Label>
             <div className="grid grid-cols-2 gap-3">
-              {hotels.filter(h => h.short_code !== 'CORP').map(h => (
+              {hotels.map(h => (
                 <div key={h.short_code} className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground w-16 truncate">{h.short_code}</span>
                   <Input
