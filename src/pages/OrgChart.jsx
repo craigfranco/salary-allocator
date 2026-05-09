@@ -128,7 +128,16 @@ export default function OrgChart() {
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const suppressedCount = employees.filter(e => e.suppressed).length;
-  const topLevel = employees.filter(e => !e.manager_id);
+  const rawTopLevel = employees.filter(e => !e.manager_id);
+
+  // If a top-level employee is suppressed (e.g. Craig), skip their card and
+  // promote their direct reports to appear at the top level instead.
+  const topLevel = rawTopLevel.flatMap(emp => {
+    if (emp.suppressed) {
+      return employees.filter(e => e.manager_id === emp.id);
+    }
+    return [emp];
+  });
 
   const toggleCollapse = (id) => setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
 
