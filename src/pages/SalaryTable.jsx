@@ -186,9 +186,7 @@ export default function SalaryTable() {
                     <span className="text-xs font-bold tabular-nums">{formatCurrency(hotelTotals[h.short_code])}</span>
                   </td>
                 ))}
-                <td className="px-2 py-3 text-center">
-                  <span className="text-xs font-bold tabular-nums">{formatCurrency(totalPayroll)}</span>
-                </td>
+                <td />
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
@@ -279,6 +277,17 @@ export default function SalaryTable() {
                 <td />
                 <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
                   <span className="text-sm font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</span>
+                </td>
+                <td />
+              </tr>
+              <tr className="bg-primary/10 border-t-2 border-primary/20">
+                <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
+                  Total Allocated
+                  <span className="ml-2 text-[10px] text-muted-foreground font-normal">(property hotels only, excl. CORP)</span>
+                </td>
+                <td />
+                <td colSpan={sortedHotels.length} className="px-2 py-2.5 text-center">
+                  <span className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(totalPayroll)}</span>
                 </td>
                 <td />
               </tr>
