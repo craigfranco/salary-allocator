@@ -16,7 +16,8 @@ const DEPT_STYLES = {
 
 function EmployeeCard({ employee, onClick }) {
   const dept = DEPT_STYLES[employee.department] || {};
-  const suppressed = !!employee.suppressed;
+  // Craig Franco is always shown as a normal leader, never faded
+  const suppressed = !!employee.suppressed && employee.name !== 'Craig Franco';
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
 
   return (
@@ -120,10 +121,14 @@ export default function OrgChart() {
   const suppressedCount = employees.filter(e => e.suppressed).length;
   const rawTopLevel = employees.filter(e => !e.manager_id);
 
-  // Promote direct reports of suppressed top-level employees to the top level
-  const topLevel = rawTopLevel.flatMap(emp =>
-    emp.suppressed ? employees.filter(e => e.manager_id === emp.id) : [emp]
-  );
+  // Craig Franco is always shown as department leader regardless of suppressed status
+  // Other suppressed top-level employees have their reports promoted up
+  const topLevel = rawTopLevel.flatMap(emp => {
+    if (emp.suppressed && emp.name !== 'Craig Franco') {
+      return employees.filter(e => e.manager_id === emp.id);
+    }
+    return [emp];
+  });
 
   const toggleCollapse = (id) => setCollapsed(prev => ({ ...prev, [id]: !prev[id] }));
 
