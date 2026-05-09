@@ -40,7 +40,6 @@ export default function SearchBar({ search, setSearch, department, setDepartment
         <option value="">All Allocations</option>
         <option value="exact">100% Allocated</option>
         <option value="issues">Has Issues</option>
-        <option value="suppressed">Suppressed</option>
       </select>
     </div>
   );
