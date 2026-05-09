@@ -208,9 +208,7 @@ export default function SalaryTable() {
                     </td>
                   );
                 })}
-                <td className="px-2 py-2 text-center">
-                  <span className="text-xs font-bold tabular-nums text-foreground">{totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—'}</span>
-                </td>
+                <td />
                 <td />
               </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
@@ -241,13 +239,7 @@ export default function SalaryTable() {
                     </td>
                   );
                 })}
-                <td className="px-2 py-2 text-center">
-                  {totalBudgetDiff !== null && (
-                    <span className={`text-xs font-bold tabular-nums ${totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                      {totalBudgetDiff > 0 ? '+' : ''}{formatCurrency(totalBudgetDiff)}
-                    </span>
-                  )}
-                </td>
+                <td />
                 <td />
               </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
@@ -276,9 +268,7 @@ export default function SalaryTable() {
                     </td>
                   );
                 })}
-                <td className="px-2 py-2 text-center">
-                  <span className="text-xs font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</span>
-                </td>
+                <td />
                 <td />
               </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
