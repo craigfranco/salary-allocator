@@ -188,7 +188,7 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Revenue</td>
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Budget Room Revenue</td>
                 <td />
                 {sortedHotels.map(h => {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
