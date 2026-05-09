@@ -182,9 +182,7 @@ export default function SalaryTable() {
                 <td colSpan={5} className="px-3 py-3 text-sm font-bold sticky left-0 bg-primary/10 z-10">Property Summary</td>
                 <td />
                 {sortedHotels.map(h => (
-                  <td key={h.short_code} className="px-2 py-3 text-center">
-                    <span className="text-xs font-semibold text-muted-foreground">{h.short_code}</span>
-                  </td>
+                  <td key={h.short_code} className="px-2 py-3" />
                 ))}
                 <td />
                 <td />
@@ -288,7 +286,7 @@ export default function SalaryTable() {
                     color: totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400' 
                   },
                   { 
-                    label: '% of Room Rev', 
+                    label: '% of\nRoom Rev', 
                     value: totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—', 
                     color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'
                   }
