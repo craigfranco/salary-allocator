@@ -236,11 +236,11 @@ export default function SalaryTable() {
                       <div className="text-sm font-bold tabular-nums text-foreground">{totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—'}</div>
                     </div>
                     <div className="border-t border-primary/20 pt-1">
-                      <div className="text-[10px] text-muted-foreground">Total S&M Budget</div>
+                      <div className="text-[10px] text-muted-foreground">Total S&M Payroll Budget</div>
                       <div className="text-sm font-bold tabular-nums text-foreground">{totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—'}</div>
                     </div>
                     <div className="border-t border-primary/20 pt-1">
-                      <div className="text-[10px] text-muted-foreground">Total Allocated</div>
+                      <div className="text-[10px] text-muted-foreground">Total Allocated Payroll</div>
                       <div className="text-sm font-bold tabular-nums text-foreground">{formatCurrency(totalPayroll)}</div>
                     </div>
                     <div className="border-t border-primary/20 pt-1">
