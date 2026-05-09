@@ -8,7 +8,7 @@ import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppLayout from '@/components/layout/AppLayout';
 import SalaryTable from '@/pages/SalaryTable';
 import HotelBudgets from '@/pages/HotelBudgets';
-import OrgChart from '@/pages/OrgChart';
+import OrgChart from '@/pages/OrgChart.jsx';
 import Alerts from '@/pages/Alerts';
 import Analytics from '@/pages/Analytics';
 import { ThemeProvider } from '@/lib/theme.jsx';

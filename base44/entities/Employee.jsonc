@@ -31,6 +31,10 @@
       "type": "boolean",
       "description": "If true, exclude this employee from all calculations",
       "default": false
+    },
+    "manager_id": {
+      "type": "string",
+      "description": "ID of the employee's direct manager (another Employee record)"
     }
   },
   "required": [

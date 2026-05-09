@@ -5,9 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function EmployeeForm({ open, onClose, onSave, employee, hotels }) {
+export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [] }) {
   const [form, setForm] = useState(employee || {
-    name: '', title: '', department: 'REVENUE', annual_salary: 0, allocations: {}
+    name: '', title: '', department: 'REVENUE', annual_salary: 0, allocations: {}, manager_id: ''
   });
 
   const handleChange = (field, value) => {
@@ -60,6 +60,26 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels }
               <Input type="number" value={form.annual_salary} onChange={(e) => handleChange('annual_salary', parseFloat(e.target.value) || 0)} />
             </div>
           </div>
+          {allEmployees.length > 0 && (
+            <div>
+              <Label>Direct Manager</Label>
+              <Select
+                value={form.manager_id || 'none'}
+                onValueChange={(v) => handleChange('manager_id', v === 'none' ? '' : v)}
+              >
+                <SelectTrigger><SelectValue placeholder="No manager (top-level)" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">— No manager (top-level) —</SelectItem>
+                  {allEmployees
+                    .filter(e => e.id !== employee?.id)
+                    .map(e => (
+                      <SelectItem key={e.id} value={e.id}>{e.name} · {e.title}</SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div>
             <Label className="mb-2 block">Hotel Allocations (%)</Label>
             <div className="grid grid-cols-2 gap-3">
