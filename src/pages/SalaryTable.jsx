@@ -178,19 +178,17 @@ export default function SalaryTable() {
               )}
             </tbody>
             <tfoot>
-              <tr className="bg-muted/60 border-t-2 border-border">
-                <td colSpan={5} className="px-3 py-3 text-sm font-bold sticky left-0 bg-muted/60 z-10">Total Allocated Payroll</td>
+              <tr className="bg-primary/10 border-t-2 border-primary/20">
+                <td colSpan={5} className="px-3 py-3 text-sm font-bold sticky left-0 bg-primary/10 z-10">Property Summary</td>
                 <td />
                 {sortedHotels.map(h => (
-                  <td key={h.short_code} className="px-2 py-3 text-center">
-                    <span className="text-xs font-bold tabular-nums">{formatCurrency(hotelTotals[h.short_code])}</span>
-                  </td>
+                  <td key={h.short_code} className="px-2 py-3" />
                 ))}
                 <td />
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Revenue Budget</td>
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Revenue</td>
                 <td />
                 {sortedHotels.map(h => {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
@@ -220,6 +218,17 @@ export default function SalaryTable() {
                     </td>
                   );
                 })}
+                <td />
+                <td />
+              </tr>
+              <tr className="bg-primary/5 border-t border-border/50">
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Allocated Payroll</td>
+                <td />
+                {sortedHotels.map(h => (
+                  <td key={h.short_code} className="px-2 py-2 text-center">
+                    <span className="text-xs font-semibold tabular-nums">{formatCurrency(hotelTotals[h.short_code])}</span>
+                  </td>
+                ))}
                 <td />
                 <td />
               </tr>
