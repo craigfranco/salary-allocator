@@ -286,7 +286,7 @@ export default function SalaryTable() {
                     color: totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400' 
                   },
                   { 
-                    label: '% of\nRoom Rev', 
+                    label: '% of Room Rev', 
                     value: totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—', 
                     color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'
                   }
