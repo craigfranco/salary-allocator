@@ -129,6 +129,7 @@ export default function SalaryTable() {
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground sticky left-0 bg-primary dark:bg-blue-900 z-10">Dept</th>
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Title</th>
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Name</th>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Reports To</th>
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-right">Salary</th>
                 <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center">Total</th>
                 {sortedHotels.map(h => (
@@ -151,11 +152,12 @@ export default function SalaryTable() {
                   onToggleSuppress={handleToggleSuppress}
                   isOdd={idx % 2 === 1}
                   highlight={q && (emp.name.toLowerCase().includes(q) || emp.title.toLowerCase().includes(q))}
+                  managerName={employees.find(e => e.id === emp.manager_id)?.name || ''}
                 />
               ))}
               {filteredEmployees.length === 0 && (
                 <tr>
-                  <td colSpan={5 + sortedHotels.length + 1} className="text-center py-12 text-muted-foreground text-sm">
+                  <td colSpan={6 + sortedHotels.length + 1} className="text-center py-12 text-muted-foreground text-sm">
                     No employees match your filters.
                   </td>
                 </tr>
@@ -163,7 +165,7 @@ export default function SalaryTable() {
             </tbody>
             <tfoot>
               <tr className="bg-muted/60 border-t-2 border-border">
-                <td colSpan={4} className="px-3 py-3 text-sm font-bold sticky left-0 bg-muted/60 z-10">Total Allocated</td>
+                <td colSpan={5} className="px-3 py-3 text-sm font-bold sticky left-0 bg-muted/60 z-10">Total Allocated</td>
                 <td />
                 {sortedHotels.map(h => (
                   <td key={h.short_code} className="px-2 py-3 text-center">
@@ -173,7 +175,7 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">S&M Payroll Budget</td>
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">S&M Payroll Budget</td>
                 <td />
                 {sortedHotels.map(h => {
                   const budget = h.sm_payroll_budget || 0;
@@ -191,7 +193,7 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Over / (Short) Budget</td>
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Over / (Short) Budget</td>
                 <td />
                 {sortedHotels.map(h => {
                   const budget = h.sm_payroll_budget || 0;
@@ -209,7 +211,7 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Revenue Budget</td>
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Revenue Budget</td>
                 <td />
                 {sortedHotels.map(h => (
                   <td key={h.short_code} className="px-2 py-2 text-center">
@@ -219,7 +221,7 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/50">
-                <td colSpan={4} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Payroll as % of Room Rev</td>
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Payroll as % of Room Rev</td>
                 <td />
                 {sortedHotels.map(h => {
                   const roomRev = h.room_revenue_budget || 0;
@@ -236,7 +238,7 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
-                <td colSpan={4} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
+                <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
                   Total Payroll % of Room Rev
                   <span className="ml-2 text-[10px] text-muted-foreground font-normal">(all properties excl. CORP)</span>
                 </td>

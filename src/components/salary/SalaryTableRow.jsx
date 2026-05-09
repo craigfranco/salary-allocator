@@ -5,7 +5,7 @@ import { Pencil, Trash2, EyeOff, Eye } from 'lucide-react';
 import AllocationCell from './AllocationCell';
 import { getTotalAllocation, getAllocationStatus, getAllocationColor, formatCurrency, getDeptColor } from '@/lib/helpers';
 
-export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit, onDelete, onToggleSuppress, isOdd, highlight }) {
+export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit, onDelete, onToggleSuppress, isOdd, highlight, managerName }) {
   const suppressed = !!employee.suppressed;
   const total = getTotalAllocation(employee.allocations);
   const status = getAllocationStatus(total);
@@ -33,6 +33,7 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
           <span className={suppressed ? 'line-through text-muted-foreground' : ''}>{employee.name}</span>
         </div>
       </td>
+      <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">{managerName || <span className="text-border">—</span>}</td>
       <td className="px-3 py-2.5 text-sm font-semibold text-right whitespace-nowrap tabular-nums">{formatCurrency(employee.annual_salary)}</td>
       <td className="px-2 py-2.5 text-center">
         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>
