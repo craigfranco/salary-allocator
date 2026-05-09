@@ -54,13 +54,13 @@ function EmployeeCard({ employee, provided, snapshot, onClick }) {
   );
 }
 
-function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle }) {
+function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle, inGrid = false }) {
   const directReports = allEmployees.filter(e => e.manager_id === employee.id);
   const isCollapsed = collapsed[employee.id];
   const isSuppressed = !!employee.suppressed;
 
   return (
-    <div className={depth > 0 ? 'ml-5 pl-4 border-l-2 border-dashed border-border mt-2' : 'mt-2'}>
+    <div className={inGrid ? '' : depth > 0 ? 'ml-5 pl-4 border-l-2 border-dashed border-border mt-2' : 'mt-2'}>
       <Draggable draggableId={employee.id} index={0}>
         {(provided, snapshot) => (
           <EmployeeCard employee={employee} provided={provided} snapshot={snapshot} onClick={onEdit} />
@@ -98,6 +98,7 @@ function OrgNode({ employee, allEmployees, depth, onEdit, collapsed, onToggle })
                         onEdit={onEdit}
                         collapsed={collapsed}
                         onToggle={onToggle}
+                        inGrid={isSuppressed && directReports.length > 1}
                       />
                     </div>
                   )}
