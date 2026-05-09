@@ -23,22 +23,21 @@ function EmployeeCard({ employee, onClick }) {
   return (
     <div
       onClick={() => onClick(employee)}
-      className={`rounded-xl border-l-2 ${dept.border} border border-border bg-card p-3 cursor-pointer transition-all duration-150 select-none w-48 flex-shrink-0 ${
+      className={`rounded-lg border-l-2 ${dept.border} border border-border bg-card p-2 cursor-pointer transition-all duration-150 select-none w-36 flex-shrink-0 ${
         suppressed ? 'opacity-40' : 'hover:shadow-md hover:border-primary/30'
       }`}
     >
-      <div className="flex items-center gap-2.5">
-        <div className={`w-8 h-8 rounded-lg ${dept.bg} flex items-center justify-center flex-shrink-0`}>
-          {suppressed ? <EyeOff className={`w-3.5 h-3.5 ${dept.text}`} /> : <User className={`w-3.5 h-3.5 ${dept.text}`} />}
+      <div className="flex items-center gap-1.5">
+        <div className={`w-6 h-6 rounded-md ${dept.bg} flex items-center justify-center flex-shrink-0`}>
+          {suppressed ? <EyeOff className={`w-3 h-3 ${dept.text}`} /> : <User className={`w-3 h-3 ${dept.text}`} />}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-xs font-semibold truncate ${suppressed ? 'line-through text-muted-foreground' : ''}`}>{employee.name}</p>
-          <p className="text-[10px] text-muted-foreground truncate leading-tight">{employee.title}</p>
+          <p className={`text-[10px] font-semibold truncate ${suppressed ? 'line-through text-muted-foreground' : ''}`}>{employee.name}</p>
+          <p className="text-[9px] text-muted-foreground truncate leading-tight">{employee.title}</p>
         </div>
       </div>
-      <div className="mt-1 text-[10px] font-bold text-muted-foreground">{formatCurrency(employee.annual_salary)}</div>
       {allocEntries.length > 0 && (
-        <div className="mt-2 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
+        <div className="mt-1.5 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
           {allocEntries.map(([code, pct]) => (
             <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
           ))}
@@ -62,19 +61,19 @@ function OrgNode({ employee, allEmployees, onEdit, collapsed, onToggle }) {
       {directReports.length > 0 && (
         <>
           <button
-            className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+            className="flex items-center gap-1 mt-0.5 text-[9px] text-muted-foreground hover:text-foreground transition-colors"
             onClick={() => onToggle(employee.id)}
           >
-            {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-            {directReports.length} report{directReports.length !== 1 ? 's' : ''}
+            {isCollapsed ? <ChevronRight className="w-2.5 h-2.5" /> : <ChevronDown className="w-2.5 h-2.5" />}
+            {directReports.length}
           </button>
 
           {!isCollapsed && (
             <>
               {/* Vertical connector line */}
-              <div className="w-px h-4 bg-border" />
+              <div className="w-px h-3 bg-border" />
               {/* Horizontal row of children */}
-              <div className="flex flex-row items-start gap-4 relative">
+              <div className="flex flex-row items-start gap-2 relative">
                 {/* Horizontal line spanning children */}
                 {directReports.length > 1 && (
                   <div
@@ -85,7 +84,7 @@ function OrgNode({ employee, allEmployees, onEdit, collapsed, onToggle }) {
                 {directReports.map((report) => (
                   <div key={report.id} className="flex flex-col items-center">
                     {/* Small vertical stub down to child card */}
-                    <div className="w-px h-4 bg-border" />
+                    <div className="w-px h-3 bg-border" />
                     <OrgNode
                       employee={report}
                       allEmployees={allEmployees}
@@ -148,9 +147,9 @@ export default function OrgChart() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card/50 p-6 overflow-auto">
+      <div className="rounded-2xl border border-border bg-card/50 p-4 overflow-auto">
         {/* Top-level row */}
-        <div className="flex flex-row items-start gap-6 justify-start min-w-max">
+        <div className="flex flex-row items-start gap-3 justify-start min-w-max">
           {topLevel.map((emp) => (
             <OrgNode
               key={emp.id}
