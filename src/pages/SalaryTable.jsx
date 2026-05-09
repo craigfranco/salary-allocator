@@ -267,7 +267,7 @@ export default function SalaryTable() {
       </div>
 
       {formOpen && (
-        <EmployeeForm open={formOpen} onClose={setFormOpen} onSave={handleSave} employee={editEmp} hotels={sortedHotels} />
+        <EmployeeForm open={formOpen} onClose={setFormOpen} onSave={handleSave} employee={editEmp} hotels={sortedHotels} allEmployees={employees} />
       )}
 
       <AlertDialog open={!!deleteEmp} onOpenChange={() => setDeleteEmp(null)}>
