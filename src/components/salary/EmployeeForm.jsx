@@ -96,17 +96,6 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                   <span className="text-xs text-muted-foreground">%</span>
                 </div>
               ))}
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground w-16 truncate">CORP</span>
-                <Input
-                  type="number"
-                  min="0" max="100"
-                  className="h-8 text-xs"
-                  value={Math.round((form.allocations?.['CORP'] || 0) * 100)}
-                  onChange={(e) => handleAllocChange('CORP', e.target.value)}
-                />
-                <span className="text-xs text-muted-foreground">%</span>
-              </div>
             </div>
           </div>
         </div>
