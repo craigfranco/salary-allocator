@@ -7,6 +7,7 @@ import { getDeptBgColor } from '@/lib/helpers';
 import { Users } from 'lucide-react';
 
 const deptLabels = { REVENUE: 'Revenue Management', ECOMM: 'E-Commerce', SALES: 'Sales & Marketing' };
+const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 export default function OrgChart() {
   const [editEmp, setEditEmp] = useState(null);
@@ -20,13 +21,9 @@ export default function OrgChart() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setEditEmp(null); },
   });
 
-  const sortedHotels = [...hotels].sort((a, b) => {
-    const order = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
-    return order.indexOf(a.short_code) - order.indexOf(b.short_code);
-  });
-
-  const suppressedCount = employees.filter(e => e.suppressed).length;
+  const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const departments = ['REVENUE', 'ECOMM', 'SALES'];
+  const suppressedCount = employees.filter(e => e.suppressed).length;
 
   return (
     <div className="space-y-6">
@@ -34,7 +31,7 @@ export default function OrgChart() {
         <h2 className="text-2xl font-display font-bold">Organization Chart</h2>
         <p className="text-sm text-muted-foreground mt-1">
           Team structure grouped by department
-          {suppressedCount > 0 && <span className="ml-2 text-amber-600 font-medium">· {suppressedCount} employee(s) suppressed</span>}
+          {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} employee(s) suppressed</span>}
         </p>
       </div>
 
@@ -45,13 +42,17 @@ export default function OrgChart() {
           const activeCount = deptEmployees.filter(e => !e.suppressed).length;
           return (
             <div key={dept}>
-              <div className={`bg-gradient-to-r ${getDeptBgColor(dept)} rounded-xl p-4 mb-4`}>
-                <div className="flex items-center gap-2 text-white">
-                  <Users className="w-5 h-5" />
-                  <h3 className="text-lg font-display font-bold">{deptLabels[dept]}</h3>
-                  <span className="ml-auto text-sm opacity-80">
-                    {activeCount} active{deptEmployees.length !== activeCount ? ` · ${deptEmployees.length - activeCount} suppressed` : ''}
-                  </span>
+              <div className={`bg-gradient-to-r ${getDeptBgColor(dept)} rounded-2xl p-4 mb-4 shadow-sm`}>
+                <div className="flex items-center gap-3 text-white">
+                  <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-display font-bold">{deptLabels[dept]}</h3>
+                    <p className="text-xs text-white/70">
+                      {activeCount} active{deptEmployees.length !== activeCount ? ` · ${deptEmployees.length - activeCount} suppressed` : ''}
+                    </p>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">

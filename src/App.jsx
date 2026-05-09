@@ -10,6 +10,8 @@ import SalaryTable from '@/pages/SalaryTable';
 import HotelBudgets from '@/pages/HotelBudgets';
 import OrgChart from '@/pages/OrgChart';
 import Alerts from '@/pages/Alerts';
+import Analytics from '@/pages/Analytics';
+import { ThemeProvider } from '@/lib/theme.jsx';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -36,6 +38,7 @@ const AuthenticatedApp = () => {
       <Route element={<AppLayout />}>
         <Route path="/" element={<SalaryTable />} />
         <Route path="/budgets" element={<HotelBudgets />} />
+        <Route path="/analytics" element={<Analytics />} />
         <Route path="/org-chart" element={<OrgChart />} />
         <Route path="/alerts" element={<Alerts />} />
       </Route>
@@ -46,14 +49,16 @@ const AuthenticatedApp = () => {
 
 function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClientInstance}>
-        <Router>
-          <AuthenticatedApp />
-        </Router>
-        <Toaster />
-      </QueryClientProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <QueryClientProvider client={queryClientInstance}>
+          <Router>
+            <AuthenticatedApp />
+          </Router>
+          <Toaster />
+        </QueryClientProvider>
+      </AuthProvider>
+    </ThemeProvider>
   )
 }
 

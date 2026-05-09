@@ -1,47 +1,62 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { TableProperties, Building2, Network, AlertTriangle, Hotel } from 'lucide-react';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, Hotel } from 'lucide-react';
+import { useTheme } from '@/lib/theme.jsx';
 
 const navItems = [
   { path: '/', label: 'Salary Table', icon: TableProperties },
   { path: '/budgets', label: 'Hotel Budgets', icon: Building2 },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/org-chart', label: 'Org Chart', icon: Network },
   { path: '/alerts', label: 'Alerts', icon: AlertTriangle },
 ];
 
 export default function AppLayout() {
   const location = useLocation();
+  const { dark, toggle } = useTheme();
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-primary text-primary-foreground border-b border-primary/20">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
+    <div className="min-h-screen bg-background transition-colors duration-300">
+      {/* Header */}
+      <header className="relative overflow-hidden bg-gradient-to-r from-primary via-primary to-blue-700 dark:from-slate-900 dark:via-blue-950 dark:to-slate-900 border-b border-white/10">
+        <div className="absolute inset-0 opacity-10 dark:opacity-20" style={{
+          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)'
+        }} />
+        <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
-                <Hotel className="w-5 h-5 text-secondary-foreground" />
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg">
+                <Hotel className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-lg font-display font-semibold leading-tight">Topline Salary</h1>
-                <p className="text-xs text-primary-foreground/60 font-inter">Management Dashboard</p>
+                <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Topline Salary</h1>
+                <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Hotel Management Dashboard</p>
               </div>
             </div>
+            <button
+              onClick={toggle}
+              className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-all duration-200"
+              title="Toggle dark/light mode"
+            >
+              {dark ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-white" />}
+            </button>
           </div>
         </div>
       </header>
 
-      <nav className="bg-card border-b sticky top-0 z-40 shadow-sm">
+      {/* Nav */}
+      <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
-          <div className="flex gap-1 overflow-x-auto py-1">
+          <div className="flex gap-0.5 overflow-x-auto py-1.5">
             {navItems.map(({ path, label, icon: Icon }) => {
               const active = location.pathname === path;
               return (
                 <Link
                   key={path}
                   to={path}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                     active
-                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      ? 'bg-primary text-primary-foreground shadow-md'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                 >

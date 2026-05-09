@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, DollarSign, Building2, TrendingUp, TrendingDown } from 'lucide-react';
 import HotelBudgetCard from '@/components/budget/HotelBudgetCard';
+import StatCard from '@/components/ui/StatCard';
 import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
+const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 export default function HotelBudgets() {
   const [addOpen, setAddOpen] = useState(false);
@@ -18,25 +21,24 @@ export default function HotelBudgets() {
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
 
   const activeEmployees = employees.filter(e => !e.suppressed);
+  const suppressedCount = employees.length - activeEmployees.length;
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Hotel.update(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hotels'] }),
   });
-
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Hotel.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 }); },
   });
 
-  const sortedHotels = [...hotels].sort((a, b) => {
-    const order = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
-    return order.indexOf(a.short_code) - order.indexOf(b.short_code);
-  });
+  const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
   const totalBudget = hotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalAllocated = hotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
-  const suppressedCount = employees.length - activeEmployees.length;
+  const totalRoomRev = hotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
+  const overBudgetCount = propertyHotels.filter(h => getHotelAllocatedTotal(activeEmployees, h.short_code) > (h.sm_payroll_budget || 0)).length;
 
   return (
     <div className="space-y-6">
@@ -45,7 +47,7 @@ export default function HotelBudgets() {
           <h2 className="text-2xl font-display font-bold">Hotel Budgets</h2>
           <p className="text-sm text-muted-foreground mt-1">
             2026 Room Revenue & S&M Payroll Budgets
-            {suppressedCount > 0 && <span className="ml-2 text-amber-600 font-medium">· {suppressedCount} employee(s) suppressed</span>}
+            {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} employee(s) suppressed</span>}
           </p>
         </div>
         <Button onClick={() => setAddOpen(true)} className="gap-2">
@@ -53,17 +55,12 @@ export default function HotelBudgets() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-primary rounded-xl">
-        <div>
-          <p className="text-xs text-primary-foreground/60 uppercase tracking-wider font-semibold">Total S&M Budget</p>
-          <p className="text-2xl font-bold text-primary-foreground font-display mt-1">{formatCurrency(totalBudget)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-primary-foreground/60 uppercase tracking-wider font-semibold">Total Allocated</p>
-          <p className={`text-2xl font-bold font-display mt-1 ${totalAllocated > totalBudget ? 'text-red-300' : 'text-emerald-300'}`}>
-            {formatCurrency(totalAllocated)}
-          </p>
-        </div>
+      {/* Summary stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard label="Total S&M Budget" value={totalBudget} prefix="$" icon={DollarSign} color="blue" />
+        <StatCard label="Total Allocated" value={totalAllocated} prefix="$" icon={TrendingUp} color={totalAllocated > totalBudget ? 'rose' : 'teal'} />
+        <StatCard label="Total Room Revenue" value={totalRoomRev} prefix="$" icon={Building2} color="purple" />
+        <StatCard label="Over Budget" value={overBudgetCount} suffix=" hotels" icon={TrendingDown} color={overBudgetCount > 0 ? 'rose' : 'teal'} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
