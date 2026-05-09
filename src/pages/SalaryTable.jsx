@@ -291,7 +291,7 @@ export default function SalaryTable() {
                     color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'
                   }
                 ].map((item, idx) => (
-                  <td key={idx} className="px-2 py-2.5 text-center">
+                  <td key={idx} className="px-6 py-2.5 text-center">
                     <div className="text-[10px] text-muted-foreground">{item.label}</div>
                     <div className={`text-sm font-bold tabular-nums ${item.color}`}>{item.value}</div>
                   </td>
