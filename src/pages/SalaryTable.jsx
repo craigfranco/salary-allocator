@@ -72,6 +72,11 @@ export default function SalaryTable() {
   const totalPayrollPct = totalRoomRev > 0 ? (totalPayroll / totalRoomRev) * 100 : null;
 
   const sortedEmployees = [...employees].sort((a, b) => {
+    // Suppressed (non-Craig) float to top
+    const aSuppressed = a.suppressed && a.name !== 'Craig Franco';
+    const bSuppressed = b.suppressed && b.name !== 'Craig Franco';
+    if (aSuppressed && !bSuppressed) return -1;
+    if (!aSuppressed && bSuppressed) return 1;
     const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
     const d = deptOrder.indexOf(a.department) - deptOrder.indexOf(b.department);
     return d !== 0 ? d : a.name.localeCompare(b.name);
