@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Plus, DollarSign, Building2, TrendingUp, TrendingDown } from 'lucide-react';
 import HotelBudgetCard from '@/components/budget/HotelBudgetCard';
+import HotelDrillDown from '@/components/budget/HotelDrillDown';
 import StatCard from '@/components/ui/StatCard';
 import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -14,6 +15,7 @@ const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP']
 
 export default function HotelBudgets() {
   const [addOpen, setAddOpen] = useState(false);
+  const [drillHotel, setDrillHotel] = useState(null);
   const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 });
   const qc = useQueryClient();
 
@@ -64,15 +66,28 @@ export default function HotelBudgets() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sortedHotels.map(hotel => (
-          <HotelBudgetCard
-            key={hotel.id}
-            hotel={hotel}
-            allocatedTotal={getHotelAllocatedTotal(activeEmployees, hotel.short_code)}
-            onUpdate={(data) => updateMutation.mutate({ id: hotel.id, data })}
-          />
-        ))}
+        {sortedHotels.map(hotel => {
+          const empCount = activeEmployees.filter(e => (e.allocations?.[hotel.short_code] || 0) > 0).length;
+          return (
+            <HotelBudgetCard
+              key={hotel.id}
+              hotel={hotel}
+              allocatedTotal={getHotelAllocatedTotal(activeEmployees, hotel.short_code)}
+              employeeCount={empCount}
+              onUpdate={(data) => updateMutation.mutate({ id: hotel.id, data })}
+              onClick={() => setDrillHotel(hotel)}
+            />
+          );
+        })}
       </div>
+
+      {drillHotel && (
+        <HotelDrillDown
+          hotel={drillHotel}
+          employees={activeEmployees}
+          onClose={() => setDrillHotel(null)}
+        />
+      )}
 
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>

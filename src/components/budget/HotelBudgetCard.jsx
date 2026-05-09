@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Building2, Pencil, Check, X } from 'lucide-react';
+import { Building2, Pencil, Check, X, Users } from 'lucide-react';
 import { formatCurrency } from '@/lib/helpers';
 import { HOTEL_COLORS } from '@/lib/helpers';
 
-export default function HotelBudgetCard({ hotel, allocatedTotal, onUpdate }) {
+export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, onUpdate, onClick }) {
   const [editing, setEditing] = useState(false);
   const [roomRev, setRoomRev] = useState(hotel.room_revenue_budget);
   const [payroll, setPayroll] = useState(hotel.sm_payroll_budget);
@@ -26,7 +26,10 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, onUpdate }) {
   if (hotel.short_code === 'CORP') return null;
 
   return (
-    <div className="rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden group">
+    <div
+      className="rounded-2xl border border-border bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 overflow-hidden group cursor-pointer"
+      onClick={onClick}
+    >
       {/* Color banner */}
       <div className={`h-1.5 w-full ${accent.bg}`} />
 
@@ -42,13 +45,20 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, onUpdate }) {
             </div>
           </div>
           {!editing ? (
-            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setEditing(true)}>
+            <div className="flex items-center gap-2">
+              {employeeCount > 0 && (
+                <span className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full bg-muted/60 text-muted-foreground">
+                  <Users className="w-3 h-3" />{employeeCount}
+                </span>
+              )}
+            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); setEditing(true); }}>
               <Pencil className="w-3.5 h-3.5" />
             </Button>
+            </div>
           ) : (
             <div className="flex gap-1">
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-500" onClick={handleSave}><Check className="w-3.5 h-3.5" /></Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setEditing(false)}><X className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-500" onClick={(e) => { e.stopPropagation(); handleSave(); }}><Check className="w-3.5 h-3.5" /></Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); setEditing(false); }}><X className="w-3.5 h-3.5" /></Button>
             </div>
           )}
         </div>
