@@ -4,13 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BookMarked, Save, Trash2, ChevronDown, Check } from 'lucide-react';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
 
 export default function ScenarioManager({ employees, onRestore }) {
+  const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [activeScenarioId, setActiveScenarioId] = useState(null);
   const [name, setName] = useState('');
@@ -49,31 +47,35 @@ export default function ScenarioManager({ employees, onRestore }) {
   const handleRestore = (scenario) => {
     onRestore(scenario.snapshot);
     setActiveScenarioId(scenario.id);
+    setOpen(false);
   };
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
           <Button variant="outline" className="gap-2">
             <BookMarked className="w-4 h-4" />
             Scenarios
             <ChevronDown className="w-3 h-3 opacity-60" />
           </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuItem onClick={() => setSaveOpen(true)} className="gap-2 font-medium">
+        </PopoverTrigger>
+        <PopoverContent align="end" className="w-64 p-1">
+          <button
+            className="flex items-center gap-2 w-full px-2 py-1.5 text-sm font-medium rounded-sm hover:bg-accent cursor-pointer"
+            onClick={() => { setOpen(false); setSaveOpen(true); }}
+          >
             <Save className="w-4 h-4" /> Save Current as Scenario
-          </DropdownMenuItem>
+          </button>
+
           {scenarios.length > 0 && (
             <>
-              <DropdownMenuSeparator />
+              <div className="my-1 h-px bg-border" />
               <div className="px-2 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Saved Scenarios</div>
               {scenarios.map(s => (
                 <div
                   key={s.id}
-                  className="flex items-center justify-between px-2 py-1.5 hover:bg-accent rounded-sm cursor-pointer group mx-1"
-                  onPointerDown={(e) => e.stopPropagation()}
+                  className="flex items-center justify-between px-2 py-1.5 hover:bg-accent rounded-sm cursor-pointer group"
                   onClick={() => handleRestore(s)}
                 >
                   <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -96,11 +98,12 @@ export default function ScenarioManager({ employees, onRestore }) {
               ))}
             </>
           )}
+
           {scenarios.length === 0 && (
             <div className="px-3 py-2 text-xs text-muted-foreground italic">No saved scenarios yet</div>
           )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </PopoverContent>
+      </Popover>
 
       <Dialog open={saveOpen} onOpenChange={setSaveOpen}>
         <DialogContent className="max-w-sm">
