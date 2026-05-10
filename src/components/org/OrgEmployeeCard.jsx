@@ -51,9 +51,9 @@ export default function OrgEmployeeCard({ employee, onClick }) {
               />
             ))}
           </div>
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <div className="mt-1.5 flex flex-wrap gap-1">
             {allocEntries.map(([code, pct]) => (
-              <span key={code} className="text-[9px] font-semibold px-1.5 py-0.5 rounded-full bg-muted/50 text-muted-foreground">
+              <span key={code} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
                 {code} {Math.round(pct * 100)}%
               </span>
             ))}
