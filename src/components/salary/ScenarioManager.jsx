@@ -4,7 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { BookMarked, Save, Trash2, RotateCcw, ChevronDown } from 'lucide-react';
+import { BookMarked, Save, Trash2, ChevronDown, Check } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger
@@ -12,6 +12,7 @@ import {
 
 export default function ScenarioManager({ employees, onRestore }) {
   const [saveOpen, setSaveOpen] = useState(false);
+  const [activeScenarioId, setActiveScenarioId] = useState(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const qc = useQueryClient();
@@ -47,6 +48,7 @@ export default function ScenarioManager({ employees, onRestore }) {
 
   const handleRestore = (scenario) => {
     onRestore(scenario.snapshot);
+    setActiveScenarioId(scenario.id);
   };
 
   return (
@@ -68,14 +70,20 @@ export default function ScenarioManager({ employees, onRestore }) {
               <DropdownMenuSeparator />
               <div className="px-2 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Saved Scenarios</div>
               {scenarios.map(s => (
-                <DropdownMenuItem
+                <div
                   key={s.id}
-                  className="flex items-center justify-between px-2 py-1.5 group"
-                  onSelect={(e) => { e.preventDefault(); handleRestore(s); }}
+                  className="flex items-center justify-between px-2 py-1.5 hover:bg-accent rounded-sm cursor-pointer group mx-1"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={() => handleRestore(s)}
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">{s.name}</div>
-                    {s.description && <div className="text-xs text-muted-foreground truncate">{s.description}</div>}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <div className="w-4 flex-shrink-0 flex items-center justify-center">
+                      {activeScenarioId === s.id && <Check className="w-3.5 h-3.5 text-primary" />}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium truncate">{s.name}</div>
+                      {s.description && <div className="text-xs text-muted-foreground truncate">{s.description}</div>}
+                    </div>
                   </div>
                   <button
                     onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(s.id); }}
@@ -84,7 +92,7 @@ export default function ScenarioManager({ employees, onRestore }) {
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
-                </DropdownMenuItem>
+                </div>
               ))}
             </>
           )}
