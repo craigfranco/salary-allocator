@@ -8,7 +8,7 @@ export default function Alerts() {
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
-  const activeEmployees = employees.filter(e => !e.suppressed);
+  const activeEmployees = employees.filter(e => !e.suppressed && !e.exclude_from_table);
   const suppressedCount = employees.length - activeEmployees.length;
 
   const allocAlerts = activeEmployees.map(emp => {
@@ -90,7 +90,7 @@ export default function Alerts() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold">{emp.name}</p>
-                      <p className="text-xs text-muted-foreground">{emp.title} · {emp.department}</p>
+                      <p className="text-xs text-muted-foreground">{emp.title} · {emp.exclude_from_table ? 'Corporate' : emp.department}</p>
                     </div>
                   </div>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
