@@ -106,6 +106,7 @@ export default function SalaryTable() {
           <h2 className="text-2xl font-display font-bold text-foreground">Salary Allocations</h2>
           <p className="text-sm text-muted-foreground mt-1">
             {activeEmployees.length} employees · {sortedHotels.filter(h => h.short_code !== 'CORP').length} properties
+            {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed</span>}
           </p>
         </div>
         <div className="flex items-center gap-2">
