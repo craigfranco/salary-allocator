@@ -109,7 +109,7 @@ export default function OrgChart() {
   const activeEmployees = employees.filter(e => !e.suppressed);
 
   activeEmployees.forEach(emp => {
-    const mid = emp.manager_id || null;
+    const mid = emp.manager_id && emp.manager_id.trim() ? emp.manager_id : null;
     if (!childrenMap[mid]) childrenMap[mid] = [];
     childrenMap[mid].push(emp);
   });
@@ -121,7 +121,7 @@ export default function OrgChart() {
 
   // Roots = employees with no manager or whose manager isn't in the active list
   const activeIds = new Set(activeEmployees.map(e => e.id));
-  const roots = activeEmployees.filter(e => !e.manager_id || !activeIds.has(e.manager_id));
+  const roots = activeEmployees.filter(e => !e.manager_id || !e.manager_id.trim() || !activeIds.has(e.manager_id));
 
   const suppressedCount = employees.filter(e => e.suppressed).length;
 
