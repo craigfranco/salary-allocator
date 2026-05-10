@@ -8,32 +8,21 @@ import { User, EyeOff, GitBranch } from 'lucide-react';
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 const DEPT_STYLES = {
-  REVENUE: { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400', border: 'border-l-teal-500', label: 'Revenue' },
-  ECOMM:   { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400', border: 'border-l-orange-500', label: 'E-Commerce' },
-  SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-l-purple-500', label: 'Sales & Marketing' },
+  REVENUE: { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400', border: 'border-teal-500', label: 'Revenue' },
+  ECOMM:   { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-500', label: 'E-Commerce' },
+  SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500', label: 'Sales & Marketing' },
 };
-
-const TIER_ORDER = ['Executive', 'Director', 'Manager', 'Coordinator / Associate', 'Other'];
-
-function getTier(title) {
-  const t = title.toLowerCase();
-  if (t.includes('executive') || t.includes('vp') || t.includes('chief')) return 'Executive';
-  if (t.includes('director')) return 'Director';
-  if (t.includes('manager')) return 'Manager';
-  if (t.includes('coordinator') || t.includes('associate') || t.includes('specialist') || t.includes('analyst')) return 'Coordinator / Associate';
-  return 'Other';
-}
 
 function EmployeeCard({ employee, onClick }) {
   const dept = DEPT_STYLES[employee.department] || {};
-  const suppressed = !!employee.suppressed && employee.name !== 'Craig Franco';
+  const suppressed = !!employee.suppressed;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
 
   return (
     <div
       onClick={() => onClick(employee)}
-      className={`rounded-lg border-l-2 ${dept.border} border border-border bg-card p-2 cursor-pointer transition-all duration-150 select-none w-36 flex-shrink-0 ${
-        suppressed ? 'opacity-40' : 'hover:shadow-md hover:border-primary/30'
+      className={`rounded-lg border ${dept.border} border-2 bg-card p-2 cursor-pointer transition-all duration-150 select-none w-40 flex-shrink-0 shadow-sm ${
+        suppressed ? 'opacity-40' : 'hover:shadow-md hover:scale-[1.02]'
       }`}
     >
       <div className="flex items-center gap-1.5">
@@ -56,6 +45,51 @@ function EmployeeCard({ employee, onClick }) {
   );
 }
 
+// Recursive tree node
+function OrgNode({ employee, childrenMap, onClick, isLast, depth }) {
+  const children = childrenMap[employee.id] || [];
+
+  return (
+    <div className="flex flex-col items-center">
+      <EmployeeCard employee={employee} onClick={onClick} />
+      {children.length > 0 && (
+        <div className="flex flex-col items-center">
+          {/* Vertical line down from parent */}
+          <div className="w-px h-6 bg-border" />
+          {/* Horizontal connector */}
+          {children.length > 1 && (
+            <div className="relative flex items-start" style={{ width: `${children.length * 176}px` }}>
+              <div
+                className="absolute top-0 bg-border"
+                style={{
+                  height: '1px',
+                  left: `${88}px`,
+                  right: `${88}px`,
+                }}
+              />
+            </div>
+          )}
+          {/* Children row */}
+          <div className="flex gap-4 items-start">
+            {children.map((child, idx) => (
+              <div key={child.id} className="flex flex-col items-center">
+                {children.length > 1 && <div className="w-px h-6 bg-border" />}
+                <OrgNode
+                  employee={child}
+                  childrenMap={childrenMap}
+                  onClick={onClick}
+                  isLast={idx === children.length - 1}
+                  depth={depth + 1}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function OrgChart() {
   const [editEmp, setEditEmp] = useState(null);
   const qc = useQueryClient();
@@ -69,24 +103,27 @@ export default function OrgChart() {
   });
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
-  const suppressedCount = employees.filter(e => e.suppressed && e.name !== 'Craig Franco').length;
 
-  // Build tiered groups: tier → dept → employees
-  const tiers = {};
-  TIER_ORDER.forEach(t => { tiers[t] = { REVENUE: [], ECOMM: [], SALES: [] }; });
+  // Build manager → children map
+  const childrenMap = {};
+  const activeEmployees = employees.filter(e => !e.suppressed);
 
-  employees.forEach(emp => {
-    if (emp.suppressed && emp.name !== 'Craig Franco') return;
-    const tier = getTier(emp.title);
-    if (tiers[tier] && tiers[tier][emp.department]) {
-      tiers[tier][emp.department].push(emp);
-    }
+  activeEmployees.forEach(emp => {
+    const mid = emp.manager_id || null;
+    if (!childrenMap[mid]) childrenMap[mid] = [];
+    childrenMap[mid].push(emp);
   });
 
-  // Only show tiers that have at least one employee
-  const activeTiers = TIER_ORDER.filter(t => Object.values(tiers[t]).some(arr => arr.length > 0));
+  // Sort children by title length (approximate seniority)
+  Object.keys(childrenMap).forEach(k => {
+    childrenMap[k].sort((a, b) => a.name.localeCompare(b.name));
+  });
 
-  const DEPTS = ['REVENUE', 'ECOMM', 'SALES'];
+  // Roots = employees with no manager or whose manager isn't in the active list
+  const activeIds = new Set(activeEmployees.map(e => e.id));
+  const roots = activeEmployees.filter(e => !e.manager_id || !activeIds.has(e.manager_id));
+
+  const suppressedCount = employees.filter(e => e.suppressed).length;
 
   return (
     <div className="space-y-4">
@@ -94,51 +131,39 @@ export default function OrgChart() {
         <div>
           <h2 className="text-2xl font-display font-bold">Organization Chart</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Grouped by seniority tier and department
-            {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed</span>}
+            Reporting hierarchy
+            {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed (hidden)</span>}
           </p>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
           <GitBranch className="w-3.5 h-3.5" />
-          Click to edit
+          Click a card to edit
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card/50 overflow-hidden">
-        {/* Department header */}
-        <div className="grid grid-cols-[120px_1fr_1fr_1fr] border-b border-border bg-muted/30">
-          <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-muted-foreground" />
-          {DEPTS.map(dept => (
-            <div key={dept} className={`px-3 py-2 text-[10px] font-bold uppercase tracking-wider ${DEPT_STYLES[dept].text}`}>
-              {DEPT_STYLES[dept].label}
-            </div>
-          ))}
-        </div>
-
-        {/* Tier rows */}
-        {activeTiers.map((tier, i) => (
-          <div
-            key={tier}
-            className={`grid grid-cols-[120px_1fr_1fr_1fr] border-b border-border/50 last:border-b-0 ${i % 2 === 0 ? 'bg-card' : 'bg-muted/10'}`}
-          >
-            {/* Tier label */}
-            <div className="px-3 py-3 flex items-start">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground leading-tight">{tier}</span>
-            </div>
-
-            {/* Dept columns */}
-            {DEPTS.map(dept => (
-              <div key={dept} className="px-2 py-3 flex flex-wrap gap-2 border-l border-border/30">
-                {tiers[tier][dept].map(emp => (
-                  <EmployeeCard key={emp.id} employee={emp} onClick={setEditEmp} />
-                ))}
-                {tiers[tier][dept].length === 0 && (
-                  <span className="text-[10px] text-muted-foreground/40 italic">—</span>
-                )}
-              </div>
-            ))}
+      {/* Legend */}
+      <div className="flex gap-4">
+        {Object.entries(DEPT_STYLES).map(([key, val]) => (
+          <div key={key} className="flex items-center gap-1.5">
+            <div className={`w-3 h-3 rounded-sm border-2 ${val.border} ${val.bg}`} />
+            <span className={`text-xs font-medium ${val.text}`}>{val.label}</span>
           </div>
         ))}
+      </div>
+
+      <div className="overflow-auto rounded-2xl border border-border bg-card/50 p-6">
+        <div className="flex gap-12 items-start min-w-max">
+          {roots.map(root => (
+            <OrgNode
+              key={root.id}
+              employee={root}
+              childrenMap={childrenMap}
+              onClick={setEditEmp}
+              isLast={true}
+              depth={0}
+            />
+          ))}
+        </div>
       </div>
 
       {editEmp && (
