@@ -274,6 +274,25 @@ export default function SalaryTable() {
                 <td />
                 <td />
               </tr>
+              <tr className="bg-primary/5 border-t border-border/50">
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">% of S&M Budget</td>
+                <td />
+                {sortedHotels.map(h => {
+                  if (h.short_code === 'CORP') return <td key={h.short_code} />;
+                  const allocated = hotelTotals[h.short_code] || 0;
+                  const budget = h.sm_payroll_budget || 0;
+                  const budgetPct = budget > 0 ? (allocated / budget) * 100 : null;
+                  return (
+                    <td key={h.short_code} className="px-2 py-2 text-center">
+                      <span className={`text-xs font-semibold tabular-nums ${budgetPct === null ? 'text-muted-foreground' : budgetPct > 100 ? 'text-red-500' : budgetPct > 95 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        {budgetPct !== null ? `${budgetPct.toFixed(1)}%` : '—'}
+                      </span>
+                    </td>
+                  );
+                })}
+                <td />
+                <td />
+              </tr>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
                 <td colSpan={5} className="px-3 py-2.5 text-xs font-bold text-foreground sticky left-0 bg-primary/10 z-10">
                   Summary
@@ -293,6 +312,11 @@ export default function SalaryTable() {
                     label: '% of\nRoom Rev', 
                     value: totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—', 
                     color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'
+                  },
+                  {
+                    label: '% of S&M\nBudget',
+                    value: totalSmBudget > 0 ? `${((totalPayroll / totalSmBudget) * 100).toFixed(1)}%` : '—',
+                    color: totalSmBudget === 0 ? 'text-muted-foreground' : (totalPayroll / totalSmBudget) > 1 ? 'text-red-500' : (totalPayroll / totalSmBudget) > 0.95 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'
                   }
                 ].map((item, idx) => (
                   <td key={idx} className="px-8 py-2.5 text-center">
