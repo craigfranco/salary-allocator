@@ -22,6 +22,7 @@ export default function SalaryTable() {
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('');
   const [allocFilter, setAllocFilter] = useState('');
+  const [hotelFilter, setHotelFilter] = useState('');
   const qc = useQueryClient();
 
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
@@ -94,6 +95,7 @@ export default function SalaryTable() {
     if (allocFilter === 'exact' && getAllocationStatus(getTotalAllocation(emp.allocations)) !== 'exact') return false;
     if (allocFilter === 'issues' && getAllocationStatus(getTotalAllocation(emp.allocations)) === 'exact') return false;
     if (allocFilter === 'suppressed' && !emp.suppressed) return false;
+    if (hotelFilter && !((emp.allocations?.[hotelFilter] || 0) > 0)) return false;
     return true;
   });
 
@@ -121,6 +123,8 @@ export default function SalaryTable() {
         search={search} setSearch={setSearch}
         department={deptFilter} setDepartment={setDeptFilter}
         allocationFilter={allocFilter} setAllocationFilter={setAllocFilter}
+        hotelFilter={hotelFilter} setHotelFilter={setHotelFilter}
+        hotels={sortedHotels}
       />
 
       {issueEmployees.length > 0 && (
