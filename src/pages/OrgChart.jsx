@@ -15,7 +15,7 @@ const DEPT_STYLES = {
 
 const CRAIG_STYLE = { bg: 'bg-amber-500/15', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500', label: 'Head of Commercial' };
 
-function EmployeeCard({ employee, onClick }) {
+function EmployeeCard({ employee, onClick, hotelMap }) {
   const dept = employee.exclude_from_table ? CRAIG_STYLE : (DEPT_STYLES[employee.department] || {});
   const suppressed = !!employee.suppressed;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
@@ -23,7 +23,7 @@ function EmployeeCard({ employee, onClick }) {
   return (
     <div
       onClick={() => onClick(employee)}
-      className={`rounded-lg border ${dept.border} border-2 bg-card p-2 cursor-pointer transition-all duration-150 select-none w-40 flex-shrink-0 shadow-sm ${
+      className={`rounded-lg border ${dept.border} border-2 bg-card p-2 cursor-pointer transition-all duration-150 select-none w-44 flex-shrink-0 shadow-sm ${
         suppressed ? 'opacity-40' : 'hover:shadow-md hover:scale-[1.02]'
       }`}
     >
@@ -37,17 +37,26 @@ function EmployeeCard({ employee, onClick }) {
         </div>
       </div>
       {allocEntries.length > 0 && (
-        <div className="mt-1.5 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
-          {allocEntries.map(([code, pct]) => (
-            <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
-          ))}
-        </div>
+        <>
+          <div className="mt-1.5 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
+            {allocEntries.map(([code, pct]) => (
+              <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
+            ))}
+          </div>
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {allocEntries.map(([code, pct]) => (
+              <span key={code} className={`text-[8px] font-bold px-1 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
+                {hotelMap[code] || code} {Math.round(pct * 100)}%
+              </span>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
-const CARD_W = 160; // w-40
+const CARD_W = 176; // w-44
 const CARD_GAP = 16; // gap-4
 const SLOT_W = CARD_W + CARD_GAP; // width per child slot
 
@@ -60,7 +69,7 @@ function subtreeWidth(employeeId, childrenMap) {
 }
 
 // Recursive tree node
-function OrgNode({ employee, childrenMap, onClick }) {
+function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
   const children = childrenMap[employee.id] || [];
   const myWidth = subtreeWidth(employee.id, childrenMap);
 
@@ -78,7 +87,7 @@ function OrgNode({ employee, childrenMap, onClick }) {
 
   return (
     <div className="flex flex-col items-center" style={{ width: myWidth }}>
-      <EmployeeCard employee={employee} onClick={onClick} />
+      <EmployeeCard employee={employee} onClick={onClick} hotelMap={hotelMap} />
       {children.length > 0 && (
         <>
           {/* Vertical line from parent down */}
@@ -101,6 +110,7 @@ function OrgNode({ employee, childrenMap, onClick }) {
                   employee={child}
                   childrenMap={childrenMap}
                   onClick={onClick}
+                  hotelMap={hotelMap}
                 />
               </div>
             ))}
@@ -124,6 +134,7 @@ export default function OrgChart() {
   });
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const hotelMap = Object.fromEntries(hotels.map(h => [h.short_code, h.name]));
 
   // Build manager → children map
   const childrenMap = {};
@@ -180,6 +191,7 @@ export default function OrgChart() {
               employee={root}
               childrenMap={childrenMap}
               onClick={setEditEmp}
+              hotelMap={hotelMap}
             />
           ))}
         </div>
