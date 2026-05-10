@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, EyeOff, Eye } from 'lucide-react';
@@ -10,6 +10,7 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
   const total = getTotalAllocation(employee.allocations);
   const status = getAllocationStatus(total);
   const colorClass = getAllocationColor(status);
+  const totalPct = Math.round(total * 100);
 
   const rowBg = suppressed
     ? 'opacity-40 bg-muted/10'
@@ -48,6 +49,7 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
           onSave={(newPct) => onAllocChange(employee, hotel.short_code, newPct)}
           disabled={suppressed}
           hotelName={hotel.name}
+          currentTotal={totalPct}
         />
       ))}
       <td className="px-2 py-2.5">

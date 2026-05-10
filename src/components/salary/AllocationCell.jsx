@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { formatCurrency } from '@/lib/helpers';
 
-export default function AllocationCell({ value, salary, onSave, disabled, hotelName }) {
+export default function AllocationCell({ value, salary, onSave, disabled, hotelName, currentTotal, onEditingChange }) {
   const [editing, setEditing] = useState(false);
   const [inputVal, setInputVal] = useState('');
   const inputRef = useRef(null);
@@ -21,6 +21,7 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
     if (disabled) return;
     setInputVal(String(displayPct));
     setEditing(true);
+    onEditingChange?.(true, displayPct);
   };
 
   const handleSave = () => {
@@ -31,26 +32,36 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
       onSave(0);
     }
     setEditing(false);
+    onEditingChange?.(false, 0);
   };
 
   const handleKey = (e) => {
     if (e.key === 'Enter') handleSave();
-    if (e.key === 'Escape') setEditing(false);
+    if (e.key === 'Escape') { setEditing(false); onEditingChange?.(false, 0); }
   };
+
+  const liveVal = parseFloat(inputVal) || 0;
+  const liveTotal = editing ? Math.round((currentTotal - displayPct + liveVal)) : 0;
+  const liveTotalColor = liveTotal === 100 ? 'text-emerald-500' : liveTotal > 100 ? 'text-red-500' : 'text-amber-500';
 
   if (editing) {
     return (
       <td className="px-1.5 py-1">
-        <input
-          ref={inputRef}
-          type="number"
-          min="0" max="100"
-          value={inputVal}
-          onChange={e => setInputVal(e.target.value)}
-          onBlur={handleSave}
-          onKeyDown={handleKey}
-          className="w-16 h-7 text-center text-sm border border-primary rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
-        />
+        <div className="flex flex-col items-center gap-0.5">
+          <input
+            ref={inputRef}
+            type="number"
+            min="0" max="100"
+            value={inputVal}
+            onChange={e => setInputVal(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={handleKey}
+            className="w-16 h-7 text-center text-sm border border-primary rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+          />
+          <span className={`text-[10px] font-bold tabular-nums ${liveTotalColor}`}>
+            total: {liveTotal}%
+          </span>
+        </div>
       </td>
     );
   }
