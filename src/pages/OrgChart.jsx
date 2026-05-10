@@ -47,46 +47,65 @@ function EmployeeCard({ employee, onClick }) {
   );
 }
 
+const CARD_W = 160; // w-40
+const CARD_GAP = 16; // gap-4
+const SLOT_W = CARD_W + CARD_GAP; // width per child slot
+
+// Returns total pixel width that a subtree occupies
+function subtreeWidth(employeeId, childrenMap) {
+  const children = childrenMap[employeeId] || [];
+  if (children.length === 0) return CARD_W;
+  const total = children.reduce((sum, c) => sum + subtreeWidth(c.id, childrenMap), 0);
+  return total + CARD_GAP * (children.length - 1);
+}
+
 // Recursive tree node
-function OrgNode({ employee, childrenMap, onClick, isLast, depth }) {
+function OrgNode({ employee, childrenMap, onClick }) {
   const children = childrenMap[employee.id] || [];
+  const myWidth = subtreeWidth(employee.id, childrenMap);
+
+  // Compute cumulative widths to find center of each child subtree
+  const childWidths = children.map(c => subtreeWidth(c.id, childrenMap));
+  let cumulative = 0;
+  const childCenters = childWidths.map(w => {
+    const center = cumulative + w / 2;
+    cumulative += w + CARD_GAP;
+    return center;
+  });
+
+  const firstCenter = childCenters[0] ?? 0;
+  const lastCenter = childCenters[childCenters.length - 1] ?? 0;
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center" style={{ width: myWidth }}>
       <EmployeeCard employee={employee} onClick={onClick} />
       {children.length > 0 && (
-        <div className="flex flex-col items-center">
-          {/* Vertical line down from parent */}
+        <>
+          {/* Vertical line from parent down */}
           <div className="w-px h-6 bg-border" />
-          {/* Horizontal connector */}
+          {/* Horizontal bar spanning first to last child center */}
           {children.length > 1 && (
-            <div className="relative flex items-start" style={{ width: `${children.length * 176}px` }}>
+            <div className="relative h-px bg-transparent" style={{ width: myWidth }}>
               <div
-                className="absolute top-0 bg-border"
-                style={{
-                  height: '1px',
-                  left: `${88}px`,
-                  right: `${88}px`,
-                }}
+                className="absolute top-0 h-px bg-border"
+                style={{ left: firstCenter, width: lastCenter - firstCenter }}
               />
             </div>
           )}
-          {/* Children row */}
-          <div className="flex gap-4 items-start">
+          {/* Children row with vertical drops */}
+          <div className="flex items-start" style={{ width: myWidth }}>
             {children.map((child, idx) => (
-              <div key={child.id} className="flex flex-col items-center">
-                {children.length > 1 && <div className="w-px h-6 bg-border" />}
+              <div key={child.id} className="flex flex-col items-center" style={{ width: childWidths[idx], marginRight: idx < children.length - 1 ? CARD_GAP : 0 }}>
+                <div className="w-px h-6 bg-border" />
                 <OrgNode
                   employee={child}
                   childrenMap={childrenMap}
                   onClick={onClick}
-                  isLast={idx === children.length - 1}
-                  depth={depth + 1}
                 />
               </div>
             ))}
           </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -161,8 +180,6 @@ export default function OrgChart() {
               employee={root}
               childrenMap={childrenMap}
               onClick={setEditEmp}
-              isLast={true}
-              depth={0}
             />
           ))}
         </div>
