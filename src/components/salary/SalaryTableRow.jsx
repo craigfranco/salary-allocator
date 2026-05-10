@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, EyeOff, Eye } from 'lucide-react';
 import AllocationCell from './AllocationCell';
 import { getTotalAllocation, getAllocationStatus, getAllocationColor, formatCurrency, getDeptColor } from '@/lib/helpers';
 
@@ -54,6 +54,14 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
         <div className="flex items-center gap-0.5">
           <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={() => onEdit(employee)}>
             <Pencil className="w-3.5 h-3.5" />
+          </Button>
+          <Button
+            variant="ghost" size="icon"
+            className={`h-7 w-7 ${suppressed ? 'text-amber-500 hover:text-amber-600' : 'text-muted-foreground hover:text-amber-500'}`}
+            title={suppressed ? 'Unsuppress (restore to calculations)' : 'Suppress (exclude from all calculations)'}
+            onClick={() => onToggleSuppress(employee)}
+          >
+            {suppressed ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/70 hover:text-destructive" onClick={() => onDelete(employee)}>
             <Trash2 className="w-3.5 h-3.5" />
