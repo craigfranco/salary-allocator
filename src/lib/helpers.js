@@ -65,6 +65,16 @@ export function getDeptAccent(dept) {
   }
 }
 
+export const HOTEL_SHORT_NAMES = {
+  AURA:    'Aura',
+  H5A:     'HAFA',
+  INK48:   'Ink 48',
+  LIFE:    'Life',
+  RENWICK: 'Renwick',
+  SMYTH:   'Smyth',
+  CORP:    'Corp',
+};
+
 export const HOTEL_COLORS = {
   AURA:    { bg: 'bg-blue-500',    text: 'text-blue-600',    badge: 'bg-blue-100 text-blue-700',    hex: '#3b82f6' },
   H5A:     { bg: 'bg-indigo-500',  text: 'text-indigo-600',  badge: 'bg-indigo-100 text-indigo-700',  hex: '#6366f1' },

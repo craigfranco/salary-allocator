@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import EmployeeForm from '@/components/salary/EmployeeForm';
-import { formatCurrency, HOTEL_COLORS } from '@/lib/helpers';
+import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import { User, EyeOff, GitBranch } from 'lucide-react';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
@@ -55,7 +55,7 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
               <div className="mt-1.5 flex flex-wrap gap-1">
                 {allocEntries.map(([code]) => (
                   <span key={code} className={`text-[8px] font-bold px-1 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
-                    {hotelMap[code] || code}
+                    {HOTEL_SHORT_NAMES[code] || hotelMap[code] || code}
                   </span>
                 ))}
               </div>

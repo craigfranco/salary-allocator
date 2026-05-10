@@ -1,5 +1,5 @@
 import React from 'react';
-import { formatCurrency, HOTEL_COLORS } from '@/lib/helpers';
+import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import { User, EyeOff } from 'lucide-react';
 
 const DEPT_STYLES = {
@@ -54,7 +54,7 @@ export default function OrgEmployeeCard({ employee, onClick }) {
           <div className="mt-1.5 flex flex-wrap gap-1">
             {allocEntries.map(([code, pct]) => (
               <span key={code} className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
-                {code} · {Math.round(pct * 100)}%
+                {HOTEL_SHORT_NAMES[code] || code} · {Math.round(pct * 100)}%
               </span>
             ))}
           </div>
