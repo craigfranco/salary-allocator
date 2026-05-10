@@ -84,7 +84,7 @@ export default function SalaryTable() {
     if (!a.suppressed && b.suppressed) return 1;
     const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
     const d = deptOrder.indexOf(a.department) - deptOrder.indexOf(b.department);
-    return d !== 0 ? d : a.name.localeCompare(b.name);
+    return d !== 0 ? d : b.annual_salary - a.annual_salary;
   });
 
   const q = search.toLowerCase();
