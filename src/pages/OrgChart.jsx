@@ -13,8 +13,10 @@ const DEPT_STYLES = {
   SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500', label: 'Sales & Marketing' },
 };
 
+const CRAIG_STYLE = { bg: 'bg-amber-500/15', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500', label: 'Head of Commercial' };
+
 function EmployeeCard({ employee, onClick }) {
-  const dept = DEPT_STYLES[employee.department] || {};
+  const dept = employee.exclude_from_table ? CRAIG_STYLE : (DEPT_STYLES[employee.department] || {});
   const suppressed = !!employee.suppressed;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
 
