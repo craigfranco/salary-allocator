@@ -279,11 +279,11 @@ export default function SalaryTable() {
                 </td>
                 <td />
                 {[
-                  { label: 'Total Room Revenue', value: totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—', color: 'text-foreground' },
-                  { label: 'Total S&M Payroll Budget', value: totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—', color: 'text-foreground' },
-                  { label: 'Total Allocated Payroll', value: formatCurrency(totalPayroll), color: 'text-foreground' },
+                  { label: 'Total Room\nRevenue', value: totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—', color: 'text-foreground' },
+                  { label: 'S&M Payroll\nBudget', value: totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—', color: 'text-foreground' },
+                  { label: 'Total Allocated\nPayroll', value: formatCurrency(totalPayroll), color: 'text-foreground' },
                   { 
-                    label: 'Over / (Short) Budget', 
+                    label: 'Over /\n(Short) Budget', 
                     value: totalBudgetDiff !== null ? (totalBudgetDiff > 0 ? '+' : '') + formatCurrency(totalBudgetDiff) : '—', 
                     color: totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400' 
                   },
@@ -293,8 +293,8 @@ export default function SalaryTable() {
                     color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'
                   }
                 ].map((item, idx) => (
-                  <td key={idx} className="px-6 py-2.5 text-center">
-                    <div className="text-[10px] text-muted-foreground max-w-[60px] mx-auto leading-tight whitespace-normal">{item.label}</div>
+                  <td key={idx} className="px-8 py-2.5 text-center">
+                    <div className="text-[10px] text-muted-foreground w-[80px] mx-auto leading-tight whitespace-pre-line">{item.label}</div>
                     <div className={`text-sm font-bold tabular-nums ${item.color}`}>{item.value}</div>
                   </td>
                 ))}
