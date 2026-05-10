@@ -58,8 +58,8 @@ export default function SalaryTable() {
     updateMutation.mutate({ id: emp.id, data: { suppressed: !emp.suppressed } });
   };
 
-  const activeEmployees = employees.filter(e => !e.suppressed);
-  const suppressedCount = employees.length - activeEmployees.length;
+  const activeEmployees = employees.filter(e => !e.suppressed && !e.exclude_from_table);
+  const suppressedCount = employees.filter(e => e.suppressed).length;
 
   const hotelTotals = {};
   sortedHotels.forEach(h => {
@@ -78,11 +78,8 @@ export default function SalaryTable() {
   const totalBudgetDiff = totalSmBudget > 0 ? totalPayroll - totalSmBudget : null;
 
   const sortedEmployees = [...employees].sort((a, b) => {
-    // Suppressed (non-Craig) float to top
-    const aSuppressed = a.suppressed && a.name !== 'Craig Franco';
-    const bSuppressed = b.suppressed && b.name !== 'Craig Franco';
-    if (aSuppressed && !bSuppressed) return -1;
-    if (!aSuppressed && bSuppressed) return 1;
+    if (a.suppressed && !b.suppressed) return -1;
+    if (!a.suppressed && b.suppressed) return 1;
     const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
     const d = deptOrder.indexOf(a.department) - deptOrder.indexOf(b.department);
     return d !== 0 ? d : a.name.localeCompare(b.name);
@@ -90,7 +87,7 @@ export default function SalaryTable() {
 
   const q = search.toLowerCase();
   const filteredEmployees = sortedEmployees.filter(emp => {
-    if (emp.name === 'Craig Franco') return false;
+    if (emp.exclude_from_table) return false;
     if (emp.suppressed && allocFilter !== 'suppressed') return false;
     if (q && !emp.name.toLowerCase().includes(q) && !emp.title.toLowerCase().includes(q) && !emp.department.toLowerCase().includes(q)) return false;
     if (deptFilter && emp.department !== deptFilter) return false;
@@ -100,7 +97,7 @@ export default function SalaryTable() {
     return true;
   });
 
-  const issueEmployees = activeEmployees.filter(e => getAllocationStatus(getTotalAllocation(e.allocations)) !== 'exact');
+  const issueEmployees = activeEmployees.filter(e => !e.exclude_from_table && getAllocationStatus(getTotalAllocation(e.allocations)) !== 'exact');
 
   return (
     <div className="space-y-4">
