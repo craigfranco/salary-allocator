@@ -1,0 +1,22 @@
+{
+  "name": "Scenario",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Scenario name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional notes about this scenario"
+    },
+    "snapshot": {
+      "type": "object",
+      "description": "Map of employee ID to their allocations object at the time of save"
+    }
+  },
+  "required": [
+    "name",
+    "snapshot"
+  ]
+}

@@ -6,6 +6,7 @@ import { Plus, AlertCircle } from 'lucide-react';
 import SalaryTableRow from '@/components/salary/SalaryTableRow';
 import SearchBar from '@/components/salary/SearchBar';
 import ExportButton from '@/components/salary/ExportButton';
+import ScenarioManager from '@/components/salary/ScenarioManager';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { getTotalAllocation, getAllocationStatus, formatCurrency } from '@/lib/helpers';
 import {
@@ -112,6 +113,14 @@ export default function SalaryTable() {
           </p>
         </div>
         <div className="flex items-center gap-2">
+          <ScenarioManager
+            employees={employees}
+            onRestore={(snapshot) => {
+              Object.entries(snapshot).forEach(([empId, allocations]) => {
+                updateMutation.mutate({ id: empId, data: { allocations } });
+              });
+            }}
+          />
           <ExportButton employees={sortedEmployees} hotels={sortedHotels} hotelTotals={hotelTotals} />
           <Button onClick={() => { setEditEmp(null); setFormOpen(true); }} className="gap-2">
             <Plus className="w-4 h-4" /> Add Employee
