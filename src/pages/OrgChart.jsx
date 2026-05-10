@@ -106,7 +106,7 @@ export default function OrgChart() {
 
   // Build manager → children map
   const childrenMap = {};
-  const activeEmployees = employees.filter(e => !e.suppressed && !e.exclude_from_table);
+  const activeEmployees = employees.filter(e => !e.suppressed);
 
   activeEmployees.forEach(emp => {
     const mid = emp.manager_id || null;
