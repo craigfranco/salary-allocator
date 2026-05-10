@@ -25,11 +25,10 @@ export default function AppLayout() {
         <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <img
-                src="https://rebelhotelco.com/wp-content/uploads/2023/01/Rebel-Hotel-Co-Logo-white.png"
-                alt="Rebel Hotel Company"
-                className="h-9 w-auto object-contain"
-              />
+              <div className="flex flex-col leading-none">
+                <span className="text-xl font-black text-white tracking-widest uppercase">REBEL</span>
+                <span className="text-[9px] text-white/70 tracking-[0.25em] uppercase font-medium">Hotel Company</span>
+              </div>
               <div>
                 <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Topline Salary</h1>
                 <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Hotel Management Dashboard</p>
