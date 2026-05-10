@@ -43,13 +43,24 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
               <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
             ))}
           </div>
-          <div className="mt-1.5 flex flex-wrap gap-1">
-            {allocEntries.map(([code, pct]) => (
-              <span key={code} className={`text-[8px] font-bold px-1 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
-                {hotelMap[code] || code} {Math.round(pct * 100)}%
-              </span>
-            ))}
-          </div>
+          {(() => {
+            const nonCorpCodes = Object.keys(hotelMap).filter(c => c !== 'CORP');
+            const allocedNonCorp = allocEntries.filter(([c]) => c !== 'CORP');
+            const isAll = allocedNonCorp.length >= nonCorpCodes.length;
+            return isAll ? (
+              <div className="mt-1.5">
+                <span className="text-[8px] font-bold px-1 py-0.5 rounded-full bg-primary/10 text-primary">All Hotels</span>
+              </div>
+            ) : (
+              <div className="mt-1.5 flex flex-wrap gap-1">
+                {allocEntries.map(([code]) => (
+                  <span key={code} className={`text-[8px] font-bold px-1 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
+                    {hotelMap[code] || code}
+                  </span>
+                ))}
+              </div>
+            );
+          })()}
         </>
       )}
     </div>
