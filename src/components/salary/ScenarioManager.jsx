@@ -68,28 +68,23 @@ export default function ScenarioManager({ employees, onRestore }) {
               <DropdownMenuSeparator />
               <div className="px-2 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Saved Scenarios</div>
               {scenarios.map(s => (
-                <div key={s.id} className="flex items-center justify-between px-2 py-1.5 hover:bg-accent rounded-sm group">
-                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => handleRestore(s)}>
+                <DropdownMenuItem
+                  key={s.id}
+                  className="flex items-center justify-between px-2 py-1.5 group"
+                  onSelect={(e) => { e.preventDefault(); handleRestore(s); }}
+                >
+                  <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium truncate">{s.name}</div>
                     {s.description && <div className="text-xs text-muted-foreground truncate">{s.description}</div>}
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-                    <button
-                      onClick={() => handleRestore(s)}
-                      className="p-1 rounded hover:bg-primary/10 text-primary"
-                      title="Restore this scenario"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={() => deleteMutation.mutate(s.id)}
-                      className="p-1 rounded hover:bg-destructive/10 text-destructive"
-                      title="Delete scenario"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); deleteMutation.mutate(s.id); }}
+                    className="p-1 rounded hover:bg-destructive/10 text-destructive opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0"
+                    title="Delete scenario"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </DropdownMenuItem>
               ))}
             </>
           )}
