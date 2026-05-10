@@ -81,7 +81,18 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
             </div>
           )}
           <div>
-            <Label className="mb-2 block">Hotel Allocations (%)</Label>
+            <div className="flex items-center justify-between mb-2">
+              <Label>Hotel Allocations (%)</Label>
+              {(() => {
+                const totalPct = Math.round(Object.values(form.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 100);
+                const color = totalPct === 100 ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30' : totalPct > 100 ? 'text-red-500 bg-red-500/10 border-red-500/30' : 'text-amber-500 bg-amber-500/10 border-amber-500/30';
+                return (
+                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${color}`}>
+                    Total: {totalPct}%
+                  </span>
+                );
+              })()}
+            </div>
             <div className="grid grid-cols-2 gap-3">
               {hotels.map(h => (
                 <div key={h.short_code} className="flex items-center gap-2">
