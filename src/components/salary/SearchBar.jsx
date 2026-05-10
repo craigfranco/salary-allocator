@@ -1,4 +1,5 @@
 import React from 'react';
+import { HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import { Search, X, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -50,7 +51,7 @@ export default function SearchBar({ search, setSearch, department, setDepartment
       >
         <option value="">All Hotels</option>
         {hotels.map(h => (
-          <option key={h.short_code} value={h.short_code}>{h.short_code}</option>
+          <option key={h.short_code} value={h.short_code}>{HOTEL_SHORT_NAMES[h.short_code] || h.short_code}</option>
         ))}
       </select>
     </div>

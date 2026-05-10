@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { formatCurrency, getHotelAllocatedTotal, getDeptAccent } from '@/lib/helpers';
+import { formatCurrency, getHotelAllocatedTotal, getDeptAccent, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import StatCard from '@/components/ui/StatCard';
 import { Users, DollarSign, Building2, TrendingUp } from 'lucide-react';
 
@@ -50,7 +50,7 @@ export default function Analytics() {
   const hotelData = sortedHotels
     .filter(h => h.short_code !== 'CORP')
     .map(h => ({
-      name: h.short_code,
+      name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code,
       allocated: Math.round(getHotelAllocatedTotal(activeEmployees, h.short_code)),
       budget: h.sm_payroll_budget || 0,
       roomRev: h.room_revenue_budget || 0,

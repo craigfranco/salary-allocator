@@ -8,7 +8,7 @@ import SearchBar from '@/components/salary/SearchBar';
 import ExportButton from '@/components/salary/ExportButton';
 import ScenarioManager from '@/components/salary/ScenarioManager';
 import EmployeeForm from '@/components/salary/EmployeeForm';
-import { getTotalAllocation, getAllocationStatus, formatCurrency } from '@/lib/helpers';
+import { getTotalAllocation, getAllocationStatus, formatCurrency, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
@@ -158,7 +158,7 @@ export default function SalaryTable() {
                 <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center">Total</th>
                 {sortedHotels.map(h => (
                   <th key={h.short_code} className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center min-w-[88px]">
-                    {h.short_code}
+                    {HOTEL_SHORT_NAMES[h.short_code] || h.short_code}
                   </th>
                 ))}
                 <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center">Total</th>
@@ -194,7 +194,7 @@ export default function SalaryTable() {
                 <td />
                 {sortedHotels.map(h => (
                   <td key={h.short_code} className="px-2 py-3 text-center">
-                    <span className="text-xs font-semibold text-muted-foreground">{h.short_code}</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{HOTEL_SHORT_NAMES[h.short_code] || h.short_code}</span>
                   </td>
                 ))}
                 <td />
