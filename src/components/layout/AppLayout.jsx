@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, Hotel } from 'lucide-react';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 
 const navItems = [
@@ -25,9 +25,11 @@ export default function AppLayout() {
         <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg">
-                <Hotel className="w-5 h-5 text-white" />
-              </div>
+              <img
+                src="https://rebelhotelco.com/wp-content/uploads/2023/01/Rebel-Hotel-Co-Logo-white.png"
+                alt="Rebel Hotel Company"
+                className="h-9 w-auto object-contain"
+              />
               <div>
                 <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Topline Salary</h1>
                 <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Hotel Management Dashboard</p>
