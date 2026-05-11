@@ -30,24 +30,13 @@ function fmtK(n) {
   return '$' + Math.round(n);
 }
 
-const RH_WATERMARK = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" style="position:absolute;bottom:40px;right:40px;width:260px;height:260px;opacity:0.06;">
-  <rect x="8" y="8" width="184" height="184" rx="22" fill="none" stroke="#ffffff" stroke-width="12"/>
-  <text x="24" y="155" font-family="Arial Black,Arial" font-weight="900" font-size="130" fill="#ffffff">R</text>
-  <text x="118" y="105" font-family="Arial Black,Arial" font-weight="900" font-size="56" fill="#ffffff">H</text>
-  <line x1="118" y1="115" x2="174" y2="115" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-</svg>`;
+const LOGO_URL = 'https://media.base44.com/images/public/69fe195adbdd18b7b19462a0/64c6f20fe_d1eb1b4f2_RBLMark-RH_Blue.png';
 
-const RH_MARK_SMALL = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="20" height="20" style="opacity:0.6">
-  <rect x="8" y="8" width="184" height="184" rx="22" fill="none" stroke="#2d4b5e" stroke-width="16"/>
-  <text x="24" y="155" font-family="Arial Black,Arial" font-weight="900" font-size="130" fill="#2d4b5e">R</text>
-  <text x="118" y="105" font-family="Arial Black,Arial" font-weight="900" font-size="56" fill="#2d4b5e">H</text>
-</svg>`;
+const RH_WATERMARK = `<img src="${LOGO_URL}" style="position:absolute;bottom:40px;right:40px;width:260px;height:260px;opacity:0.08;filter:brightness(0) invert(1);" />`;
 
-const RH_MARK_WHITE = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="28" height="28" style="opacity:0.5">
-  <rect x="8" y="8" width="184" height="184" rx="22" fill="none" stroke="#ffffff" stroke-width="16"/>
-  <text x="24" y="155" font-family="Arial Black,Arial" font-weight="900" font-size="130" fill="#ffffff">R</text>
-  <text x="118" y="105" font-family="Arial Black,Arial" font-weight="900" font-size="56" fill="#ffffff">H</text>
-</svg>`;
+const RH_MARK_SMALL = `<img src="${LOGO_URL}" style="width:20px;height:20px;opacity:0.7;object-fit:contain;" />`;
+
+const RH_MARK_WHITE = `<img src="${LOGO_URL}" style="width:28px;height:28px;opacity:0.6;filter:brightness(0) invert(1);object-fit:contain;" />`;
 
 function pageHeader(title, pageNum) {
   return `<div style="background:#2d4b5e;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 0.75in;flex-shrink:0;">
