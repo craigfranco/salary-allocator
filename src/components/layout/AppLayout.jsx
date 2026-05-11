@@ -1,9 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare } from 'lucide-react';
+import { base44 } from '@/api/base44Client';
+import { useQuery } from '@tanstack/react-query';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { path: '/', label: 'Salary Table', icon: TableProperties },
@@ -15,9 +19,28 @@ const navItems = [
 ];
 
 export default function AppLayout() {
+  const [scenarioOpen, setScenarioOpen] = useState(false);
   const location = useLocation();
   const { dark, toggle } = useTheme();
-  const { activeScenario } = useScenario();
+  const { activeScenario, setActiveScenario, scenarioData, setScenarioData } = useScenario();
+
+  const { data: scenarios = [] } = useQuery({
+    queryKey: ['scenarios'],
+    queryFn: () => base44.entities.Scenario.list('-created_date', 50),
+  });
+
+  const handleRestoreScenario = (scenario) => {
+    const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
+    setScenarioData(snapshotCopy);
+    setActiveScenario({ id: scenario.id, name: scenario.name });
+    setScenarioOpen(false);
+  };
+
+  const handleClearScenario = () => {
+    setActiveScenario(null);
+    setScenarioData(null);
+    setScenarioOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -74,12 +97,51 @@ export default function AppLayout() {
                 );
               })}
             </div>
-            {activeScenario && (
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary whitespace-nowrap ml-4">
-                <BookMarked className="w-3 h-3" />
-                Scenario: {activeScenario.name}
-              </div>
-            )}
+            <Popover open={scenarioOpen} onOpenChange={setScenarioOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={`gap-1.5 ml-4 ${activeScenario ? 'bg-primary/10 border-primary/20 text-primary hover:bg-primary/20' : ''}`}
+                >
+                  <BookMarked className="w-3.5 h-3.5" />
+                  {activeScenario ? `Scenario: ${activeScenario.name}` : 'No Scenario'}
+                  <ChevronDown className="w-3 h-3 opacity-60" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent align="end" className="w-56 p-1">
+                {activeScenario && (
+                  <>
+                    <button
+                      className="flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded-sm hover:bg-accent cursor-pointer text-destructive"
+                      onClick={handleClearScenario}
+                    >
+                      <X className="w-4 h-4" /> Clear Scenario
+                    </button>
+                    <div className="my-1 h-px bg-border" />
+                  </>
+                )}
+                <div className="px-2 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Saved Scenarios</div>
+                {scenarios.length > 0 ? (
+                  scenarios.map(s => (
+                    <button
+                      key={s.id}
+                      className={`flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent ${
+                        activeScenario?.id === s.id ? 'bg-primary/10 text-primary font-medium' : ''
+                      }`}
+                      onClick={() => handleRestoreScenario(s)}
+                    >
+                      <div className="text-left min-w-0">
+                        <div className="truncate">{s.name}</div>
+                        {s.description && <div className="text-[10px] text-muted-foreground truncate">{s.description}</div>}
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-2 py-2 text-xs text-muted-foreground italic">No saved scenarios</div>
+                )}
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </nav>
