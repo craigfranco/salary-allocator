@@ -269,9 +269,9 @@ function buildSalaryTable(employees, hotels) {
     `<th colspan="2" style="padding:6px 4px;color:rgba(255,255,255,0.85);font-weight:600;text-align:center;font-size:8px;letter-spacing:0.05em;border-left:1px solid rgba(255,255,255,0.15);">${HOTEL_NAMES[h.short_code]}</th>`
   ).join('');
 
-  return `<div class="page landscape-page" style="display:flex;flex-direction:column;position:relative;">
+  return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
     ${pageHeader('Salary Allocation Table', 3)}
-    <div style="flex:1;overflow:hidden;padding:20px 0.5in 60px;font-size:8.5px;">
+    <div style="flex:1;overflow:hidden;padding:12px 0.5in 60px;font-size:8px;">
       <table style="width:100%;border-collapse:collapse;">
         <thead>
           <tr style="background:#2d4b5e;">
@@ -413,10 +413,10 @@ function buildOrgChart(employees) {
 
   const roots = active.filter(e => !e.manager_id || !e.manager_id.trim() || !activeIds.has(e.manager_id));
 
-  return `<div class="page landscape-page" style="display:flex;flex-direction:column;position:relative;">
+  return `<div class="page" style="display:flex;flex-direction:column;position:relative;width:100%;">
     ${pageHeader('Organization Chart', 5)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding-bottom:60px;">
-      <div style="display:flex;gap:48px;justify-content:center;flex-wrap:wrap;">
+    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.5in 0.5in 60px;display:flex;align-items:center;justify-content:center;">
+      <div style="transform:scale(0.8);transform-origin:top center;display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
         ${roots.map(r => renderNode(r)).join('')}
       </div>
     </div>
@@ -563,10 +563,8 @@ export function generateExecPDF(employees, hotels) {
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', Arial, sans-serif; color: #1d1f1c; background: #fff; }
-  @page { size: letter; margin: 0; }
-  @page .landscape { size: letter landscape; margin: 0; }
+  @page { size: letter portrait; margin: 0; }
   .page { width: 8.5in; min-height: 11in; page-break-after: always; position: relative; overflow: hidden; }
-  .landscape-page { width: 11in; min-height: 8.5in; }
   .page:last-child { page-break-after: avoid; }
   .inner-page { padding: 0.5in 0.75in 0.75in; }
   @media print {
