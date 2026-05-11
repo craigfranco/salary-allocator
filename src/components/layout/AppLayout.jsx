@@ -20,10 +20,7 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
-      <header className="relative overflow-hidden bg-gradient-to-r from-primary via-primary to-blue-700 dark:from-slate-900 dark:via-blue-950 dark:to-slate-900 border-b border-white/10">
-        <div className="absolute inset-0 opacity-10 dark:opacity-20" style={{
-          backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.3) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 40%)'
-        }} />
+      <header className="border-b border-white/10" style={{ backgroundColor: '#2d4b5e' }}>
         <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
