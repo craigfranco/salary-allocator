@@ -85,6 +85,23 @@ export default function ScenarioComparison() {
 
   const sortedHotels = HOTEL_ORDER.map(code => hotels.find(h => h.short_code === code)).filter(Boolean);
 
+  // Filter to only hotels with changes across selected scenarios
+  const getHotelsWithChanges = () => {
+    if (selectedScenarios.length < 2) return sortedHotels;
+
+    return sortedHotels.filter(hotel => {
+      const payrolls = selectedScenarios.map(s => {
+        const { hotelMetrics } = calculateMetrics(s.snapshot);
+        return hotelMetrics[hotel.short_code]?.totalPayroll || 0;
+      });
+      
+      // Check if any payroll value differs from the first
+      return payrolls.some(p => p !== payrolls[0]);
+    });
+  };
+
+  const hotelsWithChanges = getHotelsWithChanges();
+
   return (
     <div className="space-y-6">
       <div>
@@ -128,27 +145,63 @@ export default function ScenarioComparison() {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Total Payroll by Hotel</h3>
             <div className="grid gap-4">
-              {sortedHotels.map(hotel => {
-                const payrolls = selectedScenarios.map(s => {
-                  const { hotelMetrics } = calculateMetrics(s.snapshot);
-                  return hotelMetrics[hotel.short_code]?.totalPayroll || 0;
-                });
+              {hotelsWithChanges.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No changes across selected scenarios</p>
+              ) : (
+                <>
+                  {hotelsWithChanges.map(hotel => {
+                    const payrolls = selectedScenarios.map(s => {
+                      const { hotelMetrics } = calculateMetrics(s.snapshot);
+                      return hotelMetrics[hotel.short_code]?.totalPayroll || 0;
+                    });
 
-                return (
-                  <div key={hotel.short_code} className="border border-border rounded-lg p-4">
-                    <h4 className="font-medium text-sm mb-3">{hotel.name}</h4>
+                    return (
+                      <div key={hotel.short_code} className="border border-border rounded-lg p-4">
+                        <h4 className="font-medium text-sm mb-3">{hotel.name}</h4>
+                        <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${selectedScenarios.length}, 1fr)` }}>
+                          {selectedScenarios.map((scenario, idx) => {
+                            const payroll = payrolls[idx];
+                            const prevPayroll = idx > 0 ? payrolls[idx - 1] : null;
+                            const change = prevPayroll !== null ? payroll - prevPayroll : null;
+
+                            return (
+                              <div key={scenario.id} className="bg-muted/40 rounded p-3">
+                                <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
+                                <p className="font-bold text-sm">{formatCurrency(payroll)}</p>
+                                {change !== null && (
+                                  <p className={`text-xs font-medium mt-1 ${change > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                    {change > 0 ? '+' : ''}{formatCurrency(change)}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* Payroll Total Line */}
+                  <div className="border-2 border-primary rounded-lg p-4 bg-primary/5 font-semibold">
+                    <h4 className="text-sm mb-3">Total Payroll (All Properties)</h4>
                     <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${selectedScenarios.length}, 1fr)` }}>
                       {selectedScenarios.map((scenario, idx) => {
-                        const payroll = payrolls[idx];
-                        const prevPayroll = idx > 0 ? payrolls[idx - 1] : null;
-                        const change = prevPayroll !== null ? payroll - prevPayroll : null;
+                        const total = hotelsWithChanges.reduce((sum, hotel) => {
+                          const { hotelMetrics } = calculateMetrics(scenario.snapshot);
+                          return sum + (hotelMetrics[hotel.short_code]?.totalPayroll || 0);
+                        }, 0);
+                        const prevTotal = idx > 0 ? hotelsWithChanges.reduce((sum, hotel) => {
+                          const { hotelMetrics } = calculateMetrics(selectedScenarios[idx - 1].snapshot);
+                          return sum + (hotelMetrics[hotel.short_code]?.totalPayroll || 0);
+                        }, 0) : null;
+                        const change = prevTotal !== null ? total - prevTotal : null;
 
                         return (
-                          <div key={scenario.id} className="bg-muted/40 rounded p-3">
+                          <div key={scenario.id} className="bg-primary/10 rounded p-3">
                             <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
-                            <p className="font-bold text-sm">{formatCurrency(payroll)}</p>
+                            <p className="font-bold text-base">{formatCurrency(total)}</p>
                             {change !== null && (
-                              <p className={`text-xs font-medium mt-1 ${change > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              <p className={`text-xs font-semibold mt-1 ${change > 0 ? 'text-red-600' : 'text-green-600'}`}>
                                 {change > 0 ? '+' : ''}{formatCurrency(change)}
                               </p>
                             )}
@@ -157,8 +210,8 @@ export default function ScenarioComparison() {
                       })}
                     </div>
                   </div>
-                );
-              })}
+                </>
+              )}
             </div>
           </Card>
 
@@ -166,29 +219,64 @@ export default function ScenarioComparison() {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Budget Variance by Hotel</h3>
             <div className="grid gap-4">
-              {sortedHotels.map(hotel => (
-                <div key={hotel.short_code} className="border border-border rounded-lg p-4">
-                  <h4 className="font-medium text-sm mb-3">{hotel.name}</h4>
-                  <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${selectedScenarios.length}, 1fr)` }}>
-                    {selectedScenarios.map(scenario => {
-                      const { variance, pct, payroll, budget } = getVariance(scenario, hotel.short_code);
-                      const isOver = variance > 0;
-                      return (
-                        <div key={scenario.id} className="bg-muted/40 rounded p-3">
-                          <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
-                          <p className="font-bold text-sm">{formatCurrency(variance)}</p>
-                          <p className={`text-xs font-medium mt-1 ${isOver ? 'text-red-600' : 'text-green-600'}`}>
-                            {isOver ? '+' : ''}{pct.toFixed(1)}%
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-2">
-                            Budget: {formatCurrency(budget)}
-                          </p>
-                        </div>
-                      );
-                    })}
+              {hotelsWithChanges.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No changes across selected scenarios</p>
+              ) : (
+                <>
+                  {hotelsWithChanges.map(hotel => (
+                    <div key={hotel.short_code} className="border border-border rounded-lg p-4">
+                      <h4 className="font-medium text-sm mb-3">{hotel.name}</h4>
+                      <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${selectedScenarios.length}, 1fr)` }}>
+                        {selectedScenarios.map(scenario => {
+                          const { variance, pct, payroll, budget } = getVariance(scenario, hotel.short_code);
+                          const isOver = variance > 0;
+                          return (
+                            <div key={scenario.id} className="bg-muted/40 rounded p-3">
+                              <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
+                              <p className="font-bold text-sm">{formatCurrency(variance)}</p>
+                              <p className={`text-xs font-medium mt-1 ${isOver ? 'text-red-600' : 'text-green-600'}`}>
+                                {isOver ? '+' : ''}{pct.toFixed(1)}%
+                              </p>
+                              <p className="text-xs text-muted-foreground mt-2">
+                                Budget: {formatCurrency(budget)}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Variance Total Line */}
+                  <div className="border-2 border-primary rounded-lg p-4 bg-primary/5 font-semibold">
+                    <h4 className="text-sm mb-3">Total Variance (All Properties)</h4>
+                    <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${selectedScenarios.length}, 1fr)` }}>
+                      {selectedScenarios.map(scenario => {
+                        const totalVariance = hotelsWithChanges.reduce((sum, hotel) => {
+                          const { variance } = getVariance(scenario, hotel.short_code);
+                          return sum + variance;
+                        }, 0);
+                        const totalBudget = hotelsWithChanges.reduce((sum, hotel) => {
+                          const { budget } = getVariance(scenario, hotel.short_code);
+                          return sum + budget;
+                        }, 0);
+                        const isOver = totalVariance > 0;
+                        const varPct = totalBudget > 0 ? (totalVariance / totalBudget) * 100 : 0;
+
+                        return (
+                          <div key={scenario.id} className="bg-primary/10 rounded p-3">
+                            <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
+                            <p className="font-bold text-base">{formatCurrency(totalVariance)}</p>
+                            <p className={`text-xs font-semibold mt-1 ${isOver ? 'text-red-600' : 'text-green-600'}`}>
+                              {isOver ? '+' : ''}{varPct.toFixed(1)}%
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                </>
+              )}
             </div>
           </Card>
 
@@ -196,27 +284,63 @@ export default function ScenarioComparison() {
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Employee Count (FTE) by Hotel</h3>
             <div className="grid gap-4">
-              {sortedHotels.map(hotel => {
-                const counts = selectedScenarios.map(s => {
-                  const { hotelMetrics } = calculateMetrics(s.snapshot);
-                  return hotelMetrics[hotel.short_code]?.employeeCount || 0;
-                });
+              {hotelsWithChanges.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No changes across selected scenarios</p>
+              ) : (
+                <>
+                  {hotelsWithChanges.map(hotel => {
+                    const counts = selectedScenarios.map(s => {
+                      const { hotelMetrics } = calculateMetrics(s.snapshot);
+                      return hotelMetrics[hotel.short_code]?.employeeCount || 0;
+                    });
 
-                return (
-                  <div key={hotel.short_code} className="border border-border rounded-lg p-4">
-                    <h4 className="font-medium text-sm mb-3">{hotel.name}</h4>
+                    return (
+                      <div key={hotel.short_code} className="border border-border rounded-lg p-4">
+                        <h4 className="font-medium text-sm mb-3">{hotel.name}</h4>
+                        <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${selectedScenarios.length}, 1fr)` }}>
+                          {selectedScenarios.map((scenario, idx) => {
+                            const count = counts[idx];
+                            const prevCount = idx > 0 ? counts[idx - 1] : null;
+                            const changeFTE = prevCount !== null ? count - prevCount : null;
+
+                            return (
+                              <div key={scenario.id} className="bg-muted/40 rounded p-3">
+                                <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
+                                <p className="font-bold text-sm">{count.toFixed(2)} FTE</p>
+                                {changeFTE !== null && (
+                                  <p className={`text-xs font-medium mt-1 ${changeFTE > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                                    {changeFTE > 0 ? '+' : ''}{changeFTE.toFixed(2)}
+                                  </p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {/* FTE Total Line */}
+                  <div className="border-2 border-primary rounded-lg p-4 bg-primary/5 font-semibold">
+                    <h4 className="text-sm mb-3">Total FTE (All Properties)</h4>
                     <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${selectedScenarios.length}, 1fr)` }}>
                       {selectedScenarios.map((scenario, idx) => {
-                        const count = counts[idx];
-                        const prevCount = idx > 0 ? counts[idx - 1] : null;
-                        const changeFTE = prevCount !== null ? count - prevCount : null;
+                        const totalFTE = hotelsWithChanges.reduce((sum, hotel) => {
+                          const { hotelMetrics } = calculateMetrics(scenario.snapshot);
+                          return sum + (hotelMetrics[hotel.short_code]?.employeeCount || 0);
+                        }, 0);
+                        const prevFTE = idx > 0 ? hotelsWithChanges.reduce((sum, hotel) => {
+                          const { hotelMetrics } = calculateMetrics(selectedScenarios[idx - 1].snapshot);
+                          return sum + (hotelMetrics[hotel.short_code]?.employeeCount || 0);
+                        }, 0) : null;
+                        const changeFTE = prevFTE !== null ? totalFTE - prevFTE : null;
 
                         return (
-                          <div key={scenario.id} className="bg-muted/40 rounded p-3">
+                          <div key={scenario.id} className="bg-primary/10 rounded p-3">
                             <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
-                            <p className="font-bold text-sm">{count.toFixed(2)} FTE</p>
+                            <p className="font-bold text-base">{totalFTE.toFixed(2)} FTE</p>
                             {changeFTE !== null && (
-                              <p className={`text-xs font-medium mt-1 ${changeFTE > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                              <p className={`text-xs font-semibold mt-1 ${changeFTE > 0 ? 'text-red-600' : 'text-green-600'}`}>
                                 {changeFTE > 0 ? '+' : ''}{changeFTE.toFixed(2)}
                               </p>
                             )}
@@ -225,8 +349,8 @@ export default function ScenarioComparison() {
                       })}
                     </div>
                   </div>
-                );
-              })}
+                </>
+              )}
             </div>
           </Card>
 
