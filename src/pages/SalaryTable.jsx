@@ -123,14 +123,15 @@ export default function SalaryTable() {
           <ScenarioManager
             employees={employees}
             onRestore={async (snapshot) => {
-              for (const [empId, val] of Object.entries(snapshot)) {
-                // Support both old format (plain allocations object) and new format ({ allocations, suppressed })
-                const isNewFormat = val && typeof val === 'object' && 'allocations' in val;
-                const data = isNewFormat
-                  ? { allocations: val.allocations, suppressed: val.suppressed }
-                  : { allocations: val };
-                await base44.entities.Employee.update(empId, data);
-              }
+              await Promise.all(
+                Object.entries(snapshot).map(([empId, val]) => {
+                  const isNewFormat = val && typeof val === 'object' && 'allocations' in val;
+                  const data = isNewFormat
+                    ? { allocations: val.allocations, suppressed: val.suppressed }
+                    : { allocations: val };
+                  return base44.entities.Employee.update(empId, data);
+                })
+              );
               qc.invalidateQueries({ queryKey: ['employees'] });
             }}
           />
