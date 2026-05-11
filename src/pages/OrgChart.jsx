@@ -31,7 +31,7 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
   return (
     <div
       onClick={() => onClick(employee)}
-      className={`rounded-xl border-2 ${dept.border} bg-white overflow-hidden cursor-pointer transition-all duration-150 select-none w-48 flex-shrink-0 shadow-md ${
+      className={`rounded-xl border-2 ${dept.border} bg-white overflow-hidden cursor-pointer transition-all duration-150 select-none w-52 flex-shrink-0 shadow-md ${
         suppressed ? 'opacity-40' : 'hover:shadow-xl hover:scale-[1.03]'
       }`}
       style={{ fontFamily: 'Inter, sans-serif' }}
@@ -41,7 +41,7 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
         <div className="w-6 h-6 rounded-full bg-white/25 flex items-center justify-center flex-shrink-0">
           {suppressed ? <EyeOff className="w-3 h-3 text-white" /> : <User className="w-3 h-3 text-white" />}
         </div>
-        <p className="text-[11px] font-bold text-white truncate leading-tight flex-1">{employee.name}</p>
+        <p className="text-[11px] font-bold text-white leading-tight flex-1 break-words">{employee.name}</p>
       </div>
       {/* Body */}
       <div className={`px-3 py-2 ${dept.bg}`}>
@@ -71,7 +71,7 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
   );
 }
 
-const CARD_W = 192; // w-48
+const CARD_W = 208; // w-52
 const CARD_GAP = 16; // gap-4
 const SLOT_W = CARD_W + CARD_GAP; // width per child slot
 
