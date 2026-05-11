@@ -20,7 +20,7 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
-      <header className="border-b border-white/10" style={{ backgroundColor: '#2d4b5e' }}>
+      <header className="border-b border-white/10" style={{ backgroundColor: '#2d4b5e' }} className="border-b border-white/10">
         <div className="relative max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
