@@ -26,22 +26,23 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
   return (
     <div
       onClick={() => onClick(employee)}
-      className={`rounded-lg border ${dept.border} border-2 bg-card p-2 cursor-pointer transition-all duration-150 select-none w-44 flex-shrink-0 shadow-sm ${
+      style={{ width: CARD_W }}
+      className={`rounded-md border-2 ${dept.border} bg-card p-1.5 cursor-pointer transition-all duration-150 select-none flex-shrink-0 shadow-sm ${
         suppressed ? 'opacity-40' : 'hover:shadow-md hover:scale-[1.02]'
       }`}
     >
-      <div className="flex items-center gap-1.5">
-        <div className={`w-6 h-6 rounded-md ${dept.bg} flex items-center justify-center flex-shrink-0`}>
-          {suppressed ? <EyeOff className={`w-3 h-3 ${dept.text}`} /> : <User className={`w-3 h-3 ${dept.text}`} />}
+      <div className="flex items-center gap-1">
+        <div className={`w-5 h-5 rounded ${dept.bg} flex items-center justify-center flex-shrink-0`}>
+          {suppressed ? <EyeOff className={`w-2.5 h-2.5 ${dept.text}`} /> : <User className={`w-2.5 h-2.5 ${dept.text}`} />}
         </div>
         <div className="flex-1 min-w-0">
-          <p className={`text-[10px] font-semibold truncate ${suppressed ? 'line-through text-muted-foreground' : ''}`}>{employee.name}</p>
-          <p className="text-[9px] text-muted-foreground truncate leading-tight">{employee.title}</p>
+          <p className={`text-[9px] font-semibold truncate leading-tight ${suppressed ? 'line-through text-muted-foreground' : ''}`}>{employee.name}</p>
+          <p className="text-[8px] text-muted-foreground truncate leading-tight">{employee.title}</p>
         </div>
       </div>
       {allocEntries.length > 0 && (
         <>
-          <div className="mt-1.5 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
+          <div className="mt-1 flex h-0.5 rounded-full overflow-hidden bg-muted/50 gap-px">
             {allocEntries.map(([code, pct]) => (
               <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
             ))}
@@ -52,13 +53,13 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
             const isExecDir = /executive director/i.test(employee.title);
             const isAll = isExecDir || allocedNonCorp.length >= nonCorpCodes.length;
             return isAll ? (
-              <div className="mt-1.5">
-                <span className="text-[8px] font-bold px-1 py-0.5 rounded-full bg-primary/10 text-primary">All Hotels</span>
+              <div className="mt-1">
+                <span className="text-[7px] font-bold px-1 py-px rounded-full bg-primary/10 text-primary">All Hotels</span>
               </div>
             ) : (
-              <div className="mt-1.5 flex flex-wrap gap-1">
+              <div className="mt-1 flex flex-wrap gap-0.5">
                 {allocEntries.map(([code]) => (
-                  <span key={code} className={`text-[8px] font-bold px-1 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
+                  <span key={code} className={`text-[7px] font-bold px-1 py-px rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
                     {HOTEL_SHORT_NAMES[code] || hotelMap[code] || code}
                   </span>
                 ))}
@@ -71,9 +72,8 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
   );
 }
 
-const CARD_W = 176; // w-44
-const CARD_GAP = 16; // gap-4
-const SLOT_W = CARD_W + CARD_GAP; // width per child slot
+const CARD_W = 140; // compact card width
+const CARD_GAP = 10; // gap between cards
 
 // Returns total pixel width that a subtree occupies
 function subtreeWidth(employeeId, childrenMap) {
@@ -106,7 +106,7 @@ function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
       {children.length > 0 && (
         <>
           {/* Vertical line from parent down */}
-          <div className="w-px h-6 bg-border" />
+          <div className="w-px h-4 bg-border" />
           {/* Horizontal bar spanning first to last child center */}
           {children.length > 1 && (
             <div className="relative h-px bg-transparent" style={{ width: myWidth }}>
@@ -120,7 +120,7 @@ function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
           <div className="flex items-start" style={{ width: myWidth }}>
             {children.map((child, idx) => (
               <div key={child.id} className="flex flex-col items-center" style={{ width: childWidths[idx], marginRight: idx < children.length - 1 ? CARD_GAP : 0 }}>
-                <div className="w-px h-6 bg-border" />
+                <div className="w-px h-4 bg-border" />
                 <OrgNode
                   employee={child}
                   childrenMap={childrenMap}
@@ -236,8 +236,8 @@ export default function OrgChart() {
         ))}
       </div>
 
-      <div className="overflow-auto rounded-2xl border border-border bg-card/50 p-6">
-        <div ref={chartRef} className="inline-flex gap-12 items-start">
+      <div className="overflow-auto rounded-2xl border border-border bg-card/50 p-4">
+        <div ref={chartRef} className="inline-flex gap-8 items-start">
           {roots.map(root => (
             <OrgNode
               key={root.id}
