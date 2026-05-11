@@ -142,13 +142,25 @@ Deno.serve(async (req) => {
     const contentW = pageW - margin * 2;
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // PAGE 1 — COVER
+    // PAGE 1 — COVER  (matches reference PDF layout exactly)
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     fillRect(doc, 0, 0, pageW, pageH, NAVY);
-    // Red accent top bar
-    fillRect(doc, 0, 0, pageW, 3.5, RED_ACCENT);
 
-    // Try to embed logo
+    // ── Compute metrics needed on cover ──
+    const totalPayroll = activeEmployees.reduce((sum, emp) =>
+      sum + propertyHotels.reduce((s, h) => s + ((emp.allocations?.[h.short_code] || 0) * emp.annual_salary), 0), 0);
+    const totalSmBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
+    const budgetDiff = totalSmBudget > 0 ? totalPayroll - totalSmBudget : null;
+    const budgetPctVal = totalSmBudget > 0 ? (totalPayroll / totalSmBudget) * 100 : null;
+    const isOver = budgetDiff !== null && budgetDiff > 0;
+    const depts = ['REVENUE', 'ECOMM', 'SALES'];
+
+    // ── Top header bar (navy slightly lighter) with logo area ──
+    fillRect(doc, 0, 0, pageW, 38, NAVY_MID);
+    // Red left accent stripe
+    fillRect(doc, 0, 0, 4, 38, RED_ACCENT);
+
+    // Try to embed logo (white version for dark bg)
     try {
       const logoUrl = 'https://media.base44.com/images/public/69cc85b631fba1e402b42659/cbde62a6d_RBLMark-RH_Blue.png';
       const logoResp = await fetch(logoUrl);
@@ -157,11 +169,8 @@ Deno.serve(async (req) => {
       const { PNG } = await import('npm:pngjs@7.0.0');
       const png = PNG.sync.read(Buffer.from(bytes));
       const { width, height, data } = png;
-      // Invert to white-on-transparent for dark bg
       for (let i = 0; i < data.length; i += 4) {
-        if (data[i + 3] > 10) {
-          data[i] = 255; data[i + 1] = 255; data[i + 2] = 255;
-        }
+        if (data[i + 3] > 10) { data[i] = 255; data[i + 1] = 255; data[i + 2] = 255; }
       }
       const outPng = new PNG({ width, height });
       outPng.data = data;
@@ -172,78 +181,81 @@ Deno.serve(async (req) => {
       for (let i = 0; i < outBytes.length; i += chunk) {
         b64 += String.fromCharCode(...outBytes.subarray(i, i + chunk));
       }
-      doc.addImage(`data:image/png;base64,${btoa(b64)}`, 'PNG', margin, 12, 22, 22);
-    } catch (_e) { /* skip logo on error */ }
+      doc.addImage(`data:image/png;base64,${btoa(b64)}`, 'PNG', pageW - margin - 22, 8, 22, 22);
+    } catch (_e) { /* skip */ }
 
-    // "S&M Payroll" label (small, above title — like "Leadership Feedback Survey")
+    // Small category label — like "Leadership Feedback Survey" in reference
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...MID_GRAY);
+    doc.text('S&M Payroll', margin + 4, 14);
+
+    // Sub-label — like "Survey" in reference
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...WHITE);
+    doc.text('Executive Summary', margin + 4, 24);
+
+    // Report name + subtitle below header bar — like "Human Resources Leadership Report" + "HQ Team Support - Q1 2026"
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(...WHITE);
+    doc.text('Sales & Marketing Payroll Report', margin, 52);
+
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.setTextColor(...MID_GRAY);
-    doc.text('S&M Payroll', margin, 46);
-
-    // Main title
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(28);
-    doc.setTextColor(...WHITE);
-    doc.text('Executive Summary', margin, 60);
-
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'normal');
     doc.setTextColor(180, 195, 220);
-    doc.text('Rebel Hotel Company  ·  2026', margin, 69);
+    doc.text('Rebel Hotel Company  —  2026 Headcount & Allocation Overview', margin, 60);
 
-    // Thin red divider
-    drawLine(doc, margin, 74, margin + 60, 74, RED_ACCENT, 0.8);
-
-    // ── 3 Key Stats (like reference PDF: RESPONSES / DEPT SCORE / COMPLETION) ──
-    const totalPayroll = activeEmployees.reduce((sum, emp) =>
-      sum + propertyHotels.reduce((s, h) => s + ((emp.allocations?.[h.short_code] || 0) * emp.annual_salary), 0), 0);
-    const totalSmBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
-    const budgetDiff = totalSmBudget > 0 ? totalPayroll - totalSmBudget : null;
-    const budgetPctVal = totalSmBudget > 0 ? (totalPayroll / totalSmBudget) * 100 : null;
-    const isOver = budgetDiff !== null && budgetDiff > 0;
+    // ── 3 large stat blocks (exactly like reference: big number + 2-line label below) ──
+    const statBlockY = 72;
+    const statBlockH = 52;
+    const statW = contentW / 3;
 
     const stats = [
-      { big: String(activeEmployees.length), label: 'EMPLOYEES' },
-      { big: fmtShort(totalPayroll), label: 'TOTAL PAYROLL' },
-      { big: budgetPctVal != null ? budgetPctVal.toFixed(0) + '%' : '—', label: 'OF S&M BUDGET' },
+      { big: String(activeEmployees.length), line1: 'EMPLOYEES',    line2: '' },
+      { big: fmtShort(totalPayroll),          line1: 'TOTAL',        line2: 'PAYROLL' },
+      { big: budgetPctVal != null ? budgetPctVal.toFixed(0) + '%' : '—', line1: 'OF S&M',  line2: 'BUDGET' },
     ];
 
-    const statBlockY = 84;
-    const statBlockH = 40;
-    const statW = contentW / stats.length;
-
-    fillRect(doc, margin, statBlockY, contentW, statBlockH, NAVY_MID);
-
     stats.forEach((s, i) => {
-      const x = margin + i * statW + statW / 2;
-      // Vertical divider between stats
-      if (i > 0) drawLine(doc, margin + i * statW, statBlockY + 6, margin + i * statW, statBlockY + statBlockH - 6, NAVY_LIGHT, 0.5);
+      const sx = margin + i * statW;
+      const cx = sx + statW / 2;
+
+      // Cell background — alternating slightly
+      fillRect(doc, sx, statBlockY, statW - 1, statBlockH, i % 2 === 0 ? NAVY_MID : [32, 48, 80]);
+
+      // Big number
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(22);
+      doc.setFontSize(28);
       doc.setTextColor(...WHITE);
-      doc.text(sanitize(s.big), x, statBlockY + 22, { align: 'center' });
+      doc.text(sanitize(s.big), cx, statBlockY + 24, { align: 'center' });
+
+      // Label lines below number
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
+      doc.setFontSize(7.5);
       doc.setTextColor(...MID_GRAY);
-      doc.text(s.label, x, statBlockY + 30, { align: 'center' });
+      doc.text(s.line1, cx, statBlockY + 34, { align: 'center' });
+      if (s.line2) doc.text(s.line2, cx, statBlockY + 40, { align: 'center' });
+
+      // Vertical divider
+      if (i > 0) drawLine(doc, sx, statBlockY + 6, sx, statBlockY + statBlockH - 6, NAVY_LIGHT, 0.4);
     });
 
-    // Budget status badge (like "Warning" / "Acceptable" in reference)
-    const badgeY = statBlockY + statBlockH + 8;
-    const badgeCol = isOver ? STATUS_BAD : STATUS_GOOD;
-    const badgeText = isOver
-      ? `OVER BUDGET    +${fmt(budgetDiff)}`
-      : `WITHIN BUDGET    ${fmt(Math.abs(budgetDiff || 0))} remaining`;
-    fillRect(doc, margin, badgeY, contentW, 10, badgeCol);
+    // ── Budget status line below stats (like "Warning" / "Acceptable" badge) ──
+    const statusY = statBlockY + statBlockH + 2;
+    const coverStatusCol = isOver ? STATUS_BAD : STATUS_GOOD;
+    const coverStatusText = isOver
+      ? `OVER BUDGET  —  +${fmt(budgetDiff)}`
+      : `WITHIN BUDGET  —  ${fmt(Math.abs(budgetDiff || 0))} remaining`;
+    fillRect(doc, margin, statusY, contentW, 9, coverStatusCol);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
+    doc.setFontSize(8.5);
     doc.setTextColor(...WHITE);
-    doc.text(sanitize(badgeText), pageW / 2, badgeY + 6.8, { align: 'center' });
+    doc.text(sanitize(coverStatusText), pageW / 2, statusY + 6, { align: 'center' });
 
-    // Dept summary pills (Revenue / E-Commerce / Sales & Marketing)
-    const depts = ['REVENUE', 'ECOMM', 'SALES'];
-    const pillY = badgeY + 18;
+    // ── Dept cards below status ──
+    const pillY = statusY + 16;
     const pillW = (contentW - 6) / 3;
 
     depts.forEach((dept, i) => {
@@ -253,36 +265,49 @@ Deno.serve(async (req) => {
       const col = DEPT_COLORS[dept];
       const px = margin + i * (pillW + 3);
 
-      fillRect(doc, px, pillY, pillW, 30, NAVY_MID);
-      fillRect(doc, px, pillY, pillW, 2.5, col);
+      fillRect(doc, px, pillY, pillW, 34, NAVY_MID);
+      fillRect(doc, px, pillY, pillW, 3, col);
 
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(6.5);
       doc.setTextColor(...col);
-      doc.text(DEPT_LABELS[dept].toUpperCase(), px + pillW / 2, pillY + 9, { align: 'center' });
+      doc.text(DEPT_LABELS[dept].toUpperCase(), px + pillW / 2, pillY + 12, { align: 'center' });
 
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       doc.setTextColor(...WHITE);
-      doc.text(`${emps.length} employees`, px + pillW / 2, pillY + 16, { align: 'center' });
+      doc.text(`${emps.length} employees`, px + pillW / 2, pillY + 19, { align: 'center' });
 
-      doc.setFontSize(11);
       doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
       doc.setTextColor(...col);
-      doc.text(fmtShort(dp), px + pillW / 2, pillY + 25, { align: 'center' });
+      doc.text(fmtShort(dp), px + pillW / 2, pillY + 29, { align: 'center' });
     });
 
-    // Confidential footer on cover
-    const confY = pageH - 20;
-    drawLine(doc, margin, confY, pageW - margin, confY, NAVY_LIGHT, 0.4);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.5);
+    // ── Cover page footer (matches reference exactly) ──
+    // "CONFIDENTIAL — HUMAN RESOURCES LEADERSHIP ONLY" equivalent
+    const confLineY = pageH - 22;
+    drawLine(doc, 0, confLineY, pageW, confLineY, NAVY_LIGHT, 0.3);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
     doc.setTextColor(...MID_GRAY);
-    doc.text('CONFIDENTIAL — AUTHORIZED PERSONNEL ONLY', pageW / 2, confY + 7, { align: 'center' });
-    doc.setFontSize(6.5);
+    doc.text('CONFIDENTIAL — AUTHORIZED PERSONNEL ONLY', pageW / 2, confLineY + 7, { align: 'center' });
+
+    // "Generated May 11, 2026" below
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(100, 115, 140);
     doc.text(
       `Generated ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`,
-      pageW / 2, confY + 13, { align: 'center' }
+      pageW / 2, confLineY + 13.5, { align: 'center' }
     );
+
+    // Bottom repeat footer bar (reference repeats footer 3 times — just do one clean bar)
+    fillRect(doc, 0, pageH - 6, pageW, 6, [18, 28, 50]);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6);
+    doc.setTextColor(...MID_GRAY);
+    doc.text('Rebel Hotel Company  —  S&M Payroll Executive Summary  —  Confidential', pageW / 2, pageH - 1.8, { align: 'center' });
 
     // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // PAGE 2 — PROPERTY BENCHMARK  (like "Department Benchmark" page)
@@ -308,13 +333,13 @@ Deno.serve(async (req) => {
     doc.text('TOTAL ALLOCATED PAYROLL  (Property Hotels)', margin + 10, y + 23);
 
     // Status badge on right side of block
-    const statusText = isOver ? 'Over Budget' : 'Within Budget';
-    const statusCol = isOver ? STATUS_BAD : STATUS_GOOD;
-    fillRect(doc, pageW - margin - 38, y + 8, 38, 12, statusCol);
+    const p2StatusText = isOver ? 'Over Budget' : 'Within Budget';
+    const p2StatusCol = isOver ? STATUS_BAD : STATUS_GOOD;
+    fillRect(doc, pageW - margin - 38, y + 8, 38, 12, p2StatusCol);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8.5);
     doc.setTextColor(...WHITE);
-    doc.text(statusText, pageW - margin - 19, y + 16, { align: 'center' });
+    doc.text(p2StatusText, pageW - margin - 19, y + 16, { align: 'center' });
     y += 34;
 
     // Score vs budget comparison table (like "SCORE VS. ALL DEPARTMENTS" table)
