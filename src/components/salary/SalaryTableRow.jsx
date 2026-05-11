@@ -31,7 +31,10 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
       <td className="px-3 py-2.5 text-sm font-medium whitespace-nowrap">
         <div className="flex items-center gap-1.5">
           {suppressed && <EyeOff className="w-3 h-3 text-muted-foreground flex-shrink-0" />}
-          <span className={suppressed ? 'text-muted-foreground italic' : ''}>{employee.name}</span>
+          <span
+            className={`cursor-pointer hover:underline hover:text-primary transition-colors ${suppressed ? 'text-muted-foreground italic' : ''}`}
+            onClick={() => onEdit(employee)}
+          >{employee.name}</span>
         </div>
       </td>
       <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">{managerName || <span className="text-border">—</span>}</td>
