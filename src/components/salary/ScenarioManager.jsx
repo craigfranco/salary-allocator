@@ -41,7 +41,7 @@ export default function ScenarioManager({ employees, onRestore }) {
     const snapshot = {};
     employees.forEach(emp => {
       snapshot[emp.id] = { 
-        allocations: emp.allocations || {}, 
+        allocations: JSON.parse(JSON.stringify(emp.allocations || {})), 
         suppressed: emp.suppressed || false 
       };
     });
@@ -60,7 +60,10 @@ export default function ScenarioManager({ employees, onRestore }) {
     if (!name.trim()) return;
     const snapshot = {};
     employees.forEach(emp => {
-      snapshot[emp.id] = { allocations: emp.allocations || {}, suppressed: emp.suppressed || false };
+      snapshot[emp.id] = { 
+        allocations: JSON.parse(JSON.stringify(emp.allocations || {})), 
+        suppressed: emp.suppressed || false 
+      };
     });
     saveMutation.mutate({ name: name.trim(), description: description.trim(), snapshot });
   };
