@@ -3,75 +3,75 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
-import { User, EyeOff, GitBranch, Download } from 'lucide-react';
+import { User, EyeOff, GitBranch, Download, Image } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 const DEPT_STYLES = {
-  REVENUE: { bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400', border: 'border-teal-500', label: 'Revenue' },
-  ECOMM:   { bg: 'bg-orange-500/15', text: 'text-orange-600 dark:text-orange-400', border: 'border-orange-500', label: 'E-Commerce' },
-  SALES:   { bg: 'bg-purple-500/15', text: 'text-purple-600 dark:text-purple-400', border: 'border-purple-500', label: 'Sales & Marketing' },
+  REVENUE: { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-400', headerBg: 'bg-teal-500', label: 'Revenue', dot: 'bg-teal-400' },
+  ECOMM:   { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-400', headerBg: 'bg-orange-500', label: 'E-Commerce', dot: 'bg-orange-400' },
+  SALES:   { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-400', headerBg: 'bg-purple-500', label: 'Sales & Marketing', dot: 'bg-purple-400' },
 };
 
-const CRAIG_STYLE = { bg: 'bg-amber-500/15', text: 'text-amber-600 dark:text-amber-400', border: 'border-amber-500', label: 'Head of Commercial' };
+const CRAIG_STYLE = { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400', headerBg: 'bg-amber-500', label: 'Head of Commercial', dot: 'bg-amber-400' };
 
 function EmployeeCard({ employee, onClick, hotelMap }) {
   const dept = employee.exclude_from_table ? CRAIG_STYLE : (DEPT_STYLES[employee.department] || {});
   const suppressed = !!employee.suppressed;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  const nonCorpCodes = Object.keys(hotelMap).filter(c => c !== 'CORP');
+  const allocedNonCorp = allocEntries.filter(([c]) => c !== 'CORP');
+  const isExecDir = /executive director/i.test(employee.title);
+  const isAll = isExecDir || allocedNonCorp.length >= nonCorpCodes.length;
 
   return (
     <div
       onClick={() => onClick(employee)}
-      className={`rounded-lg border ${dept.border} border-2 bg-card p-2 cursor-pointer transition-all duration-150 select-none w-44 flex-shrink-0 shadow-sm ${
-        suppressed ? 'opacity-40' : 'hover:shadow-md hover:scale-[1.02]'
+      className={`rounded-xl border-2 ${dept.border} bg-white overflow-hidden cursor-pointer transition-all duration-150 select-none w-48 flex-shrink-0 shadow-md ${
+        suppressed ? 'opacity-40' : 'hover:shadow-xl hover:scale-[1.03]'
       }`}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
-      <div className="flex items-center gap-1.5">
-        <div className={`w-6 h-6 rounded-md ${dept.bg} flex items-center justify-center flex-shrink-0`}>
-          {suppressed ? <EyeOff className={`w-3 h-3 ${dept.text}`} /> : <User className={`w-3 h-3 ${dept.text}`} />}
+      {/* Colored header bar */}
+      <div className={`${dept.headerBg} px-3 py-2 flex items-center gap-2`}>
+        <div className="w-6 h-6 rounded-full bg-white/25 flex items-center justify-center flex-shrink-0">
+          {suppressed ? <EyeOff className="w-3 h-3 text-white" /> : <User className="w-3 h-3 text-white" />}
         </div>
-        <div className="flex-1 min-w-0">
-          <p className={`text-[10px] font-semibold truncate ${suppressed ? 'line-through text-muted-foreground' : ''}`}>{employee.name}</p>
-          <p className="text-[9px] text-muted-foreground truncate leading-tight">{employee.title}</p>
-        </div>
+        <p className="text-[11px] font-bold text-white truncate leading-tight flex-1">{employee.name}</p>
       </div>
-      {allocEntries.length > 0 && (
-        <>
-          <div className="mt-1.5 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
-            {allocEntries.map(([code, pct]) => (
-              <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
-            ))}
-          </div>
-          {(() => {
-            const nonCorpCodes = Object.keys(hotelMap).filter(c => c !== 'CORP');
-            const allocedNonCorp = allocEntries.filter(([c]) => c !== 'CORP');
-            const isExecDir = /executive director/i.test(employee.title);
-            const isAll = isExecDir || allocedNonCorp.length >= nonCorpCodes.length;
-            return isAll ? (
-              <div className="mt-1.5">
-                <span className="text-[8px] font-bold px-1 py-0.5 rounded-full bg-primary/10 text-primary">All Hotels</span>
-              </div>
+      {/* Body */}
+      <div className={`px-3 py-2 ${dept.bg}`}>
+        <p className={`text-[10px] font-semibold ${dept.text} leading-snug mb-1.5`} style={{ minHeight: '28px' }}>{employee.title}</p>
+        {allocEntries.length > 0 && (
+          <>
+            <div className="flex h-1.5 rounded-full overflow-hidden bg-gray-200 gap-px mb-1.5">
+              {allocEntries.map(([code, pct]) => (
+                <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
+              ))}
+            </div>
+            {isAll ? (
+              <span className="text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-white/70 text-gray-600 border border-gray-200">All Hotels</span>
             ) : (
-              <div className="mt-1.5 flex flex-wrap gap-1">
-                {allocEntries.map(([code]) => (
-                  <span key={code} className={`text-[8px] font-bold px-1 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-muted/50 text-muted-foreground'}`}>
+              <div className="flex flex-wrap gap-1">
+                {allocEntries.map(([code]) => code !== 'CORP' && (
+                  <span key={code} className={`text-[8px] font-bold px-1.5 py-0.5 rounded-full ${HOTEL_COLORS[code]?.badge || 'bg-gray-100 text-gray-500'}`}>
                     {HOTEL_SHORT_NAMES[code] || hotelMap[code] || code}
                   </span>
                 ))}
               </div>
-            );
-          })()}
-        </>
-      )}
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-const CARD_W = 176; // w-44
+const CARD_W = 192; // w-48
 const CARD_GAP = 16; // gap-4
 const SLOT_W = CARD_W + CARD_GAP; // width per child slot
 
@@ -106,12 +106,12 @@ function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
       {children.length > 0 && (
         <>
           {/* Vertical line from parent down */}
-          <div className="w-px h-6 bg-border" />
+          <div className="w-0.5 h-8 bg-gray-300" />
           {/* Horizontal bar spanning first to last child center */}
           {children.length > 1 && (
-            <div className="relative h-px bg-transparent" style={{ width: myWidth }}>
+            <div className="relative h-0.5 bg-transparent" style={{ width: myWidth }}>
               <div
-                className="absolute top-0 h-px bg-border"
+                className="absolute top-0 h-0.5 bg-gray-300"
                 style={{ left: firstCenter, width: lastCenter - firstCenter }}
               />
             </div>
@@ -120,7 +120,7 @@ function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
           <div className="flex items-start" style={{ width: myWidth }}>
             {children.map((child, idx) => (
               <div key={child.id} className="flex flex-col items-center" style={{ width: childWidths[idx], marginRight: idx < children.length - 1 ? CARD_GAP : 0 }}>
-                <div className="w-px h-6 bg-border" />
+                <div className="w-0.5 h-8 bg-gray-300" />
                 <OrgNode
                   employee={child}
                   childrenMap={childrenMap}
@@ -138,29 +138,33 @@ function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
 
 export default function OrgChart() {
   const [editEmp, setEditEmp] = useState(null);
-  const [exporting, setExporting] = useState(false);
+  const [exporting, setExporting] = useState(null);
   const chartRef = useRef(null);
   const qc = useQueryClient();
 
+  const captureCanvas = async () => {
+    const el = chartRef.current;
+    return html2canvas(el, {
+      scale: 2,
+      backgroundColor: '#f8fafc',
+      useCORS: true,
+      scrollX: 0,
+      scrollY: 0,
+      width: el.scrollWidth,
+      height: el.scrollHeight,
+      windowWidth: el.scrollWidth,
+      windowHeight: el.scrollHeight,
+    });
+  };
+
   const handleExportPDF = async () => {
     if (!chartRef.current) return;
-    setExporting(true);
+    setExporting('pdf');
     try {
-      const el = chartRef.current;
-      const canvas = await html2canvas(el, {
-        scale: 1.5,
-        backgroundColor: '#ffffff',
-        useCORS: true,
-        scrollX: 0,
-        scrollY: 0,
-        width: el.scrollWidth,
-        height: el.scrollHeight,
-        windowWidth: el.scrollWidth,
-        windowHeight: el.scrollHeight,
-      });
+      const canvas = await captureCanvas();
       const imgData = canvas.toDataURL('image/png');
-      const pdfW = canvas.width / 1.5;
-      const pdfH = canvas.height / 1.5;
+      const pdfW = canvas.width / 2;
+      const pdfH = canvas.height / 2;
       const pdf = new jsPDF({ orientation: pdfW > pdfH ? 'landscape' : 'portrait', unit: 'pt', format: [pdfW, pdfH] });
       pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
       pdf.save('org-chart.pdf');
@@ -168,7 +172,24 @@ export default function OrgChart() {
       console.error('PDF export failed:', err);
       alert('Export failed: ' + err.message);
     } finally {
-      setExporting(false);
+      setExporting(null);
+    }
+  };
+
+  const handleExportImage = async () => {
+    if (!chartRef.current) return;
+    setExporting('img');
+    try {
+      const canvas = await captureCanvas();
+      const link = document.createElement('a');
+      link.download = 'org-chart.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (err) {
+      console.error('Image export failed:', err);
+      alert('Export failed: ' + err.message);
+    } finally {
+      setExporting(null);
     }
   };
 
@@ -224,25 +245,37 @@ export default function OrgChart() {
             <GitBranch className="w-3.5 h-3.5" />
             Click a card to edit
           </div>
-          <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting} className="gap-2">
-            <Download className="w-4 h-4" />
-            {exporting ? 'Exporting…' : 'Export PDF'}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2" disabled={!!exporting}>
+                <Download className="w-4 h-4" />
+                {exporting ? 'Exporting…' : 'Export'}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={handleExportPDF} className="gap-2">
+                <Download className="w-4 h-4" /> Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportImage} className="gap-2">
+                <Image className="w-4 h-4" /> Export as Image (PNG)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-3">
         {Object.entries(DEPT_STYLES).map(([key, val]) => (
-          <div key={key} className="flex items-center gap-1.5">
-            <div className={`w-3 h-3 rounded-sm border-2 ${val.border} ${val.bg}`} />
-            <span className={`text-xs font-medium ${val.text}`}>{val.label}</span>
+          <div key={key} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border shadow-sm">
+            <div className={`w-2.5 h-2.5 rounded-full ${val.dot}`} />
+            <span className={`text-xs font-semibold ${val.text}`}>{val.label}</span>
           </div>
         ))}
       </div>
 
-      <div className="overflow-auto rounded-2xl border border-border bg-card/50 p-6">
-        <div ref={chartRef} className="inline-flex gap-12 items-start">
+      <div className="overflow-auto rounded-2xl border border-border shadow-sm" style={{ background: '#f8fafc' }}>
+        <div ref={chartRef} className="inline-flex gap-12 items-start p-8" style={{ background: '#f8fafc' }}>
           {roots.map(root => (
             <OrgNode
               key={root.id}
