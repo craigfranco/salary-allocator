@@ -10,6 +10,7 @@ import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useScenario } from '@/lib/ScenarioContext';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
@@ -18,11 +19,14 @@ export default function HotelBudgets() {
   const [drillHotel, setDrillHotel] = useState(null);
   const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 });
   const qc = useQueryClient();
+  const { activeScenario, scenarioData } = useScenario();
 
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
 
-  const activeEmployees = employees.filter(e => !e.suppressed);
+  // Use scenario data if active, otherwise use DB employees
+  const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
+  const activeEmployees = displayEmployees.filter(e => !e.suppressed);
   const suppressedCount = employees.length - activeEmployees.length;
 
   const updateMutation = useMutation({
