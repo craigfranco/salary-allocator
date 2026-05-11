@@ -31,6 +31,20 @@ export default function ScenarioManager({ employees, onRestore }) {
     },
   });
 
+  const updateMutation = useMutation({
+    mutationFn: ({ id, snapshot }) => base44.entities.Scenario.update(id, { snapshot }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['scenarios'] }),
+  });
+
+  const handleUpdateActive = () => {
+    if (!activeScenario) return;
+    const snapshot = {};
+    employees.forEach(emp => {
+      snapshot[emp.id] = { allocations: emp.allocations || {}, suppressed: emp.suppressed || false };
+    });
+    updateMutation.mutate({ id: activeScenario.id, snapshot });
+  };
+
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.Scenario.delete(id),
     onSuccess: (_, id) => {
@@ -57,6 +71,19 @@ export default function ScenarioManager({ employees, onRestore }) {
   return (
     <>
       <div className="flex items-center gap-2">
+        {activeScenario && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5 text-xs"
+            onClick={handleUpdateActive}
+            disabled={updateMutation.isPending}
+            title={`Update "${activeScenario.name}" with current allocations`}
+          >
+            <Save className="w-3.5 h-3.5" />
+            {updateMutation.isPending ? 'Saving…' : `Update "${activeScenario.name}"`}
+          </Button>
+        )}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2">
