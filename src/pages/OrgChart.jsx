@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { useScenario } from '@/lib/ScenarioContext';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
@@ -193,8 +194,12 @@ export default function OrgChart() {
     }
   };
 
+  const { activeScenario, scenarioData } = useScenario();
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
+
+  // Use scenario data if active, otherwise use DB employees
+  const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Employee.update(id, data),
@@ -206,7 +211,7 @@ export default function OrgChart() {
 
   // Build manager → children map
   const childrenMap = {};
-  const activeEmployees = employees.filter(e => !e.suppressed);
+  const activeEmployees = displayEmployees.filter(e => !e.suppressed);
 
   activeEmployees.forEach(emp => {
     const mid = emp.manager_id && emp.manager_id.trim() ? emp.manager_id : null;
@@ -228,7 +233,7 @@ export default function OrgChart() {
   const activeIds = new Set(activeEmployees.map(e => e.id));
   const roots = activeEmployees.filter(e => !e.manager_id || !e.manager_id.trim() || !activeIds.has(e.manager_id));
 
-  const suppressedCount = employees.filter(e => e.suppressed).length;
+  const suppressedCount = displayEmployees.filter(e => e.suppressed).length;
 
   return (
     <div className="space-y-4">
@@ -295,7 +300,7 @@ export default function OrgChart() {
           onSave={(form) => updateMutation.mutate({ id: editEmp.id, data: form })}
           employee={editEmp}
           hotels={sortedHotels}
-          allEmployees={employees}
+          allEmployees={displayEmployees}
         />
       )}
     </div>
