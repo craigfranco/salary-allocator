@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Plus, AlertCircle, FileText } from 'lucide-react';
-import { exportExecutiveSummary } from '@/functions/exportExecutiveSummary';
-
+import { Plus, AlertCircle } from 'lucide-react';
 import SalaryTableRow from '@/components/salary/SalaryTableRow';
 import SearchBar from '@/components/salary/SearchBar';
 import ExportButton from '@/components/salary/ExportButton';
@@ -19,7 +17,6 @@ import {
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 export default function SalaryTable() {
-  const [exportingPdf, setExportingPdf] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editEmp, setEditEmp] = useState(null);
   const [deleteEmp, setDeleteEmp] = useState(null);
@@ -123,30 +120,6 @@ export default function SalaryTable() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            disabled={exportingPdf}
-            onClick={async () => {
-              setExportingPdf(true);
-              try {
-                const res = await exportExecutiveSummary({});
-                const blob = new Blob([res.data], { type: 'application/pdf' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `sm-payroll-executive-summary-${new Date().toISOString().slice(0,10)}.pdf`;
-                a.click();
-                URL.revokeObjectURL(url);
-              } finally {
-                setExportingPdf(false);
-              }
-            }}
-          >
-            <FileText className="w-4 h-4" />
-            {exportingPdf ? 'Generating…' : 'Executive Summary PDF'}
-          </Button>
           <ScenarioManager
             employees={employees}
             onRestore={async (snapshot) => {
