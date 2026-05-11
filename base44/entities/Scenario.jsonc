@@ -11,8 +11,11 @@
       "description": "Optional notes about this scenario"
     },
     "snapshot": {
-      "type": "object",
-      "description": "Map of employee ID to their allocations object at the time of save"
+      "type": "array",
+      "items": {
+        "type": "object"
+      },
+      "description": "Full employee snapshot at the time of save"
     }
   },
   "required": [

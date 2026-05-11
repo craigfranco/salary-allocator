@@ -40,7 +40,7 @@ export default function ScenarioManager({ employees, onRestore }) {
 
   const handleUpdateActive = () => {
     if (!activeScenario) return;
-    const snapshot = JSON.parse(JSON.stringify(scenarioData || employees));
+    const snapshot = Array.isArray(scenarioData) ? JSON.parse(JSON.stringify(scenarioData)) : (Array.isArray(employees) ? JSON.parse(JSON.stringify(employees)) : []);
     updateMutation.mutate({ id: activeScenario.id, snapshot });
     toast({ title: `Scenario "${activeScenario.name}" updated` });
   };
@@ -55,12 +55,12 @@ export default function ScenarioManager({ employees, onRestore }) {
 
   const handleSave = () => {
     if (!name.trim()) return;
-    const snapshot = JSON.parse(JSON.stringify(employees));
+    const snapshot = Array.isArray(employees) ? JSON.parse(JSON.stringify(employees)) : [];
     saveMutation.mutate({ name: name.trim(), description: description.trim(), snapshot });
   };
 
   const handleRestore = (scenario) => {
-    const snapshotCopy = JSON.parse(JSON.stringify(scenario.snapshot));
+    const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
     setScenarioData(snapshotCopy);
     setActiveScenario({ id: scenario.id, name: scenario.name });
     setOpen(false);

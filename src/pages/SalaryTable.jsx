@@ -51,7 +51,7 @@ export default function SalaryTable() {
   });
 
   const handleAllocChange = (emp, hotelCode, newPct) => {
-    if (activeScenario && scenarioData) {
+    if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
       const empIdx = updated.findIndex(e => e.id === emp.id);
       if (empIdx !== -1) {
@@ -68,7 +68,7 @@ export default function SalaryTable() {
   };
 
   const handleSave = (form) => {
-    if (activeScenario && scenarioData) {
+    if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
       const empIdx = updated.findIndex(e => e.id === editEmp.id);
       if (empIdx !== -1) {
@@ -85,7 +85,7 @@ export default function SalaryTable() {
   };
 
   const handleToggleSuppress = (emp) => {
-    if (activeScenario && scenarioData) {
+    if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
       const empIdx = updated.findIndex(e => e.id === emp.id);
       if (empIdx !== -1) {
