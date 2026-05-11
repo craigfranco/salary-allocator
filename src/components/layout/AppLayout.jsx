@@ -1,7 +1,8 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun } from 'lucide-react';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
+import { useScenario } from '@/lib/ScenarioContext';
 
 const navItems = [
   { path: '/', label: 'Salary Table', icon: TableProperties },
@@ -14,6 +15,7 @@ const navItems = [
 export default function AppLayout() {
   const location = useLocation();
   const { dark, toggle } = useTheme();
+  const { activeScenario } = useScenario();
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
@@ -50,24 +52,32 @@ export default function AppLayout() {
       {/* Nav */}
       <nav className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-40 shadow-sm">
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
-          <div className="flex gap-0.5 overflow-x-auto py-1.5">
-            {navItems.map(({ path, label, icon: Icon }) => {
-              const active = location.pathname === path;
-              return (
-                <Link
-                  key={path}
-                  to={path}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                    active
-                      ? 'bg-primary text-primary-foreground shadow-md'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {label}
-                </Link>
-              );
-            })}
+          <div className="flex items-center justify-between">
+            <div className="flex gap-0.5 overflow-x-auto py-1.5">
+              {navItems.map(({ path, label, icon: Icon }) => {
+                const active = location.pathname === path;
+                return (
+                  <Link
+                    key={path}
+                    to={path}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                      active
+                        ? 'bg-primary text-primary-foreground shadow-md'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+            {activeScenario && (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary whitespace-nowrap ml-4">
+                <BookMarked className="w-3 h-3" />
+                Scenario: {activeScenario.name}
+              </div>
+            )}
           </div>
         </div>
       </nav>

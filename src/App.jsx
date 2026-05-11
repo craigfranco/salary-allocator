@@ -12,6 +12,7 @@ import OrgChart from '@/pages/OrgChart.jsx';
 import Alerts from '@/pages/Alerts';
 import Analytics from '@/pages/Analytics';
 import { ThemeProvider } from '@/lib/theme.jsx';
+import { ScenarioProvider } from '@/lib/ScenarioContext';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -50,14 +51,16 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <AuthenticatedApp />
-          </Router>
-          <Toaster />
-        </QueryClientProvider>
-      </AuthProvider>
+      <ScenarioProvider>
+        <AuthProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <AuthenticatedApp />
+            </Router>
+            <Toaster />
+          </QueryClientProvider>
+        </AuthProvider>
+      </ScenarioProvider>
     </ThemeProvider>
   )
 }

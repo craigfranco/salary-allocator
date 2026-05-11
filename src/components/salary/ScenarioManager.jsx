@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BookMarked, Save, Trash2, ChevronDown, Check } from 'lucide-react';
+import { useScenario } from '@/lib/ScenarioContext';
 
 export default function ScenarioManager({ employees, onRestore }) {
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
-  const [activeScenario, setActiveScenario] = useState(null); // { id, name }
+  const { activeScenario, setActiveScenario } = useScenario();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const qc = useQueryClient();
@@ -56,12 +57,6 @@ export default function ScenarioManager({ employees, onRestore }) {
   return (
     <>
       <div className="flex items-center gap-2">
-        {activeScenario && (
-          <span className="text-xs text-muted-foreground italic flex items-center gap-1">
-            <BookMarked className="w-3 h-3" />
-            {activeScenario.name}
-          </span>
-        )}
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button variant="outline" className="gap-2">
