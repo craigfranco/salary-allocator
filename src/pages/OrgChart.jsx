@@ -146,11 +146,27 @@ export default function OrgChart() {
     if (!chartRef.current) return;
     setExporting(true);
     try {
-      const canvas = await html2canvas(chartRef.current, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+      const el = chartRef.current;
+      const canvas = await html2canvas(el, {
+        scale: 1.5,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        scrollX: 0,
+        scrollY: 0,
+        width: el.scrollWidth,
+        height: el.scrollHeight,
+        windowWidth: el.scrollWidth,
+        windowHeight: el.scrollHeight,
+      });
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width / 2, canvas.height / 2] });
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+      const pdfW = canvas.width / 1.5;
+      const pdfH = canvas.height / 1.5;
+      const pdf = new jsPDF({ orientation: pdfW > pdfH ? 'landscape' : 'portrait', unit: 'pt', format: [pdfW, pdfH] });
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
       pdf.save('org-chart.pdf');
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      alert('Export failed: ' + err.message);
     } finally {
       setExporting(false);
     }
@@ -221,7 +237,7 @@ export default function OrgChart() {
       </div>
 
       <div className="overflow-auto rounded-2xl border border-border bg-card/50 p-6">
-        <div ref={chartRef} className="flex gap-12 items-start min-w-max">
+        <div ref={chartRef} className="inline-flex gap-12 items-start">
           {roots.map(root => (
             <OrgNode
               key={root.id}
