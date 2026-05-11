@@ -179,8 +179,8 @@ export default function ScenarioComparison() {
                                 <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
                                 <p className="font-bold text-sm">{formatCurrency(payroll)}</p>
                                 {change !== null && (
-                                  <p className={`text-xs font-medium mt-1 ${change > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                    {change > 0 ? '+' : ''}{formatCurrency(change)}
+                                  <p className={`text-xs font-medium mt-1 ${change < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {change < 0 ? '' : '+'}{formatCurrency(change)}
                                   </p>
                                 )}
                               </div>
@@ -211,10 +211,10 @@ export default function ScenarioComparison() {
                             <p className="text-xs text-muted-foreground mb-1">{scenario.name}</p>
                             <p className="font-bold text-base">{formatCurrency(total)}</p>
                             {change !== null && (
-                              <p className={`text-xs font-semibold mt-1 ${change > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                                {change > 0 ? '+' : ''}{formatCurrency(change)}
-                              </p>
-                            )}
+                               <p className={`text-xs font-semibold mt-1 ${change < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                 {change < 0 ? '' : '+'}{formatCurrency(change)}
+                               </p>
+                             )}
                           </div>
                         );
                       })}
@@ -380,8 +380,8 @@ export default function ScenarioComparison() {
                     <p className="font-bold text-lg">{formatCurrency(totalSalary)}</p>
                     {change !== null && (
                       <div className="mt-2 pt-2 border-t border-border">
-                        <p className={`text-sm font-semibold ${change > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {change > 0 ? '+' : ''}{formatCurrency(change)}
+                        <p className={`text-sm font-semibold ${change < 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {change < 0 ? '' : '+'}{formatCurrency(change)}
                         </p>
                       </div>
                     )}
