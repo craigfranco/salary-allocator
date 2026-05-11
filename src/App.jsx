@@ -11,6 +11,7 @@ import HotelBudgets from '@/pages/HotelBudgets';
 import OrgChart from '@/pages/OrgChart.jsx';
 import Alerts from '@/pages/Alerts';
 import Analytics from '@/pages/Analytics';
+import ScenarioComparison from '@/pages/ScenarioComparison';
 import { ThemeProvider } from '@/lib/theme.jsx';
 import { ScenarioProvider } from '@/lib/ScenarioContext';
 
@@ -42,6 +43,7 @@ const AuthenticatedApp = () => {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/org-chart" element={<OrgChart />} />
         <Route path="/alerts" element={<Alerts />} />
+        <Route path="/compare" element={<ScenarioComparison />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

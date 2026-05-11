@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked } from 'lucide-react';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
@@ -11,6 +11,7 @@ const navItems = [
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/org-chart', label: 'Org Chart', icon: Network },
   { path: '/alerts', label: 'Alerts', icon: AlertTriangle },
+  { path: '/compare', label: 'Compare', icon: GitCompare },
 ];
 
 export default function AppLayout() {
