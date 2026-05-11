@@ -46,7 +46,8 @@ function EmployeeCard({ employee, onClick, hotelMap }) {
           {(() => {
             const nonCorpCodes = Object.keys(hotelMap).filter(c => c !== 'CORP');
             const allocedNonCorp = allocEntries.filter(([c]) => c !== 'CORP');
-            const isAll = allocedNonCorp.length >= nonCorpCodes.length;
+            const isExecDir = /executive director/i.test(employee.title);
+            const isAll = isExecDir || allocedNonCorp.length >= nonCorpCodes.length;
             return isAll ? (
               <div className="mt-1.5">
                 <span className="text-[8px] font-bold px-1 py-0.5 rounded-full bg-primary/10 text-primary">All Hotels</span>
