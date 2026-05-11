@@ -40,6 +40,10 @@
     "manager_id": {
       "type": "string",
       "description": "ID of the employee's direct manager (another Employee record)"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Optional sort order for org chart display. Lower numbers appear first among siblings."
     }
   },
   "required": [
