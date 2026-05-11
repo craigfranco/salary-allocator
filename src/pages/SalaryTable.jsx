@@ -32,7 +32,7 @@ export default function SalaryTable() {
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   // Use scenario data if scenario is active, otherwise use DB employees
-  const displayEmployees = scenarioData || employees;
+  const displayEmployees = scenarioData || employees || [];
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const tableHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
