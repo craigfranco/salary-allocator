@@ -126,9 +126,9 @@ function buildExecSummary(employees, hotels) {
 
   return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
     ${pageHeader('Executive Summary', 2)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding-bottom:60px;">
+    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.3in 0.5in 60px;">
       <!-- KPI cards -->
-      <div style="display:flex;gap:20px;margin-bottom:28px;">
+      <div style="display:flex;gap:20px;margin-bottom:16px;">
         ${[
           { label: 'Total Payroll', value: fmt(totalPayroll) },
           { label: 'Average Salary', value: fmt(avgSalary) },
@@ -140,8 +140,8 @@ function buildExecSummary(employees, hotels) {
       </div>
 
       <!-- Payroll by Hotel -->
-      <div style="margin-bottom:28px;" class="no-break">
-        <div style="font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin-bottom:12px;border-bottom:2px solid #e2e7ed;padding-bottom:6px;">Payroll by Hotel</div>
+      <div style="margin-bottom:14px;" class="no-break">
+        <div style="font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin-bottom:8px;border-bottom:2px solid #e2e7ed;padding-bottom:4px;">Payroll by Hotel</div>
         ${PROPERTY_HOTELS.map(code => {
           const total = hotelTotals[code] || 0;
           const pct = maxHotelTotal ? (total / maxHotelTotal * 100) : 0;
@@ -156,8 +156,8 @@ function buildExecSummary(employees, hotels) {
       </div>
 
       <!-- Payroll by Dept -->
-      <div style="margin-bottom:28px;" class="no-break">
-        <div style="font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin-bottom:12px;border-bottom:2px solid #e2e7ed;padding-bottom:6px;">Payroll by Department</div>
+      <div style="margin-bottom:14px;" class="no-break">
+        <div style="font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin-bottom:8px;border-bottom:2px solid #e2e7ed;padding-bottom:4px;">Payroll by Department</div>
         <div style="display:flex;gap:16px;">
           ${deptData.map(d => `<div style="flex:1;border-radius:8px;padding:14px;background:#f8fafb;border:1px solid #e2e7ed;">
             <div style="display:inline-block;padding:2px 10px;border-radius:20px;background:${DEPT_COLORS[d.dept]?.badge};color:${DEPT_COLORS[d.dept]?.text};font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">${DEPT_COLORS[d.dept]?.label}</div>
@@ -169,7 +169,7 @@ function buildExecSummary(employees, hotels) {
 
       <!-- Budget vs Actual -->
       <div class="no-break">
-        <div style="font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin-bottom:12px;border-bottom:2px solid #e2e7ed;padding-bottom:6px;">Budget vs. Actual</div>
+        <div style="font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin-bottom:8px;border-bottom:2px solid #e2e7ed;padding-bottom:4px;">Budget vs. Actual</div>
         <table style="width:100%;border-collapse:collapse;font-family:Inter,Arial,sans-serif;font-size:9px;">
           <thead>
             <tr style="background:#2d4b5e;">
@@ -271,7 +271,7 @@ function buildSalaryTable(employees, hotels) {
 
   return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
     ${pageHeader('Salary Allocation Table', 3)}
-    <div style="flex:1;overflow:hidden;padding:12px 0.5in 60px;font-size:8px;">
+    <div style="flex:1;overflow:hidden;padding:8px 0.4in 60px;font-size:7.5px;">
       <table style="width:100%;border-collapse:collapse;">
         <thead>
           <tr style="background:#2d4b5e;">
@@ -361,7 +361,7 @@ function buildHotelBreakdown(employees, hotels) {
 
   return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
     ${pageHeader('Hotel Budget Breakdown', 4)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding-bottom:60px;">
+    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.3in 0.5in 60px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div style="display:flex;flex-direction:column;gap:16px;">${left.join('')}</div>
         <div style="display:flex;flex-direction:column;gap:16px;">${right.join('')}</div>
@@ -415,8 +415,8 @@ function buildOrgChart(employees) {
 
   return `<div class="page" style="display:flex;flex-direction:column;position:relative;width:100%;">
     ${pageHeader('Organization Chart', 5)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.5in 0.5in 60px;display:flex;align-items:center;justify-content:center;">
-      <div style="transform:scale(0.8);transform-origin:top center;display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
+    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.2in 0.3in 60px;display:flex;align-items:center;justify-content:center;">
+      <div style="transform:scale(0.75);transform-origin:top center;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
         ${roots.map(r => renderNode(r)).join('')}
       </div>
     </div>
@@ -491,11 +491,11 @@ function buildAlertsAnalytics(employees, hotels) {
     </tr>`;
   }).join('');
 
-  const sectionTitle = (t) => `<div style="font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin:20px 0 10px;border-bottom:2px solid #e2e7ed;padding-bottom:6px;">${t}</div>`;
+  const sectionTitle = (t) => `<div style="font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin:12px 0 6px;border-bottom:2px solid #e2e7ed;padding-bottom:4px;">${t}</div>`;
 
   return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
     ${pageHeader('Allocation Alerts & Analytics', 6)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding-bottom:60px;">
+    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.3in 0.4in 60px;">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
         <div>
           ${sectionTitle('Allocation Status')}
