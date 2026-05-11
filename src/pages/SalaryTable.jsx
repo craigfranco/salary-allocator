@@ -124,13 +124,15 @@ export default function SalaryTable() {
             employees={employees}
             onRestore={async (snapshot) => {
               await Promise.all(
-                Object.entries(snapshot).map(([empId, val]) => {
-                  const isNewFormat = val && typeof val === 'object' && 'allocations' in val;
-                  const data = isNewFormat
-                    ? { allocations: val.allocations, suppressed: val.suppressed }
-                    : { allocations: val };
-                  return base44.entities.Employee.update(empId, data);
-                })
+                Object.entries(snapshot)
+                  .filter(([empId]) => employees.some(e => e.id === empId))
+                  .map(([empId, val]) => {
+                    const isNewFormat = val && typeof val === 'object' && 'allocations' in val;
+                    const data = isNewFormat
+                      ? { allocations: val.allocations, suppressed: val.suppressed }
+                      : { allocations: val };
+                    return base44.entities.Employee.update(empId, data);
+                  })
               );
               qc.invalidateQueries({ queryKey: ['employees'] });
             }}

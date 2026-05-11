@@ -40,7 +40,10 @@ export default function ScenarioManager({ employees, onRestore }) {
     if (!activeScenario) return;
     const snapshot = {};
     employees.forEach(emp => {
-      snapshot[emp.id] = { allocations: emp.allocations || {}, suppressed: emp.suppressed || false };
+      snapshot[emp.id] = { 
+        allocations: emp.allocations || {}, 
+        suppressed: emp.suppressed || false 
+      };
     });
     updateMutation.mutate({ id: activeScenario.id, snapshot });
   };
@@ -164,6 +167,9 @@ export default function ScenarioManager({ employees, onRestore }) {
                 placeholder="Any notes about this scenario…"
               />
             </div>
+            <p className="text-xs text-muted-foreground">
+              This scenario will save allocations and suppression status for current employees. New employees added after saving will not be included.
+            </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setSaveOpen(false)}>Cancel</Button>
