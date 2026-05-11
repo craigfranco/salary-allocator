@@ -193,9 +193,14 @@ export default function OrgChart() {
     childrenMap[mid].push(emp);
   });
 
-  // Sort children by title length (approximate seniority)
+  // Sort children: REVENUE first, then ECOMM, then SALES; within same dept by name
+  const DEPT_ORDER = { REVENUE: 0, ECOMM: 1, SALES: 2 };
   Object.keys(childrenMap).forEach(k => {
-    childrenMap[k].sort((a, b) => a.name.localeCompare(b.name));
+    childrenMap[k].sort((a, b) => {
+      const deptDiff = (DEPT_ORDER[a.department] ?? 99) - (DEPT_ORDER[b.department] ?? 99);
+      if (deptDiff !== 0) return deptDiff;
+      return a.name.localeCompare(b.name);
+    });
   });
 
   // Roots = employees with no manager or whose manager isn't in the active list
