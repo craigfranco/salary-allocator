@@ -162,8 +162,8 @@ export default function SalaryTable() {
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-gradient-to-r from-primary to-blue-700 dark:from-blue-900 dark:to-slate-800">
-                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground sticky left-0 bg-primary dark:bg-blue-900 z-10">Dept</th>
+              <tr style={{ backgroundColor: '#2d4b5e' }}>
+                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground sticky left-0 z-10" style={{ backgroundColor: '#2d4b5e' }}>Dept</th>
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Title</th>
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Name</th>
                 <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Reports To</th>
