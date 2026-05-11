@@ -115,10 +115,16 @@ export default function SalaryTable() {
         <div className="flex items-center gap-2">
           <ScenarioManager
             employees={employees}
-            onRestore={(snapshot) => {
-              Object.entries(snapshot).forEach(([empId, allocations]) => {
-                updateMutation.mutate({ id: empId, data: { allocations } });
-              });
+            onRestore={async (snapshot) => {
+              for (const [empId, val] of Object.entries(snapshot)) {
+                // Support both old format (plain allocations object) and new format ({ allocations, suppressed })
+                const isNewFormat = val && typeof val === 'object' && 'allocations' in val;
+                const data = isNewFormat
+                  ? { allocations: val.allocations, suppressed: val.suppressed }
+                  : { allocations: val };
+                await base44.entities.Employee.update(empId, data);
+              }
+              qc.invalidateQueries({ queryKey: ['employees'] });
             }}
           />
           <ExportButton employees={sortedEmployees} hotels={sortedHotels} hotelTotals={hotelTotals} />

@@ -42,7 +42,7 @@ export default function ScenarioManager({ employees, onRestore }) {
     if (!name.trim()) return;
     const snapshot = {};
     employees.forEach(emp => {
-      snapshot[emp.id] = emp.allocations || {};
+      snapshot[emp.id] = { allocations: emp.allocations || {}, suppressed: emp.suppressed || false };
     });
     saveMutation.mutate({ name: name.trim(), description: description.trim(), snapshot });
   };
