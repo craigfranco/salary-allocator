@@ -7,14 +7,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BookMarked, Save, Trash2, ChevronDown, Check } from 'lucide-react';
 import { useScenario } from '@/lib/ScenarioContext';
+import { useToast } from '@/components/ui/use-toast';
 
 export default function ScenarioManager({ employees, onRestore }) {
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
-  const { activeScenario, setActiveScenario } = useScenario();
+  const { activeScenario, setActiveScenario, scenarioData, setScenarioData } = useScenario();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const qc = useQueryClient();
+  const { toast } = useToast();
 
   const { data: scenarios = [] } = useQuery({
     queryKey: ['scenarios'],
@@ -38,14 +40,9 @@ export default function ScenarioManager({ employees, onRestore }) {
 
   const handleUpdateActive = () => {
     if (!activeScenario) return;
-    const snapshot = {};
-    employees.forEach(emp => {
-      snapshot[emp.id] = { 
-        allocations: JSON.parse(JSON.stringify(emp.allocations || {})), 
-        suppressed: emp.suppressed || false 
-      };
-    });
+    const snapshot = JSON.parse(JSON.stringify(scenarioData || employees));
     updateMutation.mutate({ id: activeScenario.id, snapshot });
+    toast({ title: `Scenario "${activeScenario.name}" updated` });
   };
 
   const deleteMutation = useMutation({
@@ -58,20 +55,15 @@ export default function ScenarioManager({ employees, onRestore }) {
 
   const handleSave = () => {
     if (!name.trim()) return;
-    const snapshot = {};
-    employees.forEach(emp => {
-      snapshot[emp.id] = { 
-        allocations: JSON.parse(JSON.stringify(emp.allocations || {})), 
-        suppressed: emp.suppressed || false 
-      };
-    });
+    const snapshot = JSON.parse(JSON.stringify(employees));
     saveMutation.mutate({ name: name.trim(), description: description.trim(), snapshot });
   };
 
   const handleRestore = (scenario) => {
-    onRestore(scenario.snapshot);
+    const snapshotCopy = JSON.parse(JSON.stringify(scenario.snapshot));
+    setScenarioData(snapshotCopy);
     setActiveScenario({ id: scenario.id, name: scenario.name });
-    // Keep popover open so user can flip between scenarios
+    setOpen(false);
   };
 
   return (

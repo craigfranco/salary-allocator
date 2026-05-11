@@ -9,6 +9,7 @@ import ExportButton from '@/components/salary/ExportButton';
 import ScenarioManager from '@/components/salary/ScenarioManager';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { getTotalAllocation, getAllocationStatus, formatCurrency, HOTEL_SHORT_NAMES } from '@/lib/helpers';
+import { useScenario } from '@/lib/ScenarioContext';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
@@ -25,9 +26,13 @@ export default function SalaryTable() {
   const [allocFilter, setAllocFilter] = useState('');
   const [hotelFilter, setHotelFilter] = useState('');
   const qc = useQueryClient();
+  const { activeScenario, scenarioData, setScenarioData } = useScenario();
 
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
+
+  // Use scenario data if scenario is active, otherwise use DB employees
+  const displayEmployees = scenarioData || employees;
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const tableHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
@@ -46,22 +51,54 @@ export default function SalaryTable() {
   });
 
   const handleAllocChange = (emp, hotelCode, newPct) => {
-    const newAllocs = { ...(emp.allocations || {}), [hotelCode]: newPct };
-    if (newPct === 0) delete newAllocs[hotelCode];
-    updateMutation.mutate({ id: emp.id, data: { allocations: newAllocs } });
+    if (activeScenario && scenarioData) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      const empIdx = updated.findIndex(e => e.id === emp.id);
+      if (empIdx !== -1) {
+        const newAllocs = { ...(updated[empIdx].allocations || {}), [hotelCode]: newPct };
+        if (newPct === 0) delete newAllocs[hotelCode];
+        updated[empIdx].allocations = newAllocs;
+        setScenarioData(updated);
+      }
+    } else {
+      const newAllocs = { ...(emp.allocations || {}), [hotelCode]: newPct };
+      if (newPct === 0) delete newAllocs[hotelCode];
+      updateMutation.mutate({ id: emp.id, data: { allocations: newAllocs } });
+    }
   };
 
   const handleSave = (form) => {
-    if (editEmp) updateMutation.mutate({ id: editEmp.id, data: form });
-    else createMutation.mutate(form);
+    if (activeScenario && scenarioData) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      const empIdx = updated.findIndex(e => e.id === editEmp.id);
+      if (empIdx !== -1) {
+        updated[empIdx] = { ...updated[empIdx], ...form };
+        setScenarioData(updated);
+        setFormOpen(false);
+        setEditEmp(null);
+      }
+    } else if (editEmp) {
+      updateMutation.mutate({ id: editEmp.id, data: form });
+    } else {
+      createMutation.mutate(form);
+    }
   };
 
   const handleToggleSuppress = (emp) => {
-    updateMutation.mutate({ id: emp.id, data: { suppressed: !emp.suppressed } });
+    if (activeScenario && scenarioData) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      const empIdx = updated.findIndex(e => e.id === emp.id);
+      if (empIdx !== -1) {
+        updated[empIdx].suppressed = !updated[empIdx].suppressed;
+        setScenarioData(updated);
+      }
+    } else {
+      updateMutation.mutate({ id: emp.id, data: { suppressed: !emp.suppressed } });
+    }
   };
 
-  const activeEmployees = employees.filter(e => !e.suppressed && !e.exclude_from_table);
-  const suppressedCount = employees.filter(e => e.suppressed).length;
+  const activeEmployees = displayEmployees.filter(e => !e.suppressed && !e.exclude_from_table);
+  const suppressedCount = displayEmployees.filter(e => e.suppressed).length;
 
   const hotelTotals = {};
   sortedHotels.forEach(h => {
@@ -79,7 +116,7 @@ export default function SalaryTable() {
   const totalSmBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalBudgetDiff = totalSmBudget > 0 ? totalPayroll - totalSmBudget : null;
 
-  const sortedEmployees = [...employees].sort((a, b) => {
+  const sortedEmployees = [...displayEmployees].sort((a, b) => {
     if (a.suppressed && !b.suppressed) return -1;
     if (!a.suppressed && b.suppressed) return 1;
     const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
@@ -120,23 +157,7 @@ export default function SalaryTable() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <ScenarioManager
-            employees={employees}
-            onRestore={async (snapshot) => {
-              await Promise.all(
-                Object.entries(snapshot)
-                  .filter(([empId]) => employees.some(e => e.id === empId))
-                  .map(([empId, val]) => {
-                    const isNewFormat = val && typeof val === 'object' && 'allocations' in val;
-                    const data = isNewFormat
-                      ? { allocations: val.allocations, suppressed: val.suppressed }
-                      : { allocations: val };
-                    return base44.entities.Employee.update(empId, data);
-                  })
-              );
-              qc.invalidateQueries({ queryKey: ['employees'] });
-            }}
-          />
+          <ScenarioManager employees={employees} />
           <ExportButton employees={sortedEmployees} hotels={sortedHotels} hotelTotals={hotelTotals} />
           <Button onClick={() => { setEditEmp(null); setFormOpen(true); }} className="gap-2">
             <Plus className="w-4 h-4" /> Add Employee
@@ -193,7 +214,7 @@ export default function SalaryTable() {
                   onToggleSuppress={handleToggleSuppress}
                   isOdd={idx % 2 === 1}
                   highlight={q && (emp.name.toLowerCase().includes(q) || emp.title.toLowerCase().includes(q))}
-                  managerName={employees.find(e => e.id === emp.manager_id)?.name || ''}
+                  managerName={displayEmployees.find(e => e.id === emp.manager_id)?.name || ''}
                 />
               ))}
               {filteredEmployees.length === 0 && (
