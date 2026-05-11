@@ -1,9 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
-import { User, EyeOff, GitBranch } from 'lucide-react';
+import { User, EyeOff, GitBranch, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
@@ -135,7 +138,23 @@ function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
 
 export default function OrgChart() {
   const [editEmp, setEditEmp] = useState(null);
+  const [exporting, setExporting] = useState(false);
+  const chartRef = useRef(null);
   const qc = useQueryClient();
+
+  const handleExportPDF = async () => {
+    if (!chartRef.current) return;
+    setExporting(true);
+    try {
+      const canvas = await html2canvas(chartRef.current, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [canvas.width / 2, canvas.height / 2] });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width / 2, canvas.height / 2);
+      pdf.save('org-chart.pdf');
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
@@ -179,9 +198,15 @@ export default function OrgChart() {
             {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed (hidden)</span>}
           </p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
-          <GitBranch className="w-3.5 h-3.5" />
-          Click a card to edit
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 rounded-lg px-3 py-2">
+            <GitBranch className="w-3.5 h-3.5" />
+            Click a card to edit
+          </div>
+          <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={exporting} className="gap-2">
+            <Download className="w-4 h-4" />
+            {exporting ? 'Exporting…' : 'Export PDF'}
+          </Button>
         </div>
       </div>
 
@@ -196,7 +221,7 @@ export default function OrgChart() {
       </div>
 
       <div className="overflow-auto rounded-2xl border border-border bg-card/50 p-6">
-        <div className="flex gap-12 items-start min-w-max">
+        <div ref={chartRef} className="flex gap-12 items-start min-w-max">
           {roots.map(root => (
             <OrgNode
               key={root.id}
