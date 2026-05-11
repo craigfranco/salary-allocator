@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
+import ExecPDFButton from '@/components/layout/ExecPDFButton';
 
 const navItems = [
   { path: '/', label: 'Salary Table', icon: TableProperties },
@@ -35,13 +36,16 @@ export default function AppLayout() {
                 <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Hotel Management Dashboard</p>
               </div>
             </div>
-            <button
-              onClick={toggle}
-              className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-all duration-200"
-              title="Toggle dark/light mode"
-            >
-              {dark ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-white" />}
-            </button>
+            <div className="flex items-center gap-3">
+              <ExecPDFButton />
+              <button
+                onClick={toggle}
+                className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-all duration-200"
+                title="Toggle dark/light mode"
+              >
+                {dark ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-white" />}
+              </button>
+            </div>
           </div>
         </div>
       </header>
