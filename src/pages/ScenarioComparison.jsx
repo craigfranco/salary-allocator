@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
 import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 
@@ -109,29 +110,38 @@ export default function ScenarioComparison() {
         <p className="text-sm text-muted-foreground mt-1">Select up to 4 scenarios to compare metrics side-by-side</p>
       </div>
 
-      {/* Scenario selector */}
+      {/* Scenario selector with dropdowns */}
       <Card className="p-4">
-        <h3 className="text-sm font-semibold mb-3">Available Scenarios</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {scenarios.map(scenario => {
-            const isSelected = selectedScenarios.find(s => s.id === scenario.id);
-            return (
-              <button
-                key={scenario.id}
-                onClick={() => toggleScenario(scenario)}
-                className={`p-3 rounded-lg border-2 transition-all text-left ${
-                  isSelected
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-muted-foreground/50'
-                }`}
+        <h3 className="text-sm font-semibold mb-4">Select Scenarios to Compare</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {[0, 1, 2, 3].map(idx => (
+            <div key={idx}>
+              <label className="text-xs text-muted-foreground block mb-2">Scenario {idx + 1}</label>
+              <Select 
+                value={selectedScenarios[idx]?.id || ''}
+                onValueChange={(scenarioId) => {
+                  const scenario = scenarios.find(s => s.id === scenarioId);
+                  if (scenario) {
+                    const updated = [...selectedScenarios];
+                    updated[idx] = scenario;
+                    setSelectedScenarios(updated.filter(s => s));
+                  }
+                }}
               >
-                <p className="font-medium text-sm">{scenario.name}</p>
-                {scenario.description && (
-                  <p className="text-xs text-muted-foreground mt-1">{scenario.description}</p>
-                )}
-              </button>
-            );
-          })}
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={null}>— Clear —</SelectItem>
+                  {scenarios.map(scenario => (
+                    <SelectItem key={scenario.id} value={scenario.id}>
+                      {scenario.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
         </div>
       </Card>
 
