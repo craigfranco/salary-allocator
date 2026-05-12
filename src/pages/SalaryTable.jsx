@@ -26,7 +26,7 @@ export default function SalaryTable() {
   const [allocFilter, setAllocFilter] = useState('');
   const [hotelFilter, setHotelFilter] = useState('');
   const qc = useQueryClient();
-  const { activeScenario, scenarioData, setScenarioData } = useScenario();
+  const { activeScenario, scenarioData, setScenarioData, suppressSalaries } = useScenario();
 
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
@@ -139,6 +139,8 @@ export default function SalaryTable() {
 
   const issueEmployees = activeEmployees.filter(e => !e.exclude_from_table && getAllocationStatus(getTotalAllocation(e.allocations)) !== 'exact');
 
+  const maskCurrency = (val) => suppressSalaries ? '••••••' : formatCurrency(val);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -244,7 +246,7 @@ export default function SalaryTable() {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
                   return (
                     <td key={h.short_code} className="px-2 py-2 text-center">
-                      <span className="text-xs font-semibold tabular-nums">{h.room_revenue_budget > 0 ? formatCurrency(h.room_revenue_budget) : '—'}</span>
+                      <span className="text-xs font-semibold tabular-nums">{h.room_revenue_budget > 0 ? maskCurrency(h.room_revenue_budget) : '—'}</span>
                     </td>
                   );
                 })}
@@ -263,7 +265,7 @@ export default function SalaryTable() {
                   return (
                     <td key={h.short_code} className="px-2 py-2 text-center">
                       <span className={`text-xs font-semibold tabular-nums ${isOver ? 'text-red-500' : isNear ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {budget > 0 ? formatCurrency(budget) : '—'}
+                        {budget > 0 ? maskCurrency(budget) : '—'}
                       </span>
                     </td>
                   );
@@ -276,7 +278,7 @@ export default function SalaryTable() {
                 <td />
                 {sortedHotels.map(h => (
                   <td key={h.short_code} className="px-2 py-2 text-center">
-                    <span className="text-xs font-semibold tabular-nums">{formatCurrency(hotelTotals[h.short_code])}</span>
+                    <span className="text-xs font-semibold tabular-nums">{maskCurrency(hotelTotals[h.short_code])}</span>
                   </td>
                 ))}
                 <td />
@@ -293,7 +295,7 @@ export default function SalaryTable() {
                   return (
                     <td key={h.short_code} className="px-2 py-2 text-center">
                       <span className={`text-xs font-semibold tabular-nums ${budgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
-                        {budgetDiff !== null ? (budgetDiff > 0 ? '+' : '') + formatCurrency(budgetDiff) : '—'}
+                        {budgetDiff !== null ? (suppressSalaries ? '••••••' : (budgetDiff > 0 ? '+' : '') + formatCurrency(budgetDiff)) : '—'}
                       </span>
                     </td>
                   );
@@ -346,12 +348,12 @@ export default function SalaryTable() {
                 </td>
                 <td />
                 {[
-                  { label: 'Total Room\nRevenue', value: totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—', color: 'text-foreground' },
-                  { label: 'S&M Payroll\nBudget', value: totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—', color: 'text-foreground' },
-                  { label: 'Total Allocated\nPayroll', value: formatCurrency(totalPayroll), color: 'text-foreground' },
+                  { label: 'Total Room\nRevenue', value: totalRoomRev > 0 ? maskCurrency(totalRoomRev) : '—', color: 'text-foreground' },
+                  { label: 'S&M Payroll\nBudget', value: totalSmBudget > 0 ? maskCurrency(totalSmBudget) : '—', color: 'text-foreground' },
+                  { label: 'Total Allocated\nPayroll', value: maskCurrency(totalPayroll), color: 'text-foreground' },
                   { 
                     label: 'Over /\n(Short) Budget', 
-                    value: totalBudgetDiff !== null ? (totalBudgetDiff > 0 ? '+' : '') + formatCurrency(totalBudgetDiff) : '—', 
+                    value: totalBudgetDiff !== null ? (suppressSalaries ? '••••••' : (totalBudgetDiff > 0 ? '+' : '') + formatCurrency(totalBudgetDiff)) : '—', 
                     color: totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400' 
                   },
                   { 

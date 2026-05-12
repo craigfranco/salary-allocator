@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X } from 'lucide-react';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X, EyeOff, Eye } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
@@ -22,7 +22,7 @@ export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const location = useLocation();
   const { dark, toggle } = useTheme();
-  const { activeScenario, setActiveScenario, scenarioData, setScenarioData } = useScenario();
+  const { activeScenario, setActiveScenario, scenarioData, setScenarioData, suppressSalaries, setSuppressSalaries } = useScenario();
 
   const { data: scenarios = [] } = useQuery({
     queryKey: ['scenarios'],
@@ -61,6 +61,18 @@ export default function AppLayout() {
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSuppressSalaries(v => !v)}
+                className={`flex items-center gap-1.5 px-3 h-9 rounded-lg border text-xs font-medium transition-all duration-200 ${
+                  suppressSalaries
+                    ? 'bg-amber-500/20 border-amber-400/40 text-amber-200 hover:bg-amber-500/30'
+                    : 'bg-white/10 border-white/20 text-white hover:bg-white/20'
+                }`}
+                title="Toggle salary visibility"
+              >
+                {suppressSalaries ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                {suppressSalaries ? 'Salaries Hidden' : 'Hide Salaries'}
+              </button>
               <ExecPDFButton />
               <button
                 onClick={toggle}
