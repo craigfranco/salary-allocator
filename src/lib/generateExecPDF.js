@@ -195,99 +195,106 @@ function buildExecSummary(employees, hotels) {
   </div>`;
 }
 
-// ─── PAGE 3: SALARY ALLOCATION TABLE ─────────────────────────────────────────
-function buildSalaryTable(employees, hotels) {
+// ─── PAGE 3+: SALARY ALLOCATION TABLE (SPLIT BY HOTEL GROUP) ──────────────
+function buildSalaryTables(employees, hotels) {
   const hotelOrder = hotels
     .sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
-  const cols = hotelOrder.filter(h => h.short_code !== 'CORP');
+  const propHotels = hotelOrder.filter(h => h.short_code !== 'CORP');
   const corpHotel = hotelOrder.find(h => h.short_code === 'CORP');
-  const allCols = [...cols, ...(corpHotel ? [corpHotel] : [])];
+
+  // Split into groups of 3 hotels per page (6 columns: % + $)
+  const hotelGroups = [];
+  for (let i = 0; i < propHotels.length; i += 3) {
+    hotelGroups.push(propHotels.slice(i, i + 3));
+  }
+  if (corpHotel) {
+    hotelGroups[hotelGroups.length - 1].push(corpHotel);
+  }
 
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
   const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
 
-  let rows = '';
-  const colTotals = {};
-  allCols.forEach(h => { colTotals[h.short_code] = 0; });
+  return hotelGroups.map((cols, pageIdx) => {
+    let rows = '';
+    const colTotals = {};
+    cols.forEach(h => { colTotals[h.short_code] = 0; });
 
-  deptOrder.forEach(dept => {
-    const deptEmps = active.filter(e => e.department === dept).sort((a, b) => b.annual_salary - a.annual_salary);
-    if (!deptEmps.length) return;
+    deptOrder.forEach(dept => {
+      const deptEmps = active.filter(e => e.department === dept).sort((a, b) => b.annual_salary - a.annual_salary);
+      if (!deptEmps.length) return;
 
-    const dc = DEPT_COLORS[dept];
-    const deptTotal = deptEmps.reduce((s, e) => s + e.annual_salary, 0);
+      const dc = DEPT_COLORS[dept];
+      const deptTotal = deptEmps.reduce((s, e) => s + e.annual_salary, 0);
 
-    // dept header
-    rows += `<tr style="background:#e8f0f5;">
-      <td colspan="${3 + allCols.length * 2 + 1}" style="padding:5px 8px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;color:${dc.text};text-transform:uppercase;letter-spacing:0.08em;border-left:3px solid ${dc.border};">
-        ${dc.label} — ${deptEmps.length} employees &nbsp;|&nbsp; ${fmt(deptTotal)}
-      </td>
-    </tr>`;
-
-    deptEmps.forEach((emp, i) => {
-      const totalPct = Math.round(Object.values(emp.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 100);
-      const isExact = totalPct === 100;
-      rows += `<tr style="background:${i%2?'#f9f7f6':'#fff'};border-left:3px solid ${dc.border};">
-        <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:7.5px;">
-          <span style="background:${dc.badge};color:${dc.text};padding:1px 5px;border-radius:3px;font-weight:700;font-size:7px;">${dc.label.substring(0,3).toUpperCase()}</span>
+      rows += `<tr style="background:#e8f0f5;">
+        <td colspan="${3 + cols.length * 2 + 1}" style="padding:5px 8px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;color:${dc.text};text-transform:uppercase;letter-spacing:0.08em;border-left:3px solid ${dc.border};">
+          ${dc.label} — ${deptEmps.length} employees &nbsp;|&nbsp; ${fmt(deptTotal)}
         </td>
-        <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;color:#1d1f1c;white-space:nowrap;">${emp.name}</td>
-        <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:7.5px;color:#6b7280;white-space:nowrap;max-width:120px;overflow:hidden;">${emp.title}</td>
-        <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:right;color:#1d1f1c;">${fmt(emp.annual_salary)}</td>
-        ${allCols.map(h => {
-          const pct = emp.allocations?.[h.short_code] || 0;
-          const dollar = pct * emp.annual_salary;
-          if (h.short_code !== 'CORP') colTotals[h.short_code] += dollar;
-          return `<td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:center;color:#6b7280;">${pct ? Math.round(pct*100)+'%' : ''}</td>
-          <td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:right;color:#374151;">${dollar > 0 ? fmtK(dollar) : ''}</td>`;
-        }).join('')}
-        <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:center;color:${isExact ? '#16a34a' : '#dc2626'};">${totalPct}%</td>
+      </tr>`;
+
+      deptEmps.forEach((emp, i) => {
+        const totalPct = Math.round(Object.values(emp.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 100);
+        const isExact = totalPct === 100;
+        rows += `<tr style="background:${i%2?'#f9f7f6':'#fff'};border-left:3px solid ${dc.border};">
+          <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:7.5px;">
+            <span style="background:${dc.badge};color:${dc.text};padding:1px 5px;border-radius:3px;font-weight:700;font-size:7px;">${dc.label.substring(0,3).toUpperCase()}</span>
+          </td>
+          <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;color:#1d1f1c;white-space:nowrap;">${emp.name}</td>
+          <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:7.5px;color:#6b7280;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;">${emp.title}</td>
+          <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:right;color:#1d1f1c;">${fmt(emp.annual_salary)}</td>
+          ${cols.map(h => {
+            const pct = emp.allocations?.[h.short_code] || 0;
+            const dollar = pct * emp.annual_salary;
+            if (h.short_code !== 'CORP') colTotals[h.short_code] += dollar;
+            return `<td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:center;color:#6b7280;">${pct ? Math.round(pct*100)+'%' : ''}</td>
+            <td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:right;color:#374151;">${dollar > 0 ? fmtK(dollar) : ''}</td>`;
+          }).join('')}
+          <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:center;color:${isExact ? '#16a34a' : '#dc2626'};">${totalPct}%</td>
+        </tr>`;
+      });
+
+      const deptSubtotals = cols.map(h => {
+        const t = deptEmps.reduce((s, e) => s + ((e.allocations?.[h.short_code] || 0) * e.annual_salary), 0);
+        return t;
+      });
+      rows += `<tr style="background:#e8f0f5;font-weight:700;">
+        <td colspan="4" style="padding:5px 8px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;color:${dc.text};border-left:3px solid ${dc.border};">Subtotal ${dc.label}</td>
+        ${cols.map((h, i) => `<td style="padding:5px 3px;font-size:7.5px;text-align:center;"></td>
+          <td style="padding:5px 3px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:right;color:#2d4b5e;">${deptSubtotals[i] > 0 ? fmtK(deptSubtotals[i]) : ''}</td>`).join('')}
+        <td></td>
       </tr>`;
     });
 
-    // dept subtotal
-    const deptSubtotals = allCols.map(h => {
-      const t = deptEmps.reduce((s, e) => s + ((e.allocations?.[h.short_code] || 0) * e.annual_salary), 0);
-      return t;
-    });
-    rows += `<tr style="background:#e8f0f5;font-weight:700;">
-      <td colspan="4" style="padding:5px 8px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;color:${dc.text};border-left:3px solid ${dc.border};">Subtotal ${dc.label}</td>
-      ${allCols.map((h, i) => `<td style="padding:5px 3px;font-size:7.5px;text-align:center;"></td>
-        <td style="padding:5px 3px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:right;color:#2d4b5e;">${deptSubtotals[i] > 0 ? fmtK(deptSubtotals[i]) : ''}</td>`).join('')}
+    rows += `<tr style="background:#2d4b5e;">
+      <td colspan="4" style="padding:6px 8px;font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:700;color:#fff;letter-spacing:0.08em;">TOTAL ALLOCATED</td>
+      ${cols.map(h => `<td></td><td style="padding:6px 3px;font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:700;text-align:right;color:#fff;">${colTotals[h.short_code] > 0 ? fmt(colTotals[h.short_code]) : '—'}</td>`).join('')}
       <td></td>
     </tr>`;
-  });
 
-  // totals row
-  rows += `<tr style="background:#2d4b5e;">
-    <td colspan="4" style="padding:6px 8px;font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:700;color:#fff;letter-spacing:0.08em;">TOTAL ALLOCATED</td>
-    ${allCols.map(h => `<td></td><td style="padding:6px 3px;font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:700;text-align:right;color:#fff;">${colTotals[h.short_code] > 0 ? fmt(colTotals[h.short_code]) : '—'}</td>`).join('')}
-    <td></td>
-  </tr>`;
+    const headerCols = cols.map(h =>
+      `<th colspan="2" style="padding:6px 4px;color:rgba(255,255,255,0.85);font-weight:600;text-align:center;font-size:8px;letter-spacing:0.05em;border-left:1px solid rgba(255,255,255,0.15);">${HOTEL_NAMES[h.short_code]}</th>`
+    ).join('');
 
-  const headerCols = allCols.map(h =>
-    `<th colspan="2" style="padding:6px 4px;color:rgba(255,255,255,0.85);font-weight:600;text-align:center;font-size:8px;letter-spacing:0.05em;border-left:1px solid rgba(255,255,255,0.15);">${HOTEL_NAMES[h.short_code]}</th>`
-  ).join('');
-
-  return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
-    ${pageHeader('Salary Allocation Table', 3)}
-    <div style="flex:1;overflow:hidden;padding:8px 0.4in 60px;font-size:7.5px;">
-      <table style="width:100%;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#2d4b5e;">
-            <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:left;font-size:8px;letter-spacing:0.05em;font-family:Inter,Arial,sans-serif;">Dept</th>
-            <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:left;font-size:8px;font-family:Inter,Arial,sans-serif;">Name</th>
-            <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:left;font-size:8px;font-family:Inter,Arial,sans-serif;">Title</th>
-            <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:right;font-size:8px;font-family:Inter,Arial,sans-serif;">Salary</th>
-            ${headerCols}
-            <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:center;font-size:8px;font-family:Inter,Arial,sans-serif;border-left:1px solid rgba(255,255,255,0.15);">Total%</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>
-    ${pageFooter(3)}
-  </div>`;
+    return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
+      ${pageHeader(`Salary Allocation Table (Part ${pageIdx + 1})`, 3 + pageIdx)}
+      <div style="flex:1;overflow:hidden;padding:8px 0.35in 60px;font-size:7.5px;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead>
+            <tr style="background:#2d4b5e;">
+              <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:left;font-size:8px;letter-spacing:0.05em;font-family:Inter,Arial,sans-serif;">Dept</th>
+              <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:left;font-size:8px;font-family:Inter,Arial,sans-serif;">Name</th>
+              <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:left;font-size:8px;font-family:Inter,Arial,sans-serif;">Title</th>
+              <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:right;font-size:8px;font-family:Inter,Arial,sans-serif;">Salary</th>
+              ${headerCols}
+              <th style="padding:6px 8px;color:rgba(255,255,255,0.85);font-weight:600;text-align:center;font-size:8px;font-family:Inter,Arial,sans-serif;border-left:1px solid rgba(255,255,255,0.15);">Total%</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+      ${pageFooter(3 + pageIdx)}
+    </div>`;
+  }).join('');
 }
 
 // ─── PAGE 4: HOTEL BUDGET BREAKDOWN ──────────────────────────────────────────
@@ -577,7 +584,7 @@ export function generateExecPDF(employees, hotels) {
 <body>
 ${buildCover(employees, hotels, dateStr)}
 ${buildExecSummary(employees, hotels)}
-${buildSalaryTable(employees, hotels)}
+${buildSalaryTables(employees, hotels)}
 ${buildHotelBreakdown(employees, hotels)}
 ${buildOrgChart(employees)}
 ${buildAlertsAnalytics(employees, hotels)}
