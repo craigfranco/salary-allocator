@@ -35,7 +35,7 @@ function TooltipStyle({ active, payload, label }) {
 }
 
 export default function Analytics() {
-  const { activeScenario, scenarioData, suppressSalaries } = useScenario();
+  const { activeScenario, scenarioData } = useScenario();
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
@@ -45,7 +45,6 @@ export default function Analytics() {
 
   const totalPayroll = activeEmployees.reduce((s, e) => s + e.annual_salary, 0);
   const avgSalary = activeEmployees.length > 0 ? totalPayroll / activeEmployees.length : 0;
-  const maskCurrency = (v) => suppressSalaries ? '••••••' : formatCurrency(v);
 
   const sortedHotels = useMemo(() => [...hotels].sort((a, b) =>
     HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code)
@@ -95,9 +94,9 @@ export default function Analytics() {
 
       {/* KPI Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Payroll" value={suppressSalaries ? 0 : totalPayroll} prefix={suppressSalaries ? '' : '$'} suffix={suppressSalaries ? ' ••••••' : ''} icon={DollarSign} color="blue" />
+        <StatCard label="Total Payroll" value={totalPayroll} prefix="$" icon={DollarSign} color="blue" />
         <StatCard label="Active Employees" value={activeEmployees.length} icon={Users} color="teal" />
-        <StatCard label="Avg Salary" value={suppressSalaries ? 0 : avgSalary} prefix={suppressSalaries ? '' : '$'} suffix={suppressSalaries ? ' ••••••' : ''} icon={TrendingUp} color="purple" />
+        <StatCard label="Avg Salary" value={avgSalary} prefix="$" icon={TrendingUp} color="purple" />
         <StatCard label="Properties" value={hotels.filter(h => h.short_code !== 'CORP').length} icon={Building2} color="amber" />
       </div>
 
@@ -154,7 +153,7 @@ export default function Analytics() {
                   <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: DEPT_COLORS[d.name] }} />
                   <div>
                     <p className="text-xs font-medium">{d.name}</p>
-                    <p className="text-[11px] text-muted-foreground">{d.headcount} staff · {maskCurrency(d.total)}</p>
+                    <p className="text-[11px] text-muted-foreground">{d.headcount} staff · {formatCurrency(d.total)}</p>
                   </div>
                 </div>
               ))}
@@ -202,7 +201,7 @@ export default function Analytics() {
                     </div>
                   </td>
                   <td className="py-2.5 text-right text-muted-foreground">{d.headcount}</td>
-                  <td className="py-2.5 text-right font-semibold">{maskCurrency(d.total)}</td>
+                  <td className="py-2.5 text-right font-semibold">{formatCurrency(d.total)}</td>
                   <td className="py-2.5 text-right">
                     <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: DEPT_COLORS[d.name] + '20', color: DEPT_COLORS[d.name] }}>
                       {totalPayroll > 0 ? ((d.total / totalPayroll) * 100).toFixed(1) : 0}%
@@ -213,7 +212,7 @@ export default function Analytics() {
               <tr className="bg-muted/30">
                 <td className="py-2 font-bold text-xs uppercase">Total</td>
                 <td className="py-2 text-right font-bold">{activeEmployees.length}</td>
-                <td className="py-2 text-right font-bold">{maskCurrency(totalPayroll)}</td>
+                <td className="py-2 text-right font-bold">{formatCurrency(totalPayroll)}</td>
                 <td className="py-2 text-right font-bold">100%</td>
               </tr>
             </tbody>
@@ -233,7 +232,7 @@ export default function Analytics() {
                   <p className="text-[11px] text-muted-foreground truncate">{emp.title}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-bold">{maskCurrency(emp.annual_salary)}</p>
+                  <p className="text-sm font-bold">{formatCurrency(emp.annual_salary)}</p>
                   <span className="text-[10px] rounded-full px-1.5 py-0.5" style={{ background: DEPT_COLORS[emp.department] + '25', color: DEPT_COLORS[emp.department] }}>
                     {emp.department}
                   </span>

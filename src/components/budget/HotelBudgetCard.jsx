@@ -4,11 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Building2, Pencil, Check, X, Users } from 'lucide-react';
 import { formatCurrency } from '@/lib/helpers';
 import { HOTEL_COLORS } from '@/lib/helpers';
-import { useScenario } from '@/lib/ScenarioContext';
 
 export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, onUpdate, onClick }) {
-  const { suppressSalaries } = useScenario();
-  const maskCurrency = (v) => suppressSalaries ? '••••••' : formatCurrency(v);
   const [editing, setEditing] = useState(false);
   const [roomRev, setRoomRev] = useState(hotel.room_revenue_budget);
   const [payroll, setPayroll] = useState(hotel.sm_payroll_budget);
@@ -76,19 +73,19 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="bg-muted/30 rounded-xl p-3">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Room Revenue</p>
-                <p className="text-sm font-bold">{maskCurrency(hotel.room_revenue_budget || 0)}</p>
+                <p className="text-sm font-bold">{formatCurrency(hotel.room_revenue_budget || 0)}</p>
               </div>
               <div className="bg-muted/30 rounded-xl p-3">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">S&M Budget</p>
-                <p className="text-sm font-bold">{maskCurrency(budget)}</p>
+                <p className="text-sm font-bold">{formatCurrency(budget)}</p>
               </div>
               <div className="bg-muted/30 rounded-xl p-3">
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Allocated</p>
-                <p className="text-sm font-bold">{maskCurrency(allocatedTotal)}</p>
+                <p className="text-sm font-bold">{formatCurrency(allocatedTotal)}</p>
               </div>
               <div className={`rounded-xl p-3 ${isOver ? 'bg-red-500/10' : 'bg-emerald-500/10'}`}>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Remaining</p>
-                <p className={`text-sm font-bold ${isOver ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>{maskCurrency(remaining)}</p>
+                <p className={`text-sm font-bold ${isOver ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>{formatCurrency(remaining)}</p>
               </div>
             </div>
 
