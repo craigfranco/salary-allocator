@@ -43,7 +43,7 @@ export default function Analytics() {
 
   // Use scenario data if active, otherwise use DB employees
   const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
-  const activeEmployees = displayEmployees.filter(e => !e.suppressed);
+  const activeEmployees = displayEmployees.filter(e => !e.suppressed && !e.exclude_from_table);
 
   const totalPayroll = activeEmployees.reduce((s, e) => s + e.annual_salary, 0);
   const avgSalary = activeEmployees.length > 0 ? totalPayroll / activeEmployees.length : 0;
