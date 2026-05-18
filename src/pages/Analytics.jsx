@@ -80,6 +80,20 @@ export default function Analytics() {
     };
   });
 
+  // Average dept salary divided by number of properties
+  const avgSalaryPerPropertyData = useMemo(() => {
+    const propertyCount = sortedHotels.filter(h => h.short_code !== 'CORP').length;
+    if (propertyCount === 0) return [];
+    return ['REVENUE', 'ECOMM', 'SALES'].map(dept => {
+      const emps = activeEmployees.filter(e => e.department === dept);
+      const total = emps.reduce((s, e) => s + e.annual_salary, 0);
+      return {
+        name: dept,
+        avg: emps.length ? Math.round(total / propertyCount) : 0,
+      };
+    });
+  }, [sortedHotels, activeEmployees]);
+
   // Average salary per department, grouped by hotel
   const avgSalaryByDeptHotelData = useMemo(() => {
     return sortedHotels
@@ -210,6 +224,23 @@ export default function Analytics() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* Avg Salary per Property by Dept */}
+      <div className={cardClass}>
+        <h3 className="text-sm font-semibold mb-1 text-foreground">Average Dept Salary per Property</h3>
+        <p className="text-xs text-muted-foreground mb-4">Total department salary divided by number of properties ({sortedHotels.filter(h => h.short_code !== 'CORP').length} hotels)</p>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={avgSalaryPerPropertyData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }} />
+            <YAxis tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+            <Tooltip content={<TooltipStyle />} />
+            <Bar dataKey="avg" name="Avg per Property" radius={[4, 4, 0, 0]}>
+              {avgSalaryPerPropertyData.map(d => <Cell key={d.name} fill={DEPT_COLORS[d.name]} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Total Allocated Salary per Hotel by Department */}
