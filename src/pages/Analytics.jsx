@@ -78,6 +78,22 @@ export default function Analytics() {
     };
   });
 
+  // Avg salary per hotel by department
+  const hotelDeptAvgData = useMemo(() => {
+    return sortedHotels
+      .filter(h => h.short_code !== 'CORP')
+      .map(h => {
+        const row = { name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code };
+        ['REVENUE', 'ECOMM', 'SALES'].forEach(dept => {
+          const emps = activeEmployees.filter(e =>
+            e.department === dept && (e.allocations?.[h.short_code] || 0) > 0
+          );
+          row[dept] = emps.length ? Math.round(emps.reduce((s, e) => s + e.annual_salary, 0) / emps.length) : 0;
+        });
+        return row;
+      });
+  }, [sortedHotels, activeEmployees]);
+
   // Top earners
   const topEarners = [...activeEmployees]
     .sort((a, b) => b.annual_salary - a.annual_salary)

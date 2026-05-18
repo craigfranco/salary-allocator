@@ -236,13 +236,13 @@ function buildSalaryTables(employees, hotels) {
           </td>
           <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;color:#1d1f1c;white-space:nowrap;">${emp.name}</td>
           <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:7.5px;color:#6b7280;white-space:nowrap;max-width:100px;overflow:hidden;text-overflow:ellipsis;">${emp.title}</td>
-          <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:right;color:#1d1f1c;">${fmt(emp.annual_salary)}</td>
+          <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:right;color:${emp._redacted ? '#6b7280' : '#1d1f1c'};">${emp._redacted ? '<span style="font-family:monospace;letter-spacing:0.1em;color:#9ca3af;">██████</span>' : fmt(emp.annual_salary)}</td>
           ${cols.map(h => {
             const pct = emp.allocations?.[h.short_code] || 0;
-            const dollar = pct * emp.annual_salary;
+            const dollar = emp._redacted ? 0 : pct * emp.annual_salary;
             if (h.short_code !== 'CORP') colTotals[h.short_code] += dollar;
             return `<td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:center;color:#6b7280;">${pct ? Math.round(pct*100)+'%' : ''}</td>
-            <td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:right;color:#374151;">${dollar > 0 ? fmtK(dollar) : ''}</td>`;
+            <td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:right;color:#374151;">${emp._redacted && pct > 0 ? '<span style="font-family:monospace;color:#9ca3af;font-size:7px;">████</span>' : (dollar > 0 ? fmtK(dollar) : '')}</td>`;
           }).join('')}
           <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:center;color:${isExact ? '#16a34a' : '#dc2626'};">${totalPct}%</td>
         </tr>`;
@@ -395,7 +395,7 @@ function buildOrgChart(employees) {
       <div style="position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:${dot};"></div>
       <div style="font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:600;color:#1d1f1c;padding-right:12px;">${emp.name}</div>
       <div style="font-family:Inter,Arial,sans-serif;font-size:7px;color:#6b7280;margin-top:2px;">${emp.title}</div>
-      <div style="font-family:Inter,Arial,sans-serif;font-size:7.5px;color:#2d4b5e;font-weight:600;margin-top:3px;">${fmt(emp.annual_salary)}</div>
+      <div style="font-family:Inter,Arial,sans-serif;font-size:7.5px;color:#2d4b5e;font-weight:600;margin-top:3px;">${emp._redacted ? '<span style="font-family:monospace;color:#9ca3af;letter-spacing:0.08em;">██████</span>' : fmt(emp.annual_salary)}</div>
     </div>`;
 
     if (!children.length) return `<div style="display:flex;flex-direction:column;align-items:center;">${card}</div>`;
@@ -551,7 +551,12 @@ function buildAlertsAnalytics(employees, hotels) {
 }
 
 // ─── MAIN EXPORT FUNCTION ─────────────────────────────────────────────────────
-export function generateExecPDF(employees, hotels) {
+export function generateExecPDF(employees, hotels, redactedIds = new Set()) {
+  // Apply salary redaction — mask salary for any employee whose ID is in the set
+  const employeesForPDF = employees.map(e =>
+    redactedIds.has(e.id) ? { ...e, annual_salary: null, _redacted: true } : e
+  );
+
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 
@@ -577,12 +582,12 @@ export function generateExecPDF(employees, hotels) {
 </style>
 </head>
 <body>
-${buildCover(employees, hotels, dateStr)}
-${buildExecSummary(employees, hotels)}
-${buildSalaryTables(employees, hotels)}
-${buildHotelBreakdown(employees, hotels)}
-${buildOrgChart(employees)}
-${buildAlertsAnalytics(employees, hotels)}
+${buildCover(employeesForPDF, hotels, dateStr)}
+${buildExecSummary(employeesForPDF, hotels)}
+${buildSalaryTables(employeesForPDF, hotels)}
+${buildHotelBreakdown(employeesForPDF, hotels)}
+${buildOrgChart(employeesForPDF)}
+${buildAlertsAnalytics(employeesForPDF, hotels)}
 </body>
 </html>`;
 
