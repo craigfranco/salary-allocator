@@ -9,6 +9,7 @@ import { formatCurrency, getHotelAllocatedTotal, getDeptAccent, HOTEL_SHORT_NAME
 import StatCard from '@/components/ui/StatCard';
 import { Users, DollarSign, Building2, TrendingUp } from 'lucide-react';
 import { useScenario } from '@/lib/ScenarioContext';
+import { useRedactedIds } from '@/lib/RedactionContext';
 
 const DEPT_COLORS = { REVENUE: '#0d9488', ECOMM: '#f97316', SALES: '#9333ea' };
 const HOTEL_COLORS_HEX = {
@@ -36,6 +37,7 @@ function TooltipStyle({ active, payload, label }) {
 
 export default function Analytics() {
   const { activeScenario, scenarioData } = useScenario();
+  const { redactedIds } = useRedactedIds();
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
@@ -95,8 +97,9 @@ export default function Analytics() {
       });
   }, [sortedHotels, activeEmployees]);
 
-  // Top earners
+  // Top earners (excluding redacted)
   const topEarners = [...activeEmployees]
+    .filter(e => !redactedIds.has(e.id))
     .sort((a, b) => b.annual_salary - a.annual_salary)
     .slice(0, 8);
 
