@@ -80,6 +80,15 @@ export default function Analytics() {
     };
   });
 
+  // Avg Salary by Hotel
+  const hotelAvgData = sortedHotels.map(h => {
+    const emps = activeEmployees.filter(e => (e.allocations?.[h.short_code] || 0) > 0);
+    return {
+      name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code,
+      avg: emps.length ? Math.round(emps.reduce((s, e) => s + e.annual_salary, 0) / emps.length) : 0,
+    };
+  }).filter(h => h.avg > 0);
+
   // Total salary allocated per hotel by department
   const hotelDeptAllocData = useMemo(() => {
     return sortedHotels
@@ -97,9 +106,8 @@ export default function Analytics() {
       });
   }, [sortedHotels, activeEmployees]);
 
-  // Top earners (excluding redacted)
+  // Top earners
   const topEarners = [...activeEmployees]
-    .filter(e => !redactedIds.has(e.id))
     .sort((a, b) => b.annual_salary - a.annual_salary)
     .slice(0, 8);
 
@@ -181,18 +189,16 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Avg Salary by Dept */}
+        {/* Avg Salary by Hotel */}
         <div className={cardClass}>
-          <h3 className="text-sm font-semibold mb-4 text-foreground">Average Salary by Department</h3>
+          <h3 className="text-sm font-semibold mb-4 text-foreground">Average Salary by Hotel</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart layout="vertical" data={deptData} margin={{ top: 4, right: 40, bottom: 0, left: 10 }}>
+            <BarChart layout="vertical" data={hotelAvgData} margin={{ top: 4, right: 40, bottom: 0, left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
               <XAxis type="number" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} width={60} />
               <Tooltip content={<TooltipStyle />} />
-              <Bar dataKey="avg" name="Avg Salary" radius={[0, 4, 4, 0]}>
-                {deptData.map(d => <Cell key={d.name} fill={DEPT_COLORS[d.name]} />)}
-              </Bar>
+              <Bar dataKey="avg" name="Avg Salary" radius={[0, 4, 4, 0]} fill="#3b82f6" />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -270,7 +276,7 @@ export default function Analytics() {
                   <p className="text-[11px] text-muted-foreground truncate">{emp.title}</p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-sm font-bold">{formatCurrency(emp.annual_salary)}</p>
+                  <p className="text-sm font-bold">{redactedIds.has(emp.id) ? '●●●●●' : formatCurrency(emp.annual_salary)}</p>
                   <span className="text-[10px] rounded-full px-1.5 py-0.5" style={{ background: DEPT_COLORS[emp.department] + '25', color: DEPT_COLORS[emp.department] }}>
                     {emp.department}
                   </span>
