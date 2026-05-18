@@ -3,7 +3,8 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { generateExecPDF } from '@/lib/generateExecPDF';
 import { FileDown, EyeOff } from 'lucide-react';
-import SalaryRedactionManager, { useRedactedIds } from '@/components/salary/SalaryRedactionManager';
+import SalaryRedactionManager from '@/components/salary/SalaryRedactionManager';
+import { useRedactedIds } from '@/lib/RedactionContext';
 
 export default function ExecPDFButton() {
   const [loading, setLoading] = useState(false);

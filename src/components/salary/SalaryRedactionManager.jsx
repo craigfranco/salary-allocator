@@ -1,33 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { EyeOff, Eye, ShieldCheck } from 'lucide-react';
+import { useRedactedIds } from '@/lib/RedactionContext';
 
-const STORAGE_KEY = 'salary_redacted_ids';
-
-export function useRedactedIds() {
-  const [redactedIds, setRedactedIds] = useState(() => {
-    try {
-      return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
-    } catch {
-      return new Set();
-    }
-  });
-
-  const toggle = (id) => {
-    setRedactedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
-      return next;
-    });
-  };
-
-  return { redactedIds, toggle };
-}
+export { useRedactedIds };
 
 export default function SalaryRedactionManager({ open, onOpenChange }) {
   const { data: employees = [] } = useQuery({
@@ -35,7 +14,7 @@ export default function SalaryRedactionManager({ open, onOpenChange }) {
     queryFn: () => base44.entities.Employee.list(),
   });
 
-  const { redactedIds, toggle } = useRedactedIds();
+  const { redactedIds, toggle, clearAll } = useRedactedIds();
 
   const DEPT_COLORS = {
     REVENUE: { badge: '#ccf0ed', text: '#0d9488', label: 'Revenue' },
@@ -122,11 +101,7 @@ export default function SalaryRedactionManager({ open, onOpenChange }) {
             variant="ghost"
             size="sm"
             className="text-muted-foreground"
-            onClick={() => {
-              active.forEach(e => {
-                if (redactedIds.has(e.id)) toggle(e.id);
-              });
-            }}
+            onClick={clearAll}
           >
             Clear All
           </Button>

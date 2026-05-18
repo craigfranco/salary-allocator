@@ -14,6 +14,7 @@ import Analytics from '@/pages/Analytics';
 import ScenarioComparison from '@/pages/ScenarioComparison';
 import { ThemeProvider } from '@/lib/theme.jsx';
 import { ScenarioProvider } from '@/lib/ScenarioContext';
+import { RedactionProvider } from '@/lib/RedactionContext';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -53,6 +54,7 @@ const AuthenticatedApp = () => {
 function App() {
   return (
     <ThemeProvider>
+      <RedactionProvider>
       <ScenarioProvider>
         <AuthProvider>
           <QueryClientProvider client={queryClientInstance}>
@@ -63,6 +65,7 @@ function App() {
           </QueryClientProvider>
         </AuthProvider>
       </ScenarioProvider>
+      </RedactionProvider>
     </ThemeProvider>
   )
 }

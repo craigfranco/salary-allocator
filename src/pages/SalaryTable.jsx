@@ -10,7 +10,7 @@ import ScenarioManager from '@/components/salary/ScenarioManager';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { getTotalAllocation, getAllocationStatus, formatCurrency, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import { useScenario } from '@/lib/ScenarioContext';
-import { useRedactedIds } from '@/components/salary/SalaryRedactionManager';
+import { useRedactedIds } from '@/lib/RedactionContext';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
