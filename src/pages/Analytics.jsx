@@ -80,6 +80,20 @@ export default function Analytics() {
     };
   });
 
+  // Average salary per department, grouped by hotel
+  const avgSalaryByDeptHotelData = useMemo(() => {
+    return sortedHotels
+      .filter(h => h.short_code !== 'CORP')
+      .map(h => {
+        const row = { name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code };
+        ['REVENUE', 'ECOMM', 'SALES'].forEach(dept => {
+          const emps = activeEmployees.filter(e => e.department === dept && (e.allocations?.[h.short_code] || 0) > 0);
+          row[dept] = emps.length ? Math.round(emps.reduce((s, e) => s + e.annual_salary, 0) / emps.length) : 0;
+        });
+        return row;
+      });
+  }, [sortedHotels, activeEmployees]);
+
   // Total salary allocated per hotel by department
   const hotelDeptAllocData = useMemo(() => {
     return sortedHotels
@@ -180,18 +194,19 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Avg Salary by Dept */}
+        {/* Avg Salary by Dept x Hotel */}
         <div className={cardClass}>
-          <h3 className="text-sm font-semibold mb-4 text-foreground">Average Salary by Department</h3>
+          <h3 className="text-sm font-semibold mb-4 text-foreground">Average Salary by Department &amp; Hotel</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart layout="vertical" data={deptData} margin={{ top: 4, right: 40, bottom: 0, left: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-              <XAxis type="number" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} width={60} />
+            <BarChart data={avgSalaryByDeptHotelData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+              <YAxis tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
               <Tooltip content={<TooltipStyle />} />
-              <Bar dataKey="avg" name="Avg Salary" radius={[0, 4, 4, 0]}>
-                {deptData.map(d => <Cell key={d.name} fill={DEPT_COLORS[d.name]} />)}
-              </Bar>
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar dataKey="REVENUE" name="Revenue" fill={DEPT_COLORS.REVENUE} radius={[3, 3, 0, 0]} />
+              <Bar dataKey="ECOMM" name="E-Commerce" fill={DEPT_COLORS.ECOMM} radius={[3, 3, 0, 0]} />
+              <Bar dataKey="SALES" name="Sales" fill={DEPT_COLORS.SALES} radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
