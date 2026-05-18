@@ -78,17 +78,18 @@ export default function Analytics() {
     };
   });
 
-  // Avg salary per hotel by department
-  const hotelDeptAvgData = useMemo(() => {
+  // Total salary allocated per hotel by department
+  const hotelDeptAllocData = useMemo(() => {
     return sortedHotels
       .filter(h => h.short_code !== 'CORP')
       .map(h => {
         const row = { name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code };
         ['REVENUE', 'ECOMM', 'SALES'].forEach(dept => {
-          const emps = activeEmployees.filter(e =>
-            e.department === dept && (e.allocations?.[h.short_code] || 0) > 0
+          row[dept] = Math.round(
+            activeEmployees
+              .filter(e => e.department === dept)
+              .reduce((s, e) => s + (e.allocations?.[h.short_code] || 0) * e.annual_salary, 0)
           );
-          row[dept] = emps.length ? Math.round(emps.reduce((s, e) => s + e.annual_salary, 0) / emps.length) : 0;
         });
         return row;
       });
@@ -194,20 +195,20 @@ export default function Analytics() {
         </div>
       </div>
 
-      {/* Avg Salary per Hotel by Department */}
+      {/* Total Allocated Salary per Hotel by Department */}
       <div className={cardClass}>
-        <h3 className="text-sm font-semibold mb-1 text-foreground">Average Salary per Hotel by Department</h3>
-        <p className="text-xs text-muted-foreground mb-4">Average annual salary of employees allocated to each hotel, grouped by discipline</p>
+        <h3 className="text-sm font-semibold mb-1 text-foreground">Total Salary Allocated by Property</h3>
+        <p className="text-xs text-muted-foreground mb-4">Total allocated payroll per hotel, broken down by department</p>
         <ResponsiveContainer width="100%" height={260}>
-          <BarChart data={hotelDeptAvgData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+          <BarChart data={hotelDeptAllocData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
             <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
             <YAxis tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
             <Tooltip content={<TooltipStyle />} />
             <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Bar dataKey="REVENUE" name="Revenue" fill={DEPT_COLORS.REVENUE} radius={[3, 3, 0, 0]} />
-            <Bar dataKey="ECOMM" name="E-Commerce" fill={DEPT_COLORS.ECOMM} radius={[3, 3, 0, 0]} />
-            <Bar dataKey="SALES" name="Sales" fill={DEPT_COLORS.SALES} radius={[3, 3, 0, 0]} />
+            <Bar dataKey="REVENUE" name="Revenue" fill={DEPT_COLORS.REVENUE} radius={[3, 3, 0, 0]} stackId="a" />
+            <Bar dataKey="ECOMM" name="E-Commerce" fill={DEPT_COLORS.ECOMM} radius={[0, 0, 0, 0]} stackId="a" />
+            <Bar dataKey="SALES" name="Sales" fill={DEPT_COLORS.SALES} radius={[3, 3, 0, 0]} stackId="a" />
           </BarChart>
         </ResponsiveContainer>
       </div>
