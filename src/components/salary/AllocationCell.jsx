@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { formatCurrency } from '@/lib/helpers';
 
-export default function AllocationCell({ value, salary, onSave, disabled, hotelName, currentTotal, onEditingChange }) {
+export default function AllocationCell({ value, salary, onSave, disabled, hotelName, currentTotal, onEditingChange, isRedacted }) {
   const [editing, setEditing] = useState(false);
   const [inputVal, setInputVal] = useState('');
   const inputRef = useRef(null);
@@ -72,12 +72,12 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-primary/5'
       }`}
       onClick={handleStart}
-      title={displayPct > 0 ? `${hotelName || ''}: ${displayPct}% · ${formatCurrency(dollars)}` : undefined}
+      title={displayPct > 0 ? `${hotelName || ''}: ${displayPct}%${isRedacted ? '' : ` · ${formatCurrency(dollars)}`}` : undefined}
     >
       {displayPct > 0 ? (
         <div className="flex flex-col items-center gap-0.5">
           <span className="text-sm font-semibold text-foreground">{displayPct}%</span>
-          <span className="text-[10px] text-muted-foreground leading-none">{formatCurrency(dollars)}</span>
+          <span className="text-[10px] text-muted-foreground leading-none font-mono">{isRedacted ? '████' : formatCurrency(dollars)}</span>
         </div>
       ) : (
         <span className="text-muted-foreground/30 text-xs group-hover:text-muted-foreground transition-colors">—</span>

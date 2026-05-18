@@ -5,7 +5,7 @@ import { Pencil, Trash2, EyeOff, Eye } from 'lucide-react';
 import AllocationCell from './AllocationCell';
 import { getTotalAllocation, getAllocationStatus, getAllocationColor, formatCurrency, getDeptColor } from '@/lib/helpers';
 
-export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit, onDelete, onToggleSuppress, isOdd, highlight, managerName }) {
+export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit, onDelete, onToggleSuppress, isOdd, highlight, managerName, isRedacted }) {
   const suppressed = !!employee.suppressed;
   const total = getTotalAllocation(employee.allocations);
   const status = getAllocationStatus(total);
@@ -38,7 +38,9 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
         </div>
       </td>
       <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">{managerName || <span className="text-border">—</span>}</td>
-      <td className="px-3 py-2.5 text-sm font-semibold text-right whitespace-nowrap tabular-nums">{formatCurrency(employee.annual_salary)}</td>
+      <td className="px-3 py-2.5 text-sm font-semibold text-right whitespace-nowrap tabular-nums">
+        {isRedacted ? <span className="font-mono tracking-widest text-muted-foreground">██████</span> : formatCurrency(employee.annual_salary)}
+      </td>
       <td className="px-2 py-2.5 text-center">
         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>
           {Math.round(total * 100)}%
@@ -53,6 +55,7 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
           disabled={suppressed}
           hotelName={hotel.name}
           currentTotal={totalPct}
+          isRedacted={isRedacted}
         />
       ))}
       <td className="px-2 py-2.5">

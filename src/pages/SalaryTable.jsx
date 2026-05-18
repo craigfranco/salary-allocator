@@ -10,6 +10,7 @@ import ScenarioManager from '@/components/salary/ScenarioManager';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { getTotalAllocation, getAllocationStatus, formatCurrency, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import { useScenario } from '@/lib/ScenarioContext';
+import { useRedactedIds } from '@/components/salary/SalaryRedactionManager';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
@@ -27,6 +28,7 @@ export default function SalaryTable() {
   const [hotelFilter, setHotelFilter] = useState('');
   const qc = useQueryClient();
   const { activeScenario, scenarioData, setScenarioData } = useScenario();
+  const { redactedIds } = useRedactedIds();
 
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
@@ -215,7 +217,8 @@ export default function SalaryTable() {
                   isOdd={idx % 2 === 1}
                   highlight={q && (emp.name.toLowerCase().includes(q) || emp.title.toLowerCase().includes(q))}
                   managerName={displayEmployees.find(e => e.id === emp.manager_id)?.name || ''}
-                />
+                  isRedacted={redactedIds.has(emp.id)}
+                  />
               ))}
               {filteredEmployees.length === 0 && (
                 <tr>
