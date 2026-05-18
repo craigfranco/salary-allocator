@@ -80,15 +80,6 @@ export default function Analytics() {
     };
   });
 
-  // Avg Salary by Hotel
-  const hotelAvgData = sortedHotels.map(h => {
-    const emps = activeEmployees.filter(e => (e.allocations?.[h.short_code] || 0) > 0);
-    return {
-      name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code,
-      avg: emps.length ? Math.round(emps.reduce((s, e) => s + e.annual_salary, 0) / emps.length) : 0,
-    };
-  }).filter(h => h.avg > 0);
-
   // Total salary allocated per hotel by department
   const hotelDeptAllocData = useMemo(() => {
     return sortedHotels
@@ -189,16 +180,18 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Avg Salary by Hotel */}
+        {/* Avg Salary by Dept */}
         <div className={cardClass}>
-          <h3 className="text-sm font-semibold mb-4 text-foreground">Average Salary by Hotel</h3>
+          <h3 className="text-sm font-semibold mb-4 text-foreground">Average Salary by Department</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart layout="vertical" data={hotelAvgData} margin={{ top: 4, right: 40, bottom: 0, left: 10 }}>
+            <BarChart layout="vertical" data={deptData} margin={{ top: 4, right: 40, bottom: 0, left: 10 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
               <XAxis type="number" tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} width={60} />
               <Tooltip content={<TooltipStyle />} />
-              <Bar dataKey="avg" name="Avg Salary" radius={[0, 4, 4, 0]} fill="#3b82f6" />
+              <Bar dataKey="avg" name="Avg Salary" radius={[0, 4, 4, 0]}>
+                {deptData.map(d => <Cell key={d.name} fill={DEPT_COLORS[d.name]} />)}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
