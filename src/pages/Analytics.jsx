@@ -194,6 +194,24 @@ export default function Analytics() {
         </div>
       </div>
 
+      {/* Avg Salary per Hotel by Department */}
+      <div className={cardClass}>
+        <h3 className="text-sm font-semibold mb-1 text-foreground">Average Salary per Hotel by Department</h3>
+        <p className="text-xs text-muted-foreground mb-4">Average annual salary of employees allocated to each hotel, grouped by discipline</p>
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={hotelDeptAvgData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+            <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
+            <YAxis tickFormatter={(v) => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
+            <Tooltip content={<TooltipStyle />} />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Bar dataKey="REVENUE" name="Revenue" fill={DEPT_COLORS.REVENUE} radius={[3, 3, 0, 0]} />
+            <Bar dataKey="ECOMM" name="E-Commerce" fill={DEPT_COLORS.ECOMM} radius={[3, 3, 0, 0]} />
+            <Bar dataKey="SALES" name="Sales" fill={DEPT_COLORS.SALES} radius={[3, 3, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
       {/* Dept cost table + top earners */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className={cardClass}>
