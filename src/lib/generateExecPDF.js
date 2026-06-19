@@ -39,7 +39,7 @@ const RH_MARK_SMALL = `<img src="${LOGO_URL}" style="width:20px;height:20px;opac
 const RH_MARK_WHITE = `<img src="${LOGO_URL}" style="width:28px;height:28px;opacity:0.6;filter:brightness(0) invert(1);object-fit:contain;" />`;
 
 function pageHeader(title, pageNum) {
-  return `<div style="background:#2d4b5e;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 0.75in;flex-shrink:0;">
+  return `<div style="background:#2d4b5e;height:44px;display:flex;align-items:center;justify-content:space-between;padding:0 0.5in;flex-shrink:0;">
     <span style="font-family:Inter,Arial,sans-serif;font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.7);">${title}</span>
     <div style="display:flex;align-items:center;gap:16px;">
       ${RH_MARK_WHITE}
@@ -49,7 +49,7 @@ function pageHeader(title, pageNum) {
 }
 
 function pageFooter(pageNum) {
-  return `<div style="position:absolute;bottom:0;left:0;right:0;border-top:1px solid #e2e7ed;display:flex;align-items:center;justify-content:space-between;padding:8px 0.75in;background:#fff;">
+  return `<div class="page-footer">
     <div style="display:flex;align-items:center;gap:8px;">
       ${RH_MARK_SMALL}
       <span style="font-family:Inter,Arial,sans-serif;font-size:8px;color:#6b7280;">Rebel Hotel Co. — Topline Salary Report 2026</span>
@@ -65,7 +65,7 @@ function buildCover(employees, hotels, date) {
   const totalPayroll = active.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const propHotels = hotels.filter(h => PROPERTY_HOTELS.includes(h.short_code));
 
-  return `<div class="page" style="background:#2d4b5e;display:flex;flex-direction:column;justify-content:space-between;position:relative;">
+  return `<div class="page" style="background:#2d4b5e;justify-content:space-between;">
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 60px 40px;">
       <span style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;color:rgba(255,255,255,0.6);text-transform:uppercase;">REBEL HOTEL CO.</span>
       <div style="width:60px;height:2px;background:#fff;margin:28px auto;opacity:0.35;"></div>
@@ -124,9 +124,9 @@ function buildExecSummary(employees, hotels) {
     return { name: HOTEL_NAMES[h.short_code], roomRev: h.room_revenue_budget, smBudget: h.sm_payroll_budget, allocated, variance, pctUsed };
   });
 
-  return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
+  return `<div class="page">
     ${pageHeader('Executive Summary', 2)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.3in 0.5in 60px;">
+    <div class="page-content">
       <!-- KPI cards -->
       <div style="display:flex;gap:20px;margin-bottom:16px;">
         ${[
@@ -270,9 +270,9 @@ function buildSalaryTables(employees, hotels) {
       `<th colspan="2" style="padding:6px 4px;color:rgba(255,255,255,0.85);font-weight:600;text-align:center;font-size:8px;letter-spacing:0.05em;border-left:1px solid rgba(255,255,255,0.15);">${HOTEL_NAMES[h.short_code]}</th>`
     ).join('');
 
-    return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
+    return `<div class="page">
       ${pageHeader('Salary Allocation Table', pageNum + pageIdx)}
-      <div style="flex:1;overflow:hidden;padding:8px 0.4in 60px;font-size:7px;">
+      <div class="page-content" style="font-size:7px;">
         <table style="width:100%;border-collapse:collapse;">
           <thead>
             <tr style="background:#2d4b5e;">
@@ -361,9 +361,9 @@ function buildHotelBreakdown(employees, hotels) {
   const left = hotelSections.slice(0, 3);
   const right = hotelSections.slice(3);
 
-  return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
+  return `<div class="page">
     ${pageHeader('Hotel Budget Breakdown', 4)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.3in 0.5in 60px;">
+    <div class="page-content">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div style="display:flex;flex-direction:column;gap:16px;">${left.join('')}</div>
         <div style="display:flex;flex-direction:column;gap:16px;">${right.join('')}</div>
@@ -415,9 +415,9 @@ function buildOrgChart(employees) {
 
   const roots = active.filter(e => !e.manager_id || !e.manager_id.trim() || !activeIds.has(e.manager_id));
 
-  return `<div class="page" style="display:flex;flex-direction:column;position:relative;width:100%;">
+  return `<div class="page">
     ${pageHeader('Organization Chart', 5)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.2in 0.3in 60px;display:flex;align-items:center;justify-content:center;">
+    <div class="page-content" style="display:flex;align-items:center;justify-content:center;">
       <div style="transform:scale(0.75);transform-origin:top center;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
         ${roots.map(r => renderNode(r)).join('')}
       </div>
@@ -495,9 +495,9 @@ function buildAlertsAnalytics(employees, hotels) {
 
   const sectionTitle = (t) => `<div style="font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin:12px 0 6px;border-bottom:2px solid #e2e7ed;padding-bottom:4px;">${t}</div>`;
 
-  return `<div class="page" style="display:flex;flex-direction:column;position:relative;">
+  return `<div class="page">
     ${pageHeader('Allocation Alerts & Analytics', 6)}
-    <div class="inner-page" style="flex:1;overflow:hidden;padding:0.3in 0.4in 60px;">
+    <div class="page-content">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
         <div>
           ${sectionTitle('Allocation Status')}
@@ -571,12 +571,36 @@ export function generateExecPDF(employees, hotels, redactedIds = new Set()) {
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', Arial, sans-serif; color: #1d1f1c; background: #fff; }
   @page { size: letter landscape; margin: 0; }
-  .page { width: 11in; min-height: 8.5in; page-break-after: always; position: relative; overflow: hidden; }
+  .page {
+    width: 11in;
+    height: 8.5in;
+    page-break-after: always;
+    page-break-inside: avoid;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
   .page:last-child { page-break-after: avoid; }
-  .inner-page { padding: 0.5in 0.75in 0.75in; }
+  .page-content {
+    flex: 1;
+    overflow: hidden;
+    padding: 0.25in 0.5in 0;
+    min-height: 0;
+  }
+  .page-footer {
+    flex-shrink: 0;
+    border-top: 1px solid #e2e7ed;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0.5in;
+    background: #fff;
+    height: 32px;
+  }
   @media print {
     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .page { page-break-after: always; }
+    .page { page-break-after: always; page-break-inside: avoid; }
     .no-break { page-break-inside: avoid; }
   }
 </style>
@@ -595,5 +619,5 @@ ${buildAlertsAnalytics(employeesForPDF, hotels)}
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
-  setTimeout(() => printWindow.print(), 800);
+  setTimeout(() => printWindow.print(), 1200);
 }
