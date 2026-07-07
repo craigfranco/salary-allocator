@@ -5,20 +5,23 @@ import { generateExecPDF } from '@/lib/generateExecPDF';
 import { FileDown, EyeOff } from 'lucide-react';
 import SalaryRedactionManager from '@/components/salary/SalaryRedactionManager';
 import { useRedactedIds } from '@/lib/RedactionContext';
+import { useScenario } from '@/lib/ScenarioContext';
 
 export default function ExecPDFButton() {
   const [loading, setLoading] = useState(false);
   const [redactionOpen, setRedactionOpen] = useState(false);
   const { redactedIds } = useRedactedIds();
+  const { scenarioData } = useScenario();
 
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   const handleClick = () => {
-    if (loading || !employees.length) return;
+    const pdfEmployees = Array.isArray(scenarioData) && scenarioData.length > 0 ? scenarioData : employees;
+    if (loading || !pdfEmployees.length) return;
     setLoading(true);
     try {
-      generateExecPDF(employees, hotels, redactedIds);
+      generateExecPDF(pdfEmployees, hotels, redactedIds);
     } finally {
       setTimeout(() => setLoading(false), 1000);
     }
