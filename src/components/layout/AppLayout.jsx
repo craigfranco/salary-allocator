@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
@@ -26,8 +26,16 @@ export default function AppLayout() {
 
   const { data: scenarios = [] } = useQuery({
     queryKey: ['scenarios'],
-    queryFn: () => base44.entities.Scenario.list('-created_date', 50),
+    queryFn: () => base44.entities.Scenario.list('-updated_date', 50),
   });
+
+  const autoLoaded = useRef(false);
+  useEffect(() => {
+    if (!autoLoaded.current && scenarios.length > 0 && !activeScenario) {
+      autoLoaded.current = true;
+      handleRestoreScenario(scenarios[0]);
+    }
+  }, [scenarios]);
 
   const handleRestoreScenario = (scenario) => {
     const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
