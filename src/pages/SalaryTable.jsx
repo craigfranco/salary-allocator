@@ -52,6 +52,16 @@ export default function SalaryTable() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setDeleteEmp(null); },
   });
 
+  const handleDelete = (emp) => {
+    if (activeScenario && Array.isArray(scenarioData)) {
+      const updated = scenarioData.filter(e => e.id !== emp.id);
+      setScenarioData(updated);
+      setDeleteEmp(null);
+    } else {
+      deleteMutation.mutate(emp.id);
+    }
+  };
+
   const handleAllocChange = (emp, hotelCode, newPct) => {
     if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
@@ -393,7 +403,7 @@ export default function SalaryTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => deleteMutation.mutate(deleteEmp.id)} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction onClick={() => handleDelete(deleteEmp)} className="bg-destructive text-destructive-foreground">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
