@@ -65,7 +65,7 @@ export default function AppLayout() {
               />
               <div>
                 <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Commercial Talent</h1>
-                <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Hotel Management Dashboard</p>
+                <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Salary Allocations</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
