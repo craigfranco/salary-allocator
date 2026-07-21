@@ -64,7 +64,7 @@ export default function AppLayout() {
                 style={{ filter: 'brightness(0) invert(1)' }}
               />
               <div>
-                <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Topline Salary</h1>
+                <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Commercial Talent</h1>
                 <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Hotel Management Dashboard</p>
               </div>
             </div>
