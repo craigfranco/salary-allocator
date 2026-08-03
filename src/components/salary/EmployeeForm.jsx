@@ -88,7 +88,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="font-display">{employee ? 'Edit Employee' : 'Add New Employee'}</DialogTitle>
         </DialogHeader>
