@@ -136,7 +136,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                     className="h-7 text-xs px-2"
                     onClick={applyEvenSplit}
                   >
-                    Even Split ({selectedHotels.size})
+                    By Room Count ({selectedHotels.size})
                   </Button>
                   <Button
                     type="button"
