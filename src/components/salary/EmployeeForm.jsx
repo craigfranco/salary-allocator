@@ -81,17 +81,56 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
             </div>
           )}
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
               <Label>Hotel Allocations (%)</Label>
-              {(() => {
-                const totalPct = Math.round(Object.values(form.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 100);
-                const color = totalPct === 100 ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30' : totalPct > 100 ? 'text-red-500 bg-red-500/10 border-red-500/30' : 'text-amber-500 bg-amber-500/10 border-amber-500/30';
-                return (
-                  <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${color}`}>
-                    Total: {totalPct}%
-                  </span>
-                );
-              })()}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-2"
+                    onClick={() => {
+                      const n = hotels.length;
+                      if (n === 0) return;
+                      const even = 1 / n;
+                      const newAllocs = {};
+                      hotels.forEach(h => { newAllocs[h.short_code] = even; });
+                      setForm(prev => ({ ...prev, allocations: newAllocs }));
+                    }}
+                  >
+                    Even Split
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-2"
+                    onClick={() => {
+                      const hotelsWithRev = hotels.filter(h => (h.room_revenue_budget || 0) > 0);
+                      const totalRev = hotelsWithRev.reduce((s, h) => s + h.room_revenue_budget, 0);
+                      if (totalRev === 0) return;
+                      const newAllocs = {};
+                      hotels.forEach(h => {
+                        const rev = h.room_revenue_budget || 0;
+                        newAllocs[h.short_code] = rev > 0 ? rev / totalRev : 0;
+                      });
+                      setForm(prev => ({ ...prev, allocations: newAllocs }));
+                    }}
+                  >
+                    By Room Rev
+                  </Button>
+                </div>
+                {(() => {
+                  const totalPct = Math.round(Object.values(form.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 100);
+                  const color = totalPct === 100 ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30' : totalPct > 100 ? 'text-red-500 bg-red-500/10 border-red-500/30' : 'text-amber-500 bg-amber-500/10 border-amber-500/30';
+                  return (
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${color}`}>
+                      Total: {totalPct}%
+                    </span>
+                  );
+                })()}
+              </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {hotels.map(h => (
