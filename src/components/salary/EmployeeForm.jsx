@@ -38,6 +38,22 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     setForm(prev => ({ ...prev, allocations: newAllocs }));
   };
 
+  const applyRoomCountSplit = () => {
+    const selected = hotels.filter(h => selectedHotels.has(h.short_code) && (h.room_count || 0) > 0);
+    const totalRooms = selected.reduce((s, h) => s + h.room_count, 0);
+    if (totalRooms === 0) return;
+    const newAllocs = {};
+    hotels.forEach(h => {
+      if (!selectedHotels.has(h.short_code)) {
+        newAllocs[h.short_code] = 0;
+      } else {
+        const rooms = h.room_count || 0;
+        newAllocs[h.short_code] = rooms > 0 ? rooms / totalRooms : 0;
+      }
+    });
+    setForm(prev => ({ ...prev, allocations: newAllocs }));
+  };
+
   const applyRevenueSplit = () => {
     const selected = hotels.filter(h => selectedHotels.has(h.short_code) && (h.room_revenue_budget || 0) > 0);
     const totalRev = selected.reduce((s, h) => s + h.room_revenue_budget, 0);
@@ -135,6 +151,15 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                     size="sm"
                     className="h-7 text-xs px-2"
                     onClick={applyEvenSplit}
+                  >
+                    Even Split ({selectedHotels.size})
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 text-xs px-2"
+                    onClick={applyRoomCountSplit}
                   >
                     By Room Count ({selectedHotels.size})
                   </Button>
