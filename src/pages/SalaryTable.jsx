@@ -121,7 +121,7 @@ export default function SalaryTable() {
   };
 
   const activeEmployees = displayEmployees.filter(e => !e.suppressed && !e.exclude_from_table);
-  const suppressedCount = displayEmployees.filter(e => e.suppressed).length;
+  const suppressedCount = displayEmployees.filter(e => e.suppressed && !e.exclude_from_table).length;
 
   const hotelTotals = {};
   sortedHotels.forEach(h => {

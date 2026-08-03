@@ -22,7 +22,7 @@ const CRAIG_STYLE = { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border
 
 function EmployeeCard({ employee, onClick, hotelMap }) {
   const dept = employee.exclude_from_table ? CRAIG_STYLE : (DEPT_STYLES[employee.department] || {});
-  const suppressed = !!employee.suppressed;
+  const suppressed = !!employee.suppressed && !employee.exclude_from_table;
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
   const nonCorpCodes = Object.keys(hotelMap).filter(c => c !== 'CORP');
   const allocedNonCorp = allocEntries.filter(([c]) => c !== 'CORP');
@@ -211,7 +211,7 @@ export default function OrgChart() {
 
   // Build manager → children map
   const childrenMap = {};
-  const activeEmployees = displayEmployees.filter(e => !e.suppressed);
+  const activeEmployees = displayEmployees.filter(e => !e.suppressed || e.exclude_from_table);
 
   activeEmployees.forEach(emp => {
     const mid = emp.manager_id && emp.manager_id.trim() ? emp.manager_id : null;
@@ -233,7 +233,7 @@ export default function OrgChart() {
   const activeIds = new Set(activeEmployees.map(e => e.id));
   const roots = activeEmployees.filter(e => !e.manager_id || !e.manager_id.trim() || !activeIds.has(e.manager_id));
 
-  const suppressedCount = displayEmployees.filter(e => e.suppressed).length;
+  const suppressedCount = displayEmployees.filter(e => e.suppressed && !e.exclude_from_table).length;
 
   return (
     <div className="space-y-4">

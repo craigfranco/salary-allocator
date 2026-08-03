@@ -13,7 +13,7 @@ export default function Alerts() {
   // Use scenario data if active, otherwise use DB employees
   const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
   const activeEmployees = displayEmployees.filter(e => !e.suppressed && !e.exclude_from_table);
-  const suppressedCount = displayEmployees.length - activeEmployees.length;
+  const suppressedCount = displayEmployees.filter(e => e.suppressed && !e.exclude_from_table).length;
 
   const allocAlerts = activeEmployees.map(emp => {
     const total = getTotalAllocation(emp.allocations);
