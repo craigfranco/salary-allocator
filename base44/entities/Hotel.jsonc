@@ -17,6 +17,10 @@
     "sm_payroll_budget": {
       "type": "number",
       "description": "2026 S&M Payroll Budget"
+    },
+    "room_count": {
+      "type": "number",
+      "description": "Total number of guest rooms at the hotel"
     }
   },
   "required": [
