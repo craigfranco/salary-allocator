@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pencil, Trash2, EyeOff, Eye } from 'lucide-react';
+import { Pencil, Trash2, EyeOff, Eye, Copy } from 'lucide-react';
 import AllocationCell from './AllocationCell';
 import { getTotalAllocation, getAllocationStatus, getAllocationColor, formatCurrency, getDeptColor } from '@/lib/helpers';
 
-export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit, onDelete, onToggleSuppress, isOdd, highlight, managerName, isRedacted }) {
+export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit, onDelete, onToggleSuppress, onDuplicate, isOdd, highlight, managerName, isRedacted }) {
   const suppressed = !!employee.suppressed;
   const total = getTotalAllocation(employee.allocations);
   const status = getAllocationStatus(total);
@@ -70,6 +70,9 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
             onClick={() => onToggleSuppress(employee)}
           >
             {suppressed ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-primary" title="Duplicate employee" onClick={() => onDuplicate(employee)}>
+            <Copy className="w-3.5 h-3.5" />
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive/70 hover:text-destructive" onClick={() => onDelete(employee)}>
             <Trash2 className="w-3.5 h-3.5" />

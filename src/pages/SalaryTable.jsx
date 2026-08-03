@@ -96,6 +96,17 @@ export default function SalaryTable() {
     }
   };
 
+  const handleDuplicate = (emp) => {
+    const { id, created_date, updated_date, created_by_id, ...cloneData } = emp;
+    const dup = { ...cloneData, name: `${emp.name} (Copy)` };
+    if (activeScenario && Array.isArray(scenarioData)) {
+      const updated = [...JSON.parse(JSON.stringify(scenarioData)), { ...dup, id: 'dup_' + Date.now() }];
+      setScenarioData(updated);
+    } else {
+      createMutation.mutate(dup);
+    }
+  };
+
   const handleToggleSuppress = (emp) => {
     if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
@@ -224,6 +235,7 @@ export default function SalaryTable() {
                   onEdit={(e) => { setEditEmp(e); setFormOpen(true); }}
                   onDelete={setDeleteEmp}
                   onToggleSuppress={handleToggleSuppress}
+                  onDuplicate={handleDuplicate}
                   isOdd={idx % 2 === 1}
                   highlight={q && (emp.name.toLowerCase().includes(q) || emp.title.toLowerCase().includes(q))}
                   managerName={displayEmployees.find(e => e.id === emp.manager_id)?.name || ''}
@@ -278,6 +290,20 @@ export default function SalaryTable() {
                       <span className={`text-xs font-semibold tabular-nums ${isOver ? 'text-red-500' : isNear ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400'}`}>
                         {budget > 0 ? formatCurrency(budget) : '—'}
                       </span>
+                    </td>
+                  );
+                })}
+                <td />
+                <td />
+              </tr>
+              <tr className="bg-primary/5 border-t border-border/50">
+                <td colSpan={5} className="px-3 py-2 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Room Count</td>
+                <td />
+                {sortedHotels.map(h => {
+                  if (h.short_code === 'CORP') return <td key={h.short_code} />;
+                  return (
+                    <td key={h.short_code} className="px-2 py-2 text-center">
+                      <span className="text-xs font-semibold tabular-nums text-muted-foreground">{h.room_count || '—'}</span>
                     </td>
                   );
                 })}

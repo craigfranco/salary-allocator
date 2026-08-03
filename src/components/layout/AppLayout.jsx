@@ -8,6 +8,7 @@ import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import ScenarioDiffDialog from '@/components/salary/ScenarioDiffDialog';
 
 const navItems = [
   { path: '/', label: 'Salary Table', icon: TableProperties },
@@ -20,6 +21,7 @@ const navItems = [
 
 export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
+  const [diffTarget, setDiffTarget] = useState(null);
   const location = useLocation();
   const { dark, toggle } = useTheme();
   const { activeScenario, setActiveScenario, scenarioData, setScenarioData } = useScenario();
@@ -29,19 +31,36 @@ export default function AppLayout() {
     queryFn: () => base44.entities.Scenario.list('-updated_date', 50),
   });
 
+  const { data: dbEmployees = [] } = useQuery({
+    queryKey: ['employees'],
+    queryFn: () => base44.entities.Employee.list(),
+  });
+
   const autoLoaded = useRef(false);
   useEffect(() => {
     if (!autoLoaded.current && scenarios.length > 0 && !activeScenario) {
       autoLoaded.current = true;
-      handleRestoreScenario(scenarios[0]);
+      doRestore(scenarios[0]);
     }
   }, [scenarios]);
 
-  const handleRestoreScenario = (scenario) => {
+  const doRestore = (scenario) => {
     const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
     setScenarioData(snapshotCopy);
     setActiveScenario({ id: scenario.id, name: scenario.name });
     setScenarioOpen(false);
+    setDiffTarget(null);
+  };
+
+  const handleRestoreScenario = (scenario) => {
+    const current = Array.isArray(scenarioData) ? scenarioData : dbEmployees;
+    setDiffTarget({ scenario, current });
+    setScenarioOpen(false);
+  };
+
+  const getCurrentEmployees = () => {
+    if (Array.isArray(scenarioData)) return scenarioData;
+    return Array.isArray(dbEmployees) ? dbEmployees : [];
   };
 
   const handleClearScenario = () => {
@@ -157,6 +176,15 @@ export default function AppLayout() {
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         <Outlet />
       </main>
+
+      <ScenarioDiffDialog
+        open={!!diffTarget}
+        onClose={() => setDiffTarget(null)}
+        onConfirm={() => diffTarget && doRestore(diffTarget.scenario)}
+        currentEmployees={getCurrentEmployees()}
+        scenarioName={diffTarget?.scenario?.name || ''}
+        scenarioSnapshot={diffTarget?.scenario?.snapshot || []}
+      />
     </div>
   );
 }

@@ -8,10 +8,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { BookMarked, Save, Trash2, ChevronDown, Check } from 'lucide-react';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useToast } from '@/components/ui/use-toast';
+import ScenarioDiffDialog from './ScenarioDiffDialog';
 
 export default function ScenarioManager({ employees, onRestore }) {
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
+  const [diffTarget, setDiffTarget] = useState(null);
   const { activeScenario, setActiveScenario, scenarioData, setScenarioData } = useScenario();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -61,10 +63,21 @@ export default function ScenarioManager({ employees, onRestore }) {
   };
 
   const handleRestore = (scenario) => {
-    const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
-    setScenarioData(snapshotCopy);
-    setActiveScenario({ id: scenario.id, name: scenario.name });
+    setDiffTarget(scenario);
     setOpen(false);
+  };
+
+  const handleConfirmRestore = () => {
+    if (!diffTarget) return;
+    const snapshotCopy = Array.isArray(diffTarget.snapshot) ? JSON.parse(JSON.stringify(diffTarget.snapshot)) : [];
+    setScenarioData(snapshotCopy);
+    setActiveScenario({ id: diffTarget.id, name: diffTarget.name });
+    setDiffTarget(null);
+  };
+
+  const getCurrentEmployees = () => {
+    if (Array.isArray(scenarioData)) return scenarioData;
+    return Array.isArray(employees) ? employees : [];
   };
 
   return (
@@ -175,6 +188,15 @@ export default function ScenarioManager({ employees, onRestore }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ScenarioDiffDialog
+        open={!!diffTarget}
+        onClose={() => setDiffTarget(null)}
+        onConfirm={handleConfirmRestore}
+        currentEmployees={getCurrentEmployees()}
+        scenarioName={diffTarget?.name || ''}
+        scenarioSnapshot={diffTarget?.snapshot || []}
+      />
     </>
   );
 }
