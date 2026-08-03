@@ -147,6 +147,27 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                 <div className="flex items-center gap-1.5">
                   <Button
                     type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs px-2 text-muted-foreground"
+                    onClick={() => {
+                      const all = new Set(hotels.filter(h => h.short_code !== 'CORP').map(h => h.short_code));
+                      setSelectedHotels(all);
+                    }}
+                  >
+                    Select All
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs px-2 text-muted-foreground"
+                    onClick={() => setSelectedHotels(new Set())}
+                  >
+                    Deselect All
+                  </Button>
+                  <Button
+                    type="button"
                     variant="outline"
                     size="sm"
                     className="h-7 text-xs px-2"
