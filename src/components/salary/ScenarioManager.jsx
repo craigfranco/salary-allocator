@@ -55,7 +55,8 @@ export default function ScenarioManager({ employees, onRestore }) {
 
   const handleSave = () => {
     if (!name.trim()) return;
-    const snapshot = Array.isArray(employees) ? JSON.parse(JSON.stringify(employees)) : [];
+    const source = Array.isArray(scenarioData) ? scenarioData : employees;
+    const snapshot = Array.isArray(source) ? JSON.parse(JSON.stringify(source)) : [];
     saveMutation.mutate({ name: name.trim(), description: description.trim(), snapshot });
   };
 
