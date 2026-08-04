@@ -61,32 +61,40 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   };
 
   const applyRoomCountSplit = () => {
-    const selected = hotels.filter(h => selectedHotels.has(h.short_code) && (h.room_count || 0) > 0);
+    const corpPct = form.allocations?.CORP || 0;
+    const remainder = corpLocked ? Math.max(0, 1 - corpPct) : 1;
+    const selected = hotels.filter(h => selectedHotels.has(h.short_code) && h.short_code !== 'CORP' && (h.room_count || 0) > 0);
     const totalRooms = selected.reduce((s, h) => s + h.room_count, 0);
     if (totalRooms === 0) return;
     const newAllocs = {};
     hotels.forEach(h => {
-      if (!selectedHotels.has(h.short_code)) {
+      if (h.short_code === 'CORP') {
+        newAllocs[h.short_code] = corpLocked ? corpPct : (selectedHotels.has(h.short_code) ? (h.room_count || 0) / totalRooms : 0);
+      } else if (!selectedHotels.has(h.short_code)) {
         newAllocs[h.short_code] = 0;
       } else {
         const rooms = h.room_count || 0;
-        newAllocs[h.short_code] = rooms > 0 ? rooms / totalRooms : 0;
+        newAllocs[h.short_code] = rooms > 0 ? (rooms / totalRooms) * remainder : 0;
       }
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
   };
 
   const applyRevenueSplit = () => {
-    const selected = hotels.filter(h => selectedHotels.has(h.short_code) && (h.room_revenue_budget || 0) > 0);
+    const corpPct = form.allocations?.CORP || 0;
+    const remainder = corpLocked ? Math.max(0, 1 - corpPct) : 1;
+    const selected = hotels.filter(h => selectedHotels.has(h.short_code) && h.short_code !== 'CORP' && (h.room_revenue_budget || 0) > 0);
     const totalRev = selected.reduce((s, h) => s + h.room_revenue_budget, 0);
     if (totalRev === 0) return;
     const newAllocs = {};
     hotels.forEach(h => {
-      if (!selectedHotels.has(h.short_code)) {
+      if (h.short_code === 'CORP') {
+        newAllocs[h.short_code] = corpLocked ? corpPct : (selectedHotels.has(h.short_code) ? (h.room_revenue_budget || 0) / totalRev : 0);
+      } else if (!selectedHotels.has(h.short_code)) {
         newAllocs[h.short_code] = 0;
       } else {
         const rev = h.room_revenue_budget || 0;
-        newAllocs[h.short_code] = rev > 0 ? rev / totalRev : 0;
+        newAllocs[h.short_code] = rev > 0 ? (rev / totalRev) * remainder : 0;
       }
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
