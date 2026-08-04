@@ -10,7 +10,7 @@ const DEPT_STYLES = {
 
 const DEPTS = ['REVENUE', 'ECOMM', 'SALES'];
 
-export default function HotelDrillDown({ hotel, employees, onClose }) {
+export default function HotelDrillDown({ hotel, employees, onClose, onEditEmployee }) {
   if (!hotel) return null;
 
   const accent = HOTEL_COLORS[hotel.short_code] || HOTEL_COLORS.CORP;
@@ -85,11 +85,16 @@ export default function HotelDrillDown({ hotel, employees, onClose }) {
                 {/* Employee rows */}
                 <div className="divide-y divide-border">
                   {deptEmployees.sort((a, b) => b.dollars - a.dollars).map(emp => (
-                    <div key={emp.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors">
-                      <div className="flex-1 min-w-0 pr-4">
-                        <p className="text-sm font-semibold text-foreground truncate">{emp.name}</p>
+                    <div key={emp.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors group">
+                      <button
+                        type="button"
+                        onClick={() => onEditEmployee?.(emp)}
+                        className="flex-1 min-w-0 pr-4 text-left group-hover:text-primary transition-colors"
+                        title="Edit employee"
+                      >
+                        <p className="text-sm font-semibold text-foreground group-hover:underline truncate">{emp.name}</p>
                         <p className="text-[11px] text-muted-foreground truncate">{emp.title}</p>
-                      </div>
+                      </button>
                       <div className="text-right flex-shrink-0">
                         <p className="text-sm font-bold text-foreground">{formatCurrency(emp.dollars)}</p>
                         <p className="text-[11px] text-muted-foreground">{Math.round(emp.pct * 100)}% of salary</p>

@@ -7,6 +7,7 @@ import HotelBudgetCard from '@/components/budget/HotelBudgetCard';
 import HotelDrillDown from '@/components/budget/HotelDrillDown';
 import DeptBreakdownRollup from '@/components/budget/DeptBreakdownRollup';
 import StatCard from '@/components/ui/StatCard';
+import EmployeeForm from '@/components/salary/EmployeeForm';
 import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -18,9 +19,11 @@ const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP']
 export default function HotelBudgets() {
   const [addOpen, setAddOpen] = useState(false);
   const [drillHotel, setDrillHotel] = useState(null);
+  const [editEmp, setEditEmp] = useState(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 });
   const qc = useQueryClient();
-  const { activeScenario, scenarioData } = useScenario();
+  const { activeScenario, scenarioData, setScenarioData } = useScenario();
 
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
@@ -38,6 +41,39 @@ export default function HotelBudgets() {
     mutationFn: (data) => base44.entities.Hotel.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 }); },
   });
+
+  const empUpdateMutation = useMutation({
+    mutationFn: ({ id, data }) => base44.entities.Employee.update(id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setFormOpen(false); setEditEmp(null); },
+  });
+  const empCreateMutation = useMutation({
+    mutationFn: (data) => base44.entities.Employee.create(data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setFormOpen(false); setEditEmp(null); },
+  });
+
+  const handleEditEmployee = (emp) => {
+    setEditEmp(emp);
+    setFormOpen(true);
+  };
+
+  const handleSaveEmployee = (form) => {
+    if (activeScenario && Array.isArray(scenarioData)) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      if (editEmp) {
+        const idx = updated.findIndex(e => e.id === editEmp.id);
+        if (idx !== -1) updated[idx] = { ...updated[idx], ...form };
+      } else {
+        updated.push({ ...form, id: 'new_' + Date.now() });
+      }
+      setScenarioData(updated);
+      setFormOpen(false);
+      setEditEmp(null);
+    } else if (editEmp) {
+      empUpdateMutation.mutate({ id: editEmp.id, data: form });
+    } else {
+      empCreateMutation.mutate(form);
+    }
+  };
 
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
@@ -94,6 +130,18 @@ export default function HotelBudgets() {
           hotel={drillHotel}
           employees={activeEmployees}
           onClose={() => setDrillHotel(null)}
+          onEditEmployee={handleEditEmployee}
+        />
+      )}
+
+      {formOpen && (
+        <EmployeeForm
+          open={formOpen}
+          onClose={setFormOpen}
+          onSave={handleSaveEmployee}
+          employee={editEmp}
+          hotels={sortedHotels}
+          allEmployees={displayEmployees}
         />
       )}
 
