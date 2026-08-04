@@ -140,6 +140,7 @@ function OrgNode({ employee, childrenMap, onClick, hotelMap }) {
 export default function OrgChart() {
   const [editEmp, setEditEmp] = useState(null);
   const [exporting, setExporting] = useState(null);
+  const [deptFilter, setDeptFilter] = useState([]); // empty = all disciplines
   const chartRef = useRef(null);
   const qc = useQueryClient();
 
@@ -209,9 +210,32 @@ export default function OrgChart() {
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const hotelMap = Object.fromEntries(hotels.map(h => [h.short_code, h.name]));
 
+  // Discipline filter: show selected departments plus their management chain up to roots
+  const byId = {};
+  displayEmployees.forEach(e => { byId[e.id] = e; });
+  const ancestorIds = (emp) => {
+    const set = new Set();
+    let cur = emp.manager_id && emp.manager_id.trim() ? byId[emp.manager_id] : null;
+    while (cur && !set.has(cur.id)) {
+      set.add(cur.id);
+      cur = cur.manager_id && cur.manager_id.trim() ? byId[cur.manager_id] : null;
+    }
+    return set;
+  };
+  let allowedIds = null;
+  if (deptFilter.length > 0) {
+    allowedIds = new Set();
+    displayEmployees.forEach(e => {
+      if (deptFilter.includes(e.department)) {
+        allowedIds.add(e.id);
+        ancestorIds(e).forEach(id => allowedIds.add(id));
+      }
+    });
+  }
+
   // Build manager → children map
   const childrenMap = {};
-  const activeEmployees = displayEmployees.filter(e => !e.suppressed || e.exclude_from_table);
+  const activeEmployees = displayEmployees.filter(e => (!e.suppressed || e.exclude_from_table) && (!allowedIds || allowedIds.has(e.id)));
 
   activeEmployees.forEach(emp => {
     const mid = emp.manager_id && emp.manager_id.trim() ? emp.manager_id : null;
@@ -269,14 +293,35 @@ export default function OrgChart() {
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-3">
-        {Object.entries(DEPT_STYLES).map(([key, val]) => (
-          <div key={key} className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border border-border shadow-sm">
-            <div className={`w-2.5 h-2.5 rounded-full ${val.dot}`} />
-            <span className={`text-xs font-semibold ${val.text}`}>{val.label}</span>
-          </div>
-        ))}
+      {/* Legend / discipline filter */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setDeptFilter([])}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
+            deptFilter.length === 0
+              ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+              : 'bg-card border-border text-muted-foreground hover:bg-muted/50'
+          }`}
+        >
+          <span className="text-xs font-semibold">All</span>
+        </button>
+        {Object.entries(DEPT_STYLES).map(([key, val]) => {
+          const active = deptFilter.includes(key);
+          return (
+            <button
+              key={key}
+              onClick={() => setDeptFilter(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all ${
+                active
+                  ? `${val.headerBg} text-white border-transparent shadow-sm`
+                  : 'bg-card border-border text-muted-foreground hover:bg-muted/50'
+              }`}
+            >
+              <div className={`w-2.5 h-2.5 rounded-full ${active ? 'bg-white/80' : val.dot}`} />
+              <span className={`text-xs font-semibold ${active ? 'text-white' : val.text}`}>{val.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="overflow-auto rounded-2xl border border-border shadow-sm" style={{ background: '#f8fafc' }}>
