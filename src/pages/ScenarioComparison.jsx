@@ -6,8 +6,10 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
 import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+const CHART_COLORS = ['#2d4b5e', '#f59e0b', '#0d9488', '#a855f7'];
 
 export default function ScenarioComparison() {
   const [selectedScenarios, setSelectedScenarios] = useState([]);
@@ -151,6 +153,41 @@ export default function ScenarioComparison() {
         </div>
       ) : (
         <div className="space-y-6">
+          {/* Visual comparison chart */}
+          {selectedScenarios.length >= 2 && (
+            <Card className="p-6">
+              <h3 className="text-lg font-semibold mb-4">Payroll by Hotel — Visual Comparison</h3>
+              <ResponsiveContainer width="100%" height={Math.max(300, hotelsWithChanges.length * 60 + 80)}>
+                <BarChart
+                  data={hotelsWithChanges.filter(h => h.short_code !== 'CORP').map(hotel => {
+                    const row = { hotel: HOTEL_SHORT_NAMES[hotel.short_code] || hotel.short_code };
+                    selectedScenarios.forEach(s => {
+                      const { hotelMetrics } = calculateMetrics(s.snapshot);
+                      row[s.name] = Math.round((hotelMetrics[hotel.short_code]?.totalPayroll || 0) / 1000);
+                    });
+                    return row;
+                  })}
+                  margin={{ top: 10, right: 20, left: 0, bottom: 10 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis dataKey="hotel" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={50} />
+                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `$${v}k`} />
+                  <Tooltip formatter={(v) => formatCurrency(v * 1000)} contentStyle={{ borderRadius: '8px', fontSize: '12px' }} />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  {selectedScenarios.map((s, idx) => (
+                    <Bar
+                      key={s.id}
+                      dataKey={s.name}
+                      fill={CHART_COLORS[idx % CHART_COLORS.length]}
+                      radius={[4, 4, 0, 0]}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+              <p className="text-xs text-muted-foreground mt-2">Values in thousands ($k). Shows allocated payroll per property across selected scenarios.</p>
+            </Card>
+          )}
+
           {/* Payroll by Hotel */}
           <Card className="p-6">
             <h3 className="text-lg font-semibold mb-4">Total Payroll by Hotel</h3>

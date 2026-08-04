@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 
 export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [] }) {
   const [form, setForm] = useState(employee || {
-    name: '', title: '', department: 'REVENUE', annual_salary: 0, allocations: {}, manager_id: ''
+    name: '', title: '', department: 'REVENUE', annual_salary: 0, allocations: {}, manager_id: '', suppressed: false
   });
   const [selectedHotels, setSelectedHotels] = useState(() => {
     if (employee?.allocations) {
@@ -119,6 +119,16 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
               <Label>Annual Salary</Label>
               <Input type="number" value={form.annual_salary} onChange={(e) => handleChange('annual_salary', parseFloat(e.target.value) || 0)} />
             </div>
+          </div>
+          <div className="flex items-center justify-between rounded-lg border border-border p-3 bg-muted/30">
+            <div>
+              <Label className="cursor-pointer">Suppress Employee</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">Hidden from tables and calculations, still visible in org chart</p>
+            </div>
+            <Checkbox
+              checked={!!form.suppressed}
+              onCheckedChange={(v) => handleChange('suppressed', !!v)}
+            />
           </div>
           {allEmployees.length > 0 && (
             <div>
