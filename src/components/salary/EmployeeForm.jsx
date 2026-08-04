@@ -18,25 +18,28 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     }
     return new Set(hotels.map(h => h.short_code));
   });
-  const [corpLocked, setCorpLocked] = useState(false);
+  const [lockedHotels, setLockedHotels] = useState(new Set());
 
-  // Hold CORP at a fixed pct and spread the remainder evenly across selected non-CORP hotels.
-  const spreadExcludingCorp = (corpPct) => {
-    const remainder = Math.max(0, 1 - corpPct);
-    const others = hotels.filter(h => h.short_code !== 'CORP' && selectedHotels.has(h.short_code));
-    const each = others.length > 0 ? remainder / others.length : 0;
+  // Spread the remainder (1 - lockedSum) evenly across unlocked, selected hotels.
+  const spreadRemainderEvenly = (lockedSet) => {
+    const lockedSum = hotels.filter(h => lockedSet.has(h.short_code)).reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
+    const remainder = Math.max(0, 1 - lockedSum);
+    const unlocked = hotels.filter(h => !lockedSet.has(h.short_code) && selectedHotels.has(h.short_code));
+    const each = unlocked.length > 0 ? remainder / unlocked.length : 0;
     const newAllocs = {};
     hotels.forEach(h => {
-      if (h.short_code === 'CORP') newAllocs[h.short_code] = corpPct;
+      if (lockedSet.has(h.short_code)) newAllocs[h.short_code] = form.allocations?.[h.short_code] || 0;
       else newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? each : 0;
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
   };
 
-  const toggleCorpLock = () => {
-    const next = !corpLocked;
-    setCorpLocked(next);
-    if (next) spreadExcludingCorp(form.allocations?.CORP || 0);
+  const toggleLock = (code) => {
+    const willLock = !lockedHotels.has(code);
+    const next = new Set(lockedHotels);
+    if (willLock) next.add(code); else next.delete(code);
+    setLockedHotels(next);
+    if (willLock) spreadRemainderEvenly(next);
   };
 
   const toggleHotel = (code) => {
@@ -49,7 +52,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   };
 
   const applyEvenSplit = () => {
-    if (corpLocked) { spreadExcludingCorp(form.allocations?.CORP || 0); return; }
+    if (lockedHotels.size > 0) { spreadRemainderEvenly(lockedHotels); return; }
     const selected = hotels.filter(h => selectedHotels.has(h.short_code));
     if (selected.length === 0) return;
     const even = 1 / selected.length;
@@ -61,40 +64,42 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   };
 
   const applyRoomCountSplit = () => {
-    const corpPct = form.allocations?.CORP || 0;
-    const remainder = corpLocked ? Math.max(0, 1 - corpPct) : 1;
-    const selected = hotels.filter(h => selectedHotels.has(h.short_code) && h.short_code !== 'CORP' && (h.room_count || 0) > 0);
-    const totalRooms = selected.reduce((s, h) => s + h.room_count, 0);
-    if (totalRooms === 0) return;
+    const locked = hotels.filter(h => lockedHotels.has(h.short_code));
+    const lockedSum = locked.reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
+    const remainder = locked.length > 0 ? Math.max(0, 1 - lockedSum) : 1;
+    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code) && (h.room_count || 0) > 0);
+    const totalRooms = unlocked.reduce((s, h) => s + h.room_count, 0);
+    if (locked.length === 0 && totalRooms === 0) return;
     const newAllocs = {};
     hotels.forEach(h => {
-      if (h.short_code === 'CORP') {
-        newAllocs[h.short_code] = corpLocked ? corpPct : (selectedHotels.has(h.short_code) ? (h.room_count || 0) / totalRooms : 0);
+      if (lockedHotels.has(h.short_code)) {
+        newAllocs[h.short_code] = form.allocations?.[h.short_code] || 0;
       } else if (!selectedHotels.has(h.short_code)) {
         newAllocs[h.short_code] = 0;
       } else {
         const rooms = h.room_count || 0;
-        newAllocs[h.short_code] = rooms > 0 ? (rooms / totalRooms) * remainder : 0;
+        newAllocs[h.short_code] = (totalRooms > 0 && rooms > 0) ? (rooms / totalRooms) * remainder : 0;
       }
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
   };
 
   const applyRevenueSplit = () => {
-    const corpPct = form.allocations?.CORP || 0;
-    const remainder = corpLocked ? Math.max(0, 1 - corpPct) : 1;
-    const selected = hotels.filter(h => selectedHotels.has(h.short_code) && h.short_code !== 'CORP' && (h.room_revenue_budget || 0) > 0);
-    const totalRev = selected.reduce((s, h) => s + h.room_revenue_budget, 0);
-    if (totalRev === 0) return;
+    const locked = hotels.filter(h => lockedHotels.has(h.short_code));
+    const lockedSum = locked.reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
+    const remainder = locked.length > 0 ? Math.max(0, 1 - lockedSum) : 1;
+    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code) && (h.room_revenue_budget || 0) > 0);
+    const totalRev = unlocked.reduce((s, h) => s + h.room_revenue_budget, 0);
+    if (locked.length === 0 && totalRev === 0) return;
     const newAllocs = {};
     hotels.forEach(h => {
-      if (h.short_code === 'CORP') {
-        newAllocs[h.short_code] = corpLocked ? corpPct : (selectedHotels.has(h.short_code) ? (h.room_revenue_budget || 0) / totalRev : 0);
+      if (lockedHotels.has(h.short_code)) {
+        newAllocs[h.short_code] = form.allocations?.[h.short_code] || 0;
       } else if (!selectedHotels.has(h.short_code)) {
         newAllocs[h.short_code] = 0;
       } else {
         const rev = h.room_revenue_budget || 0;
-        newAllocs[h.short_code] = rev > 0 ? (rev / totalRev) * remainder : 0;
+        newAllocs[h.short_code] = (totalRev > 0 && rev > 0) ? (rev / totalRev) * remainder : 0;
       }
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
@@ -106,7 +111,22 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
 
   const handleAllocChange = (code, value) => {
     const v = parseFloat(value) / 100 || 0;
-    if (code === 'CORP' && corpLocked) { spreadExcludingCorp(v); return; }
+    if (lockedHotels.has(code)) {
+      // Locked hotel: hold this value, spread the remainder evenly across unlocked selected.
+      const lockedValues = {};
+      hotels.forEach(h => { lockedValues[h.short_code] = (h.short_code === code) ? v : (form.allocations?.[h.short_code] || 0); });
+      const lockedSum = hotels.filter(h => lockedHotels.has(h.short_code)).reduce((s, h) => s + lockedValues[h.short_code], 0);
+      const remainder = Math.max(0, 1 - lockedSum);
+      const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code));
+      const each = unlocked.length > 0 ? remainder / unlocked.length : 0;
+      const newAllocs = {};
+      hotels.forEach(h => {
+        if (lockedHotels.has(h.short_code)) newAllocs[h.short_code] = lockedValues[h.short_code];
+        else newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? each : 0;
+      });
+      setForm(prev => ({ ...prev, allocations: newAllocs }));
+      return;
+    }
     setForm(prev => ({
       ...prev,
       allocations: { ...prev.allocations, [code]: v }
@@ -185,7 +205,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
           <div>
             <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
               <Label>Hotel Allocations (%)</Label>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <div className="flex items-center gap-1.5">
                   <Button
                     type="button"
@@ -247,37 +267,43 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                 })()}
               </div>
             </div>
+            {lockedHotels.size > 0 && (
+              <p className="text-xs text-muted-foreground mb-2">
+                {lockedHotels.size} hotel{lockedHotels.size > 1 ? 's' : ''} locked — spread buttons distribute the remainder across the rest.
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-3">
-              {hotels.map(h => (
-                <div key={h.short_code} className="flex items-center gap-2">
-                  <Checkbox
-                    checked={selectedHotels.has(h.short_code)}
-                    onCheckedChange={() => toggleHotel(h.short_code)}
-                    className="flex-shrink-0"
-                  />
-                  <span className={`text-xs w-14 truncate ${selectedHotels.has(h.short_code) ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{h.short_code}</span>
-                  <Input
-                    type="number"
-                    min="0" max="100"
-                    className={`h-8 text-xs ${h.short_code === 'CORP' && corpLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
-                    value={Math.round((form.allocations?.[h.short_code] || 0) * 100)}
-                    onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
-                  />
-                  <span className="text-xs text-muted-foreground">%</span>
-                  {h.short_code === 'CORP' && (
+              {hotels.map(h => {
+                const isLocked = lockedHotels.has(h.short_code);
+                return (
+                  <div key={h.short_code} className="flex items-center gap-2">
+                    <Checkbox
+                      checked={selectedHotels.has(h.short_code)}
+                      onCheckedChange={() => toggleHotel(h.short_code)}
+                      className="flex-shrink-0"
+                    />
+                    <span className={`text-xs w-14 truncate ${selectedHotels.has(h.short_code) ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{h.short_code}</span>
+                    <Input
+                      type="number"
+                      min="0" max="100"
+                      className={`h-8 text-xs ${isLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
+                      value={Math.round((form.allocations?.[h.short_code] || 0) * 100)}
+                      onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
+                    />
+                    <span className="text-xs text-muted-foreground">%</span>
                     <button
                       type="button"
-                      onClick={toggleCorpLock}
-                      title={corpLocked ? 'Unlock CORP' : 'Lock CORP % and spread the rest evenly'}
+                      onClick={() => toggleLock(h.short_code)}
+                      title={isLocked ? 'Unlock this hotel' : 'Lock this % and spread the rest'}
                       className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors"
                     >
-                      {corpLocked
+                      {isLocked
                         ? <Lock className="w-3.5 h-3.5 text-primary" />
                         : <Unlock className="w-3.5 h-3.5 text-muted-foreground" />}
                     </button>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
