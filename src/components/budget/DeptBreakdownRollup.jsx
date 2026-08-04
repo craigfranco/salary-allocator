@@ -92,14 +92,21 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
               <td className="px-4 py-3 text-xs font-bold uppercase tracking-wider sticky left-0 bg-primary/5">Total</td>
               {propertyHotels.map(h => {
                 const colTotal = DEPTS.reduce((s, d) => s + matrix[d.key][h.short_code], 0);
+                const rev = h.room_revenue_budget || 0;
+                const colPct = rev > 0 ? (colTotal / rev) * 100 : 0;
                 return (
                   <td key={h.short_code} className="px-3 py-3 text-center tabular-nums text-xs font-bold">
-                    {colTotal > 0 ? formatCurrency(colTotal) : <span className="text-muted-foreground/40">—</span>}
+                    {colTotal > 0 ? (
+                      <div>
+                        <div>{formatCurrency(colTotal)}</div>
+                        <div className="text-[10px] text-muted-foreground font-normal">{rev > 0 ? `${colPct.toFixed(1)}%` : '—'}</div>
+                      </div>
+                    ) : <span className="text-muted-foreground/40">—</span>}
                   </td>
                 );
               })}
               <td className="px-3 py-3 text-center tabular-nums text-sm font-bold bg-primary/10">{formatCurrency(grandTotal)}</td>
-              <td className="px-3 py-3 text-center tabular-nums text-sm font-bold bg-primary/10">100%</td>
+              <td className="px-3 py-3 text-center tabular-nums text-sm font-bold bg-primary/10">{totalRoomRev > 0 ? `${((grandTotal / totalRoomRev) * 100).toFixed(1)}%` : '—'}</td>
             </tr>
           </tfoot>
         </table>
