@@ -14,7 +14,7 @@ export default function ScenarioManager({ employees, onRestore }) {
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
   const [diffTarget, setDiffTarget] = useState(null);
-  const { activeScenario, setActiveScenario, scenarioData, setScenarioData } = useScenario();
+  const { activeScenario, setActiveScenario, scenarioData, restoreScenario } = useScenario();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const qc = useQueryClient();
@@ -69,9 +69,7 @@ export default function ScenarioManager({ employees, onRestore }) {
 
   const handleConfirmRestore = () => {
     if (!diffTarget) return;
-    const snapshotCopy = Array.isArray(diffTarget.snapshot) ? JSON.parse(JSON.stringify(diffTarget.snapshot)) : [];
-    setScenarioData(snapshotCopy);
-    setActiveScenario({ id: diffTarget.id, name: diffTarget.name });
+    restoreScenario(diffTarget);
     setDiffTarget(null);
   };
 

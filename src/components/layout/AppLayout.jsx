@@ -24,7 +24,7 @@ export default function AppLayout() {
   const [diffTarget, setDiffTarget] = useState(null);
   const location = useLocation();
   const { dark, toggle } = useTheme();
-  const { activeScenario, setActiveScenario, scenarioData, setScenarioData } = useScenario();
+  const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario();
 
   const { data: scenarios = [] } = useQuery({
     queryKey: ['scenarios'],
@@ -45,9 +45,7 @@ export default function AppLayout() {
   }, [scenarios]);
 
   const doRestore = (scenario) => {
-    const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
-    setScenarioData(snapshotCopy);
-    setActiveScenario({ id: scenario.id, name: scenario.name });
+    restoreScenario(scenario);
     setScenarioOpen(false);
     setDiffTarget(null);
   };
@@ -64,8 +62,7 @@ export default function AppLayout() {
   };
 
   const handleClearScenario = () => {
-    setActiveScenario(null);
-    setScenarioData(null);
+    clearScenario();
     setScenarioOpen(false);
   };
 
