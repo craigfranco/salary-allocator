@@ -31,6 +31,12 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
 
   const grandTotal = Object.values(deptTotals).reduce((s, v) => s + v, 0);
 
+  // Column (per-hotel) totals
+  const colTotals = {};
+  propertyHotels.forEach(h => {
+    colTotals[h.short_code] = DEPTS.reduce((s, d) => s + matrix[d.key][h.short_code], 0);
+  });
+
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
       <div className="px-5 py-4 border-b border-border bg-muted/30">
@@ -48,6 +54,7 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
                 </th>
               ))}
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-foreground text-center bg-muted/20">Total</th>
+              <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-foreground text-center bg-muted/20">% Total</th>
             </tr>
           </thead>
           <tbody>
@@ -59,12 +66,26 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
                     <span className={`text-xs font-semibold ${d.text}`}>{d.label}</span>
                   </div>
                 </td>
-                {propertyHotels.map(h => (
-                  <td key={h.short_code} className="px-3 py-3 text-center tabular-nums text-xs font-medium">
-                    {matrix[d.key][h.short_code] > 0 ? formatCurrency(matrix[d.key][h.short_code]) : <span className="text-muted-foreground/40">—</span>}
-                  </td>
-                ))}
-                <td className="px-3 py-3 text-center tabular-nums text-xs font-bold bg-muted/20">{formatCurrency(deptTotals[d.key])}</td>
+                {propertyHotels.map(h => {
+                  const val = matrix[d.key][h.short_code];
+                  const share = colTotals[h.short_code] > 0 ? (val / colTotals[h.short_code]) * 100 : 0;
+                  return (
+                    <td key={h.short_code} className="px-3 py-3 text-center tabular-nums text-xs font-medium">
+                      {val > 0 ? (
+                        <div>
+                          <div>{formatCurrency(val)}</div>
+                          <div className="text-[10px] text-muted-foreground font-normal">{share.toFixed(1)}%</div>
+                        </div>
+                      ) : <span className="text-muted-foreground/40">—</span>}
+                    </td>
+                  );
+                })}
+                <td className="px-3 py-3 text-center tabular-nums text-xs font-bold bg-muted/20">
+                  {deptTotals[d.key] > 0 ? formatCurrency(deptTotals[d.key]) : <span className="text-muted-foreground/40">—</span>}
+                </td>
+                <td className="px-3 py-3 text-center tabular-nums text-xs font-bold bg-muted/20">
+                  {grandTotal > 0 ? `${((deptTotals[d.key] / grandTotal) * 100).toFixed(1)}%` : '—'}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -80,6 +101,7 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
                 );
               })}
               <td className="px-3 py-3 text-center tabular-nums text-sm font-bold bg-primary/10">{formatCurrency(grandTotal)}</td>
+              <td className="px-3 py-3 text-center tabular-nums text-sm font-bold bg-primary/10">100%</td>
             </tr>
           </tfoot>
         </table>
