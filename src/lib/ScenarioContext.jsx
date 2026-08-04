@@ -11,29 +11,19 @@ const ScenarioContext = createContext({
 
 export function ScenarioProvider({ children }) {
   const [activeScenario, setActiveScenario] = useState(null); // { id, name }
-  // Per-scenario working copies so edits persist when switching between scenarios.
-  const [cache, setCache] = useState({}); // { [scenarioId]: employee[] }
+  // Transient working copy of the currently-displayed scenario's saved snapshot.
+  const [scenarioData, setScenarioData] = useState(null);
 
-  const scenarioData = activeScenario ? cache[activeScenario.id] ?? null : null;
-
-  const setScenarioData = (data) => {
-    if (!activeScenario?.id) return;
-    setCache(prev => ({ ...prev, [activeScenario.id]: data }));
-  };
-
-  // Switch to a scenario, preserving any previously-edited working copy for it.
-  // Only seed from the saved snapshot the first time the scenario is loaded.
+  // Selecting a scenario just displays its saved snapshot as-is (no edit application).
   const restoreScenario = (scenario) => {
+    const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
     setActiveScenario({ id: scenario.id, name: scenario.name });
-    setCache(prev => {
-      if (prev[scenario.id] != null) return prev;
-      const snapshotCopy = Array.isArray(scenario.snapshot) ? JSON.parse(JSON.stringify(scenario.snapshot)) : [];
-      return { ...prev, [scenario.id]: snapshotCopy };
-    });
+    setScenarioData(snapshotCopy);
   };
 
   const clearScenario = () => {
     setActiveScenario(null);
+    setScenarioData(null);
   };
 
   return (

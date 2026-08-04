@@ -8,12 +8,10 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { BookMarked, Save, Trash2, ChevronDown, Check } from 'lucide-react';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useToast } from '@/components/ui/use-toast';
-import ScenarioDiffDialog from './ScenarioDiffDialog';
 
 export default function ScenarioManager({ employees, onRestore }) {
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
-  const [diffTarget, setDiffTarget] = useState(null);
   const { activeScenario, setActiveScenario, scenarioData, restoreScenario } = useScenario();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -63,19 +61,8 @@ export default function ScenarioManager({ employees, onRestore }) {
   };
 
   const handleRestore = (scenario) => {
-    setDiffTarget(scenario);
+    restoreScenario(scenario);
     setOpen(false);
-  };
-
-  const handleConfirmRestore = () => {
-    if (!diffTarget) return;
-    restoreScenario(diffTarget);
-    setDiffTarget(null);
-  };
-
-  const getCurrentEmployees = () => {
-    if (Array.isArray(scenarioData)) return scenarioData;
-    return Array.isArray(employees) ? employees : [];
   };
 
   return (
@@ -186,15 +173,6 @@ export default function ScenarioManager({ employees, onRestore }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <ScenarioDiffDialog
-        open={!!diffTarget}
-        onClose={() => setDiffTarget(null)}
-        onConfirm={handleConfirmRestore}
-        currentEmployees={getCurrentEmployees()}
-        scenarioName={diffTarget?.name || ''}
-        scenarioSnapshot={diffTarget?.snapshot || []}
-      />
     </>
   );
 }
