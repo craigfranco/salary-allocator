@@ -105,13 +105,13 @@ export default function ScenarioDiffDialog({ open, onClose, onConfirm, currentEm
             </>
           ) : (
             <p className="text-sm text-muted-foreground">
-              No changes detected — the current state matches this scenario.
+              No changes detected — the current state matches this scenario. You can still restore it to set it as the active scenario.
             </p>
           )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={onConfirm} disabled={!hasChanges} className="bg-primary text-primary-foreground">
+          <Button onClick={onConfirm} className="bg-primary text-primary-foreground">
             Restore Scenario
           </Button>
         </DialogFooter>
