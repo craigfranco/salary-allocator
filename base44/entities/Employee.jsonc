@@ -44,6 +44,14 @@
     "sort_order": {
       "type": "number",
       "description": "Optional sort order for org chart display. Lower numbers appear first among siblings."
+    },
+    "locked_hotels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Hotel short codes whose allocation % is locked (held fixed) when spreading the remainder.",
+      "default": []
     }
   },
   "required": [

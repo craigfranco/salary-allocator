@@ -9,7 +9,7 @@ import { Lock, Unlock } from 'lucide-react';
 
 export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [] }) {
   const [form, setForm] = useState(employee || {
-    name: '', title: '', department: 'REVENUE', annual_salary: 0, allocations: {}, manager_id: '', suppressed: false
+    name: '', title: '', department: 'REVENUE', annual_salary: 0, allocations: {}, manager_id: '', suppressed: false, locked_hotels: []
   });
   const [selectedHotels, setSelectedHotels] = useState(() => {
     if (employee?.allocations) {
@@ -18,7 +18,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     }
     return new Set(hotels.map(h => h.short_code));
   });
-  const [lockedHotels, setLockedHotels] = useState(new Set());
+  const [lockedHotels, setLockedHotels] = useState(new Set(employee?.locked_hotels || []));
 
   // Spread the remainder (1 - lockedSum) evenly across unlocked, selected hotels.
   const spreadRemainderEvenly = (lockedSet) => {
@@ -135,7 +135,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
 
   const handleSubmit = () => {
     if (!form.name || !form.title || !form.annual_salary) return;
-    onSave(form);
+    onSave({ ...form, locked_hotels: Array.from(lockedHotels) });
   };
 
   return (
