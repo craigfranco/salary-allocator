@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, DollarSign, Building2, TrendingUp, TrendingDown } from 'lucide-react';
 import HotelBudgetCard from '@/components/budget/HotelBudgetCard';
 import HotelDrillDown from '@/components/budget/HotelDrillDown';
+import DeptBreakdownRollup from '@/components/budget/DeptBreakdownRollup';
 import StatCard from '@/components/ui/StatCard';
 import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -69,6 +70,8 @@ export default function HotelBudgets() {
         <StatCard label="Over Budget" value={overBudgetCount} suffix=" hotels" icon={TrendingDown} color={overBudgetCount > 0 ? 'rose' : 'teal'} />
       </div>
 
+      <DeptBreakdownRollup employees={activeEmployees} hotels={sortedHotels} />
+
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {sortedHotels.map(hotel => {
           const empCount = activeEmployees.filter(e => (e.allocations?.[hotel.short_code] || 0) > 0).length;
@@ -78,6 +81,7 @@ export default function HotelBudgets() {
               hotel={hotel}
               allocatedTotal={getHotelAllocatedTotal(activeEmployees, hotel.short_code)}
               employeeCount={empCount}
+              employees={activeEmployees}
               onUpdate={(data) => updateMutation.mutate({ id: hotel.id, data })}
               onClick={() => setDrillHotel(hotel)}
             />

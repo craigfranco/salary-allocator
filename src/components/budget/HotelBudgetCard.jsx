@@ -5,12 +5,26 @@ import { Building2, Pencil, Check, X, Users } from 'lucide-react';
 import { formatCurrency } from '@/lib/helpers';
 import { HOTEL_COLORS } from '@/lib/helpers';
 
-export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, onUpdate, onClick }) {
+const DEPTS = [
+  { key: 'REVENUE', label: 'Revenue', dot: 'bg-teal-500', text: 'text-teal-600 dark:text-teal-400' },
+  { key: 'ECOMM',   label: 'E-Comm',  dot: 'bg-orange-500', text: 'text-orange-600 dark:text-orange-400' },
+  { key: 'SALES',   label: 'S&M',     dot: 'bg-purple-500', text: 'text-purple-600 dark:text-purple-400' },
+];
+
+export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, employees = [], onUpdate, onClick }) {
   const [editing, setEditing] = useState(false);
   const [roomRev, setRoomRev] = useState(hotel.room_revenue_budget);
   const [payroll, setPayroll] = useState(hotel.sm_payroll_budget);
 
   const budget = hotel.sm_payroll_budget || 0;
+  const deptBreakdown = DEPTS.map(d => {
+    const total = employees.reduce((s, e) => {
+      if (e.suppressed || e.exclude_from_table || e.department !== d.key) return s;
+      const pct = e.allocations?.[hotel.short_code] || 0;
+      return s + pct * (e.annual_salary || 0);
+    }, 0);
+    return { ...d, total };
+  });
   const remaining = budget - allocatedTotal;
   const pctUsed = budget > 0 ? Math.min((allocatedTotal / budget) * 100, 100) : 0;
   const isOver = budget > 0 && allocatedTotal > budget;
@@ -86,6 +100,29 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
               <div className={`rounded-xl p-3 ${isOver ? 'bg-red-500/10' : 'bg-emerald-500/10'}`}>
                 <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Remaining</p>
                 <p className={`text-sm font-bold ${isOver ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>{formatCurrency(remaining)}</p>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/60 overflow-hidden">
+              <div className="px-3 py-2 bg-muted/20 border-b border-border/60">
+                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">By Department</span>
+              </div>
+              <div className="divide-y divide-border/40">
+                {deptBreakdown.map(d => {
+                  const share = allocatedTotal > 0 ? (d.total / allocatedTotal) * 100 : 0;
+                  return (
+                    <div key={d.key} className="flex items-center justify-between px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${d.dot}`} />
+                        <span className={`text-xs font-semibold ${d.text}`}>{d.label}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-muted-foreground tabular-nums">{Math.round(share)}%</span>
+                        <span className="text-xs font-bold tabular-nums">{d.total > 0 ? formatCurrency(d.total) : '—'}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
