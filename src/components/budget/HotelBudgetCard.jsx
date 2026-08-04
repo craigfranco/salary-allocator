@@ -109,7 +109,8 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
               </div>
               <div className="divide-y divide-border/40">
                 {deptBreakdown.map(d => {
-                  const share = allocatedTotal > 0 ? (d.total / allocatedTotal) * 100 : 0;
+                  const rev = hotel.room_revenue_budget || 0;
+                  const pct = rev > 0 ? (d.total / rev) * 100 : 0;
                   return (
                     <div key={d.key} className="flex items-center justify-between px-3 py-2">
                       <div className="flex items-center gap-2">
@@ -117,7 +118,7 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
                         <span className={`text-xs font-semibold ${d.text}`}>{d.label}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-muted-foreground tabular-nums">{Math.round(share)}%</span>
+                        <span className="text-[10px] text-muted-foreground tabular-nums">{rev > 0 ? `${pct.toFixed(1)}%` : '—'}</span>
                         <span className="text-xs font-bold tabular-nums">{d.total > 0 ? formatCurrency(d.total) : '—'}</span>
                       </div>
                     </div>

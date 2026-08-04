@@ -31,11 +31,8 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
 
   const grandTotal = Object.values(deptTotals).reduce((s, v) => s + v, 0);
 
-  // Column (per-hotel) totals
-  const colTotals = {};
-  propertyHotels.forEach(h => {
-    colTotals[h.short_code] = DEPTS.reduce((s, d) => s + matrix[d.key][h.short_code], 0);
-  });
+  // Total room revenue across properties
+  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
 
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
@@ -54,7 +51,7 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
                 </th>
               ))}
               <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-foreground text-center bg-muted/20">Total</th>
-              <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-foreground text-center bg-muted/20">% Total</th>
+              <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-foreground text-center bg-muted/20">% of Rev</th>
             </tr>
           </thead>
           <tbody>
@@ -68,13 +65,14 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
                 </td>
                 {propertyHotels.map(h => {
                   const val = matrix[d.key][h.short_code];
-                  const share = colTotals[h.short_code] > 0 ? (val / colTotals[h.short_code]) * 100 : 0;
+                  const rev = h.room_revenue_budget || 0;
+                  const pct = rev > 0 ? (val / rev) * 100 : 0;
                   return (
                     <td key={h.short_code} className="px-3 py-3 text-center tabular-nums text-xs font-medium">
                       {val > 0 ? (
                         <div>
                           <div>{formatCurrency(val)}</div>
-                          <div className="text-[10px] text-muted-foreground font-normal">{share.toFixed(1)}%</div>
+                          <div className="text-[10px] text-muted-foreground font-normal">{rev > 0 ? `${pct.toFixed(1)}%` : '—'}</div>
                         </div>
                       ) : <span className="text-muted-foreground/40">—</span>}
                     </td>
@@ -84,7 +82,7 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
                   {deptTotals[d.key] > 0 ? formatCurrency(deptTotals[d.key]) : <span className="text-muted-foreground/40">—</span>}
                 </td>
                 <td className="px-3 py-3 text-center tabular-nums text-xs font-bold bg-muted/20">
-                  {grandTotal > 0 ? `${((deptTotals[d.key] / grandTotal) * 100).toFixed(1)}%` : '—'}
+                  {totalRoomRev > 0 ? `${((deptTotals[d.key] / totalRoomRev) * 100).toFixed(1)}%` : '—'}
                 </td>
               </tr>
             ))}
