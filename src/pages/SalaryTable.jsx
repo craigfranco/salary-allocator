@@ -82,13 +82,17 @@ export default function SalaryTable() {
   const handleSave = (form) => {
     if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
-      const empIdx = updated.findIndex(e => e.id === editEmp.id);
-      if (empIdx !== -1) {
-        updated[empIdx] = { ...updated[empIdx], ...form };
-        setScenarioData(updated);
-        setFormOpen(false);
-        setEditEmp(null);
+      if (editEmp) {
+        const empIdx = updated.findIndex(e => e.id === editEmp.id);
+        if (empIdx !== -1) {
+          updated[empIdx] = { ...updated[empIdx], ...form };
+        }
+      } else {
+        updated.push({ ...form, id: 'new_' + Date.now() });
       }
+      setScenarioData(updated);
+      setFormOpen(false);
+      setEditEmp(null);
     } else if (editEmp) {
       updateMutation.mutate({ id: editEmp.id, data: form });
     } else {
