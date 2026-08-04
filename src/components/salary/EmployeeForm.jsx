@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Lock, Unlock } from 'lucide-react';
 
 export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [] }) {
   const [form, setForm] = useState(employee || {
@@ -17,6 +18,26 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     }
     return new Set(hotels.map(h => h.short_code));
   });
+  const [corpLocked, setCorpLocked] = useState(false);
+
+  // Hold CORP at a fixed pct and spread the remainder evenly across selected non-CORP hotels.
+  const spreadExcludingCorp = (corpPct) => {
+    const remainder = Math.max(0, 1 - corpPct);
+    const others = hotels.filter(h => h.short_code !== 'CORP' && selectedHotels.has(h.short_code));
+    const each = others.length > 0 ? remainder / others.length : 0;
+    const newAllocs = {};
+    hotels.forEach(h => {
+      if (h.short_code === 'CORP') newAllocs[h.short_code] = corpPct;
+      else newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? each : 0;
+    });
+    setForm(prev => ({ ...prev, allocations: newAllocs }));
+  };
+
+  const toggleCorpLock = () => {
+    const next = !corpLocked;
+    setCorpLocked(next);
+    if (next) spreadExcludingCorp(form.allocations?.CORP || 0);
+  };
 
   const toggleHotel = (code) => {
     setSelectedHotels(prev => {
@@ -28,6 +49,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   };
 
   const applyEvenSplit = () => {
+    if (corpLocked) { spreadExcludingCorp(form.allocations?.CORP || 0); return; }
     const selected = hotels.filter(h => selectedHotels.has(h.short_code));
     if (selected.length === 0) return;
     const even = 1 / selected.length;
@@ -75,9 +97,11 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   };
 
   const handleAllocChange = (code, value) => {
+    const v = parseFloat(value) / 100 || 0;
+    if (code === 'CORP' && corpLocked) { spreadExcludingCorp(v); return; }
     setForm(prev => ({
       ...prev,
-      allocations: { ...prev.allocations, [code]: parseFloat(value) / 100 || 0 }
+      allocations: { ...prev.allocations, [code]: v }
     }));
   };
 
@@ -227,11 +251,23 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                   <Input
                     type="number"
                     min="0" max="100"
-                    className="h-8 text-xs"
+                    className={`h-8 text-xs ${h.short_code === 'CORP' && corpLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
                     value={Math.round((form.allocations?.[h.short_code] || 0) * 100)}
                     onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
                   />
                   <span className="text-xs text-muted-foreground">%</span>
+                  {h.short_code === 'CORP' && (
+                    <button
+                      type="button"
+                      onClick={toggleCorpLock}
+                      title={corpLocked ? 'Unlock CORP' : 'Lock CORP % and spread the rest evenly'}
+                      className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors"
+                    >
+                      {corpLocked
+                        ? <Lock className="w-3.5 h-3.5 text-primary" />
+                        : <Unlock className="w-3.5 h-3.5 text-muted-foreground" />}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
