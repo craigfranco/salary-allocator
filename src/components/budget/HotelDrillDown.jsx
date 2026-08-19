@@ -38,7 +38,7 @@ export default function HotelDrillDown({ hotel, employees, onClose, onEditEmploy
       <div className="flex-1 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
-      <div className="w-full max-w-xl bg-background border-l border-border flex flex-col overflow-hidden shadow-2xl animate-in slide-in-from-right duration-300">
+      <div className="w-full max-w-3xl bg-background border-l border-border flex flex-col overflow-hidden shadow-2xl animate-in slide-in-from-right duration-300">
         {/* Header */}
         <div className="relative overflow-hidden" style={{ background: `linear-gradient(135deg, ${accent.hex}cc, ${accent.hex}88)` }}>
           <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.4) 0%, transparent 60%)' }} />
