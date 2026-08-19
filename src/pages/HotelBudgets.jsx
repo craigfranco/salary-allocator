@@ -99,11 +99,19 @@ export default function HotelBudgets() {
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="Total S&M Budget" value={totalBudget} prefix="$" icon={DollarSign} color="blue" />
         <StatCard label="Total Allocated" value={totalAllocated} prefix="$" icon={TrendingUp} color={totalAllocated > totalBudget ? 'rose' : 'teal'} />
         <StatCard label="Total Room Revenue" value={totalRoomRev} prefix="$" icon={Building2} color="purple" />
         <StatCard label="Over Budget" value={overBudgetCount} suffix=" hotels" icon={TrendingDown} color={overBudgetCount > 0 ? 'rose' : 'teal'} />
+        <StatCard
+          label="Budget Overage"
+          value={totalAllocated > totalBudget ? totalAllocated - totalBudget : 0}
+          prefix="$"
+          icon={TrendingDown}
+          color={totalAllocated > totalBudget ? 'rose' : 'teal'}
+          trend={totalAllocated > totalBudget ? `${overBudgetCount} hotel${overBudgetCount !== 1 ? 's' : ''} over budget` : 'Within budget'}
+        />
       </div>
 
       <DeptBreakdownRollup employees={activeEmployees} hotels={sortedHotels} />
