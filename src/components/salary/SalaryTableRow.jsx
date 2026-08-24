@@ -22,13 +22,13 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
 
   return (
     <tr className={`border-b border-border/40 transition-colors ${rowBg}`}>
-      <td className={`px-3 py-2.5 sticky left-0 z-10 ${suppressed ? 'bg-muted/10' : isOdd ? 'bg-muted/20' : 'bg-card'}`}>
+      <td className={`px-2 py-2 sticky left-0 z-10 ${suppressed ? 'bg-muted/10' : isOdd ? 'bg-muted/20' : 'bg-card'}`}>
         <Badge variant="outline" className={`text-[10px] font-semibold whitespace-nowrap ${getDeptColor(employee.department)}`}>
           {employee.department}
         </Badge>
       </td>
-      <td className="px-3 py-2.5 text-xs text-muted-foreground max-w-[160px] truncate">{employee.title}</td>
-      <td className="px-3 py-2.5 text-sm font-medium whitespace-nowrap">
+      <td className="px-2 py-2 text-xs text-muted-foreground max-w-[120px] truncate">{employee.title}</td>
+      <td className="px-2 py-2 text-sm font-medium whitespace-nowrap">
         <div className="flex items-center gap-1.5">
           {suppressed && <EyeOff className="w-3 h-3 text-muted-foreground flex-shrink-0" />}
           <span
@@ -37,12 +37,12 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
           >{employee.name}</span>
         </div>
       </td>
-      <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">{managerName || <span className="text-border">—</span>}</td>
-      <td className={`px-3 py-2.5 text-sm font-semibold text-right whitespace-nowrap tabular-nums ${suppressed ? 'text-muted-foreground/50 line-through' : ''}`}>
+      <td className="px-2 py-2 text-xs text-muted-foreground whitespace-nowrap max-w-[100px] truncate">{managerName || <span className="text-border">—</span>}</td>
+      <td className={`px-2 py-2 text-sm font-semibold text-right whitespace-nowrap tabular-nums ${suppressed ? 'text-muted-foreground/50 line-through' : ''}`}>
         {isRedacted ? <span className="font-mono tracking-widest text-muted-foreground">██████</span> : formatCurrency(employee.annual_salary)}
       </td>
-      <td className="px-2 py-2.5 text-center">
-        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>
+      <td className="px-1.5 py-2 text-center">
+        <span className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>
           {Math.round(total * 100)}%
         </span>
       </td>

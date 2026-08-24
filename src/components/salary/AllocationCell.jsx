@@ -46,7 +46,7 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
 
   if (editing) {
     return (
-      <td className="px-1.5 py-1">
+      <td className="px-1 py-1">
         <div className="flex flex-col items-center gap-0.5">
           <input
             ref={inputRef}
@@ -56,7 +56,7 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
             onChange={e => setInputVal(e.target.value)}
             onBlur={handleSave}
             onKeyDown={handleKey}
-            className="w-16 h-7 text-center text-sm border border-primary rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-12 h-7 text-center text-xs border border-primary rounded-md bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <span className={`text-[10px] font-bold tabular-nums ${liveTotalColor}`}>
             total: {liveTotal}%
@@ -68,7 +68,7 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
 
   return (
     <td
-      className={`px-1.5 py-1 text-center transition-colors group relative ${
+      className={`px-1 py-1 text-center transition-colors group relative ${
         disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:bg-primary/5'
       }`}
       onClick={handleStart}

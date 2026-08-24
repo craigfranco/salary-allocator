@@ -214,19 +214,19 @@ export default function SalaryTable() {
           <table className="w-full text-left">
             <thead>
               <tr style={{ backgroundColor: '#2d4b5e' }}>
-                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground sticky left-0 z-10" style={{ backgroundColor: '#2d4b5e' }}>Dept</th>
-                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Title</th>
-                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Name</th>
-                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Reports To</th>
-                <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-right">Salary</th>
-                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center">Total</th>
+                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground sticky left-0 z-10" style={{ backgroundColor: '#2d4b5e' }}>Dept</th>
+                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Title</th>
+                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Name</th>
+                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Reports To</th>
+                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-right">Salary</th>
+                <th className="px-1.5 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center min-w-[52px]">Total</th>
                 {sortedHotels.map(h => (
-                  <th key={h.short_code} className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center min-w-[88px]">
+                  <th key={h.short_code} className="px-1.5 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center min-w-[64px]">
                     {HOTEL_SHORT_NAMES[h.short_code] || h.short_code}
                   </th>
                 ))}
-                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center">Total</th>
-                <th className="px-2 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Actions</th>
+                <th className="px-1.5 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground text-center min-w-[52px]">Total</th>
+                <th className="px-1.5 py-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground">Actions</th>
               </tr>
             </thead>
             <tbody>
