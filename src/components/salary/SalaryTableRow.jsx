@@ -38,7 +38,7 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
         </div>
       </td>
       <td className="px-3 py-2.5 text-xs text-muted-foreground whitespace-nowrap">{managerName || <span className="text-border">—</span>}</td>
-      <td className="px-3 py-2.5 text-sm font-semibold text-right whitespace-nowrap tabular-nums">
+      <td className={`px-3 py-2.5 text-sm font-semibold text-right whitespace-nowrap tabular-nums ${suppressed ? 'text-muted-foreground/50 line-through' : ''}`}>
         {isRedacted ? <span className="font-mono tracking-widest text-muted-foreground">██████</span> : formatCurrency(employee.annual_salary)}
       </td>
       <td className="px-2 py-2.5 text-center">
@@ -56,6 +56,7 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
           hotelName={hotel.name}
           currentTotal={totalPct}
           isRedacted={isRedacted}
+          suppressed={suppressed}
         />
       ))}
       <td className="px-2 py-2.5">

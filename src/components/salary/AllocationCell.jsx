@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { formatCurrency } from '@/lib/helpers';
 
-export default function AllocationCell({ value, salary, onSave, disabled, hotelName, currentTotal, onEditingChange, isRedacted }) {
+export default function AllocationCell({ value, salary, onSave, disabled, hotelName, currentTotal, onEditingChange, isRedacted, suppressed }) {
   const [editing, setEditing] = useState(false);
   const [inputVal, setInputVal] = useState('');
   const inputRef = useRef(null);
@@ -76,8 +76,8 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
     >
       {displayPct > 0 ? (
         <div className="flex flex-col items-center gap-0.5">
-          <span className="text-sm font-semibold text-foreground">{displayPct}%</span>
-          <span className="text-[10px] text-muted-foreground leading-none font-mono">{isRedacted ? '████' : formatCurrency(dollars)}</span>
+          <span className={`text-sm font-semibold ${suppressed ? 'text-muted-foreground/50 line-through' : 'text-foreground'}`}>{displayPct}%</span>
+          <span className={`text-[10px] leading-none font-mono ${suppressed ? 'text-muted-foreground/40 line-through' : 'text-muted-foreground'}`}>{isRedacted ? '████' : formatCurrency(dollars)}</span>
         </div>
       ) : (
         <span className="text-muted-foreground/30 text-xs group-hover:text-muted-foreground transition-colors">—</span>
