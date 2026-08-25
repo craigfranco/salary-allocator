@@ -82,6 +82,8 @@ export default function HotelBudgets() {
   const totalAllocated = propertyHotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
   const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
   const overBudgetCount = propertyHotels.filter(h => getHotelAllocatedTotal(activeEmployees, h.short_code) > (h.sm_payroll_budget || 0)).length;
+  const corpAllocated = getHotelAllocatedTotal(activeEmployees, 'CORP');
+  const corpEmpCount = activeEmployees.filter(e => (e.allocations?.CORP || 0) > 0).length;
 
   return (
     <div className="space-y-6">
@@ -99,9 +101,10 @@ export default function HotelBudgets() {
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
         <StatCard label="Total S&M Budget" value={totalBudget} prefix="$" icon={DollarSign} color="blue" />
         <StatCard label="Total Allocated" value={totalAllocated} prefix="$" icon={TrendingUp} color={totalAllocated > totalBudget ? 'rose' : 'teal'} />
+        <StatCard label="Allocated to Corp" value={corpAllocated} prefix="$" icon={Building2} color="amber" trend={`${corpEmpCount} employee${corpEmpCount !== 1 ? 's' : ''}`} />
         <StatCard label="Total Room Revenue" value={totalRoomRev} prefix="$" icon={Building2} color="purple" />
         <StatCard label="Over Budget" value={overBudgetCount} suffix=" hotels" icon={TrendingDown} color={overBudgetCount > 0 ? 'rose' : 'teal'} />
         <StatCard
