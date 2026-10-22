@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Building2, Pencil, Check, X, Users } from 'lucide-react';
+import { Building2, Pencil, Check, X, Users, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/helpers';
 import { HOTEL_COLORS } from '@/lib/helpers';
 
@@ -11,7 +11,7 @@ const DEPTS = [
   { key: 'SALES',   label: 'S&M',     dot: 'bg-purple-500', text: 'text-purple-600 dark:text-purple-400' },
 ];
 
-export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, employees = [], onUpdate, onClick }) {
+export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, employees = [], onUpdate, onDelete, onClick }) {
   const [editing, setEditing] = useState(false);
   const [roomRev, setRoomRev] = useState(hotel.room_revenue_budget);
   const [payroll, setPayroll] = useState(hotel.sm_payroll_budget);
@@ -65,6 +65,9 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
                   <Users className="w-3 h-3" />{employeeCount}
                 </span>
               )}
+              <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Remove hotel">
+                <Trash2 className="w-3.5 h-3.5" />
+              </Button>
             <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); setEditing(true); }}>
               <Pencil className="w-3.5 h-3.5" />
             </Button>

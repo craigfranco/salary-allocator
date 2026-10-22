@@ -13,12 +13,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useScenario } from '@/lib/ScenarioContext';
+import { formatCurrency as fmt } from '@/lib/helpers';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 export default function HotelBudgets() {
   const [addOpen, setAddOpen] = useState(false);
   const [drillHotel, setDrillHotel] = useState(null);
+  const [deleteHotel, setDeleteHotel] = useState(null);
   const [editEmp, setEditEmp] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 });
@@ -40,6 +46,31 @@ export default function HotelBudgets() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Hotel.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 }); },
+  });
+
+  const hotelDeleteMutation = useMutation({
+    mutationFn: async (hotel) => {
+      // Remove the hotel's allocation from all employees, then delete the hotel
+      const affected = displayEmployees.filter(e => (e.allocations?.[hotel.short_code] || 0) > 0);
+      if (activeScenario && Array.isArray(scenarioData)) {
+        const updated = JSON.parse(JSON.stringify(scenarioData));
+        updated.forEach(e => {
+          if (e.allocations) delete e.allocations[hotel.short_code];
+        });
+        setScenarioData(updated);
+      } else if (affected.length > 0) {
+        await base44.entities.Employee.bulkUpdate(
+          affected.map(e => {
+            const allocs = { ...(e.allocations || {}) };
+            delete allocs[hotel.short_code];
+            return { id: e.id, allocations: allocs };
+          })
+        );
+        qc.invalidateQueries({ queryKey: ['employees'] });
+      }
+      return base44.entities.Hotel.delete(hotel.id);
+    },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setDeleteHotel(null); },
   });
 
   const empUpdateMutation = useMutation({
@@ -130,6 +161,7 @@ export default function HotelBudgets() {
               employeeCount={empCount}
               employees={activeEmployees}
               onUpdate={(data) => updateMutation.mutate({ id: hotel.id, data })}
+              onDelete={() => setDeleteHotel(hotel)}
               onClick={() => setDrillHotel(hotel)}
             />
           );
@@ -171,6 +203,34 @@ export default function HotelBudgets() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!deleteHotel} onOpenChange={() => setDeleteHotel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Hotel</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div>
+                Are you sure you want to remove <strong>{deleteHotel?.name}</strong>?
+                {(() => {
+                  const affected = activeEmployees.filter(e => (e.allocations?.[deleteHotel?.short_code] || 0) > 0);
+                  if (affected.length === 0) return ' No employees currently have allocations to this hotel.';
+                  const total = affected.reduce((s, e) => s + (e.allocations[deleteHotel.short_code] || 0) * (e.annual_salary || 0), 0);
+                  return ` ${affected.length} employee${affected.length > 1 ? 's' : ''} currently allocate ${fmt(total)} to this hotel — those allocations will be removed.`;
+                })()}
+                {' '}This action cannot be undone.
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground"
+              onClick={() => hotelDeleteMutation.mutate(deleteHotel)}
+            >
+              Remove Hotel
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
