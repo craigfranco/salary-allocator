@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X, DollarSign, Users, Wrench } from 'lucide-react';
@@ -8,6 +8,7 @@ import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const navItems = [
   { path: '/', label: 'Salary Table', icon: TableProperties },
@@ -24,6 +25,13 @@ const navItems = [
 export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const DEPT_LABELS = { COMMERCIAL: 'Commercial', FINANCE: 'Finance', HR: 'HR', ENGINEERING: 'Engineering' };
+  const DEPT_ROUTES = { COMMERCIAL: '/', FINANCE: '/finance', HR: '/hr', ENGINEERING: '/engineering' };
+  const routeDept = location.pathname.startsWith('/finance') ? 'FINANCE'
+    : location.pathname.startsWith('/hr') ? 'HR'
+    : location.pathname.startsWith('/engineering') ? 'ENGINEERING'
+    : 'COMMERCIAL';
   const { dark, toggle } = useTheme();
   const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario();
 
@@ -65,9 +73,23 @@ export default function AppLayout() {
                 style={{ filter: 'brightness(0) invert(1)' }}
               />
               <div>
-                <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Commercial Talent</h1>
-                <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">Salary Allocations</p>
+                <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Salary Allocations</h1>
+                <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">{DEPT_LABELS[routeDept]}</p>
               </div>
+              <Select value={routeDept} onValueChange={(v) => navigate(DEPT_ROUTES[v])}>
+                <SelectTrigger
+                  className="h-10 px-4 rounded-xl bg-white/10 border-white/30 text-white font-semibold shadow hover:bg-white/20 transition-colors"
+                  title="Switch department"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="COMMERCIAL">Commercial</SelectItem>
+                  <SelectItem value="FINANCE">Finance</SelectItem>
+                  <SelectItem value="HR">HR</SelectItem>
+                  <SelectItem value="ENGINEERING">Engineering</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center gap-3">
               <ExecPDFButton />
