@@ -1,0 +1,50 @@
+{
+  "name": "DeptStaff",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Full name of the team member"
+    },
+    "title": {
+      "type": "string",
+      "description": "Job title"
+    },
+    "department": {
+      "type": "string",
+      "enum": [
+        "FINANCE",
+        "HR",
+        "ENGINEERING"
+      ],
+      "description": "Department this member belongs to"
+    },
+    "annual_salary": {
+      "type": "number",
+      "description": "Annual salary in dollars"
+    },
+    "allocations": {
+      "type": "object",
+      "description": "Hotel allocation percentages as decimals (e.g. 0.40 = 40%). Keys are hotel short codes."
+    },
+    "suppressed": {
+      "type": "boolean",
+      "description": "If true, hide this member from the table and calculations",
+      "default": false
+    },
+    "locked_hotels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Hotel short codes whose allocation % is locked (held fixed) when spreading the remainder.",
+      "default": []
+    }
+  },
+  "required": [
+    "name",
+    "title",
+    "department",
+    "annual_salary"
+  ]
+}

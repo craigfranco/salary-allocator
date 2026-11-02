@@ -7,9 +7,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Lock, Unlock } from 'lucide-react';
 
-export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [] }) {
+const DEPARTMENT_LABELS = { FINANCE: 'Finance', HR: 'Human Resources', ENGINEERING: 'Engineering' };
+
+export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [], fixedDepartment }) {
   const [form, setForm] = useState(employee || {
-    name: '', title: '', department: 'REVENUE', annual_salary: 0, allocations: {}, manager_id: '', suppressed: false, locked_hotels: []
+    name: '', title: '', department: fixedDepartment || 'REVENUE', annual_salary: 0, allocations: {}, manager_id: '', suppressed: false, locked_hotels: []
   });
   const [selectedHotels, setSelectedHotels] = useState(() => {
     if (employee?.allocations) {
@@ -158,14 +160,18 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Department</Label>
-              <Select value={form.department} onValueChange={(v) => handleChange('department', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="REVENUE">Revenue</SelectItem>
-                  <SelectItem value="ECOMM">E-Commerce</SelectItem>
-                  <SelectItem value="SALES">Sales & Marketing</SelectItem>
-                </SelectContent>
-              </Select>
+              {fixedDepartment ? (
+                <Input value={DEPARTMENT_LABELS[fixedDepartment] || fixedDepartment} disabled />
+              ) : (
+                <Select value={form.department} onValueChange={(v) => handleChange('department', v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="REVENUE">Revenue</SelectItem>
+                    <SelectItem value="ECOMM">E-Commerce</SelectItem>
+                    <SelectItem value="SALES">Sales & Marketing</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
             </div>
             <div>
               <Label>Annual Salary</Label>

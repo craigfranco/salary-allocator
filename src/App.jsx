@@ -12,6 +12,7 @@ import OrgChart from '@/pages/OrgChart.jsx';
 import Alerts from '@/pages/Alerts';
 import Analytics from '@/pages/Analytics';
 import ScenarioComparison from '@/pages/ScenarioComparison';
+import DeptTeam from '@/pages/DeptTeam';
 import { ThemeProvider } from '@/lib/theme.jsx';
 import { ScenarioProvider } from '@/lib/ScenarioContext';
 import { RedactionProvider } from '@/lib/RedactionContext';
@@ -45,6 +46,9 @@ const AuthenticatedApp = () => {
         <Route path="/org-chart" element={<OrgChart />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/compare" element={<ScenarioComparison />} />
+        <Route path="/finance" element={<DeptTeam dept="FINANCE" />} />
+        <Route path="/hr" element={<DeptTeam dept="HR" />} />
+        <Route path="/engineering" element={<DeptTeam dept="ENGINEERING" />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

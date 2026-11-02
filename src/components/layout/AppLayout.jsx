@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X } from 'lucide-react';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X, DollarSign, Users, Wrench } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
@@ -16,6 +16,9 @@ const navItems = [
   { path: '/org-chart', label: 'Org Chart', icon: Network },
   { path: '/alerts', label: 'Alerts', icon: AlertTriangle },
   { path: '/compare', label: 'Compare', icon: GitCompare },
+  { path: '/finance', label: 'Finance', icon: DollarSign },
+  { path: '/hr', label: 'Human Resources', icon: Users },
+  { path: '/engineering', label: 'Engineering', icon: Wrench },
 ];
 
 export default function AppLayout() {
