@@ -11,28 +11,12 @@ const DEPTS = [
   { key: 'SALES',   label: 'S&M',     dot: 'bg-purple-500', text: 'text-purple-600 dark:text-purple-400' },
 ];
 
-const PAYROLL_DEPTS = [
-  { key: 'COMMERCIAL',   label: 'Commercial',   dot: 'bg-primary',    budget: (h) => h.sm_payroll_budget || 0 },
-  { key: 'FINANCE',      label: 'Finance',      dot: 'bg-sky-500',     budget: (h) => h.finance_payroll_budget || 0 },
-  { key: 'HR',           label: 'HR',           dot: 'bg-amber-500',   budget: (h) => h.hr_payroll_budget || 0 },
-  { key: 'ENGINEERING',  label: 'Engineering',  dot: 'bg-emerald-500', budget: (h) => h.engineering_payroll_budget || 0 },
-];
-
-export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, employees = [], deptStaff = [], onUpdate, onDelete, onClick }) {
+export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, employees = [], onUpdate, onDelete, onClick }) {
   const [editing, setEditing] = useState(false);
   const [roomRev, setRoomRev] = useState(hotel.total_revenue_budget);
   const [payroll, setPayroll] = useState(hotel.sm_payroll_budget);
-  const [finBudget, setFinBudget] = useState(hotel.finance_payroll_budget || 0);
-  const [hrBudget, setHrBudget] = useState(hotel.hr_payroll_budget || 0);
-  const [engBudget, setEngBudget] = useState(hotel.engineering_payroll_budget || 0);
 
   const budget = hotel.sm_payroll_budget || 0;
-  const deptAllocated = {
-    COMMERCIAL: allocatedTotal,
-    FINANCE: deptStaff.filter(s => s.department === 'FINANCE' && !s.suppressed).reduce((s, e) => s + ((e.allocations?.[hotel.short_code] || 0) * (e.annual_salary || 0)), 0),
-    HR: deptStaff.filter(s => s.department === 'HR' && !s.suppressed).reduce((s, e) => s + ((e.allocations?.[hotel.short_code] || 0) * (e.annual_salary || 0)), 0),
-    ENGINEERING: deptStaff.filter(s => s.department === 'ENGINEERING' && !s.suppressed).reduce((s, e) => s + ((e.allocations?.[hotel.short_code] || 0) * (e.annual_salary || 0)), 0),
-  };
   const deptBreakdown = DEPTS.map(d => {
     const total = employees.reduce((s, e) => {
       if (e.suppressed || e.exclude_from_table || e.department !== d.key) return s;
@@ -52,9 +36,6 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
     onUpdate({
       total_revenue_budget: roomRev,
       sm_payroll_budget: payroll,
-      finance_payroll_budget: finBudget,
-      hr_payroll_budget: hrBudget,
-      engineering_payroll_budget: engBudget,
     });
     setEditing(false);
   };
@@ -106,9 +87,6 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
           <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
             <div><label className="text-xs text-muted-foreground">Total Revenue Budget</label><Input type="number" value={roomRev} onChange={(e) => setRoomRev(parseFloat(e.target.value) || 0)} /></div>
             <div><label className="text-xs text-muted-foreground">S&M Payroll Budget (Commercial)</label><Input type="number" value={payroll} onChange={(e) => setPayroll(parseFloat(e.target.value) || 0)} /></div>
-            <div><label className="text-xs text-muted-foreground">Finance Payroll Budget</label><Input type="number" value={finBudget} onChange={(e) => setFinBudget(parseFloat(e.target.value) || 0)} /></div>
-            <div><label className="text-xs text-muted-foreground">HR Payroll Budget</label><Input type="number" value={hrBudget} onChange={(e) => setHrBudget(parseFloat(e.target.value) || 0)} /></div>
-            <div><label className="text-xs text-muted-foreground">Engineering Payroll Budget</label><Input type="number" value={engBudget} onChange={(e) => setEngBudget(parseFloat(e.target.value) || 0)} /></div>
           </div>
         ) : (
           <>
@@ -155,33 +133,7 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
               </div>
             </div>
 
-            <div className="rounded-xl border border-border/60 overflow-hidden mt-4">
-              <div className="px-3 py-2 bg-muted/20 border-b border-border/60">
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Department Payroll Budgets</span>
-              </div>
-              <div className="divide-y divide-border/40">
-                {PAYROLL_DEPTS.map(d => {
-                  const deptBudget = d.budget(hotel);
-                  const alloc = deptAllocated[d.key];
-                  const over = deptBudget > 0 && alloc > deptBudget;
-                  return (
-                    <div key={d.key} className="flex items-center justify-between px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${d.dot}`} />
-                        <span className="text-xs font-semibold">{d.label}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`text-xs font-bold tabular-nums ${over ? 'text-red-500' : ''}`}>{formatCurrency(alloc)}</span>
-                        <span className="text-[10px] text-muted-foreground tabular-nums">of {formatCurrency(deptBudget)}</span>
-                        {over && <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-500">Over</span>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
+            <div className="mt-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Budget Used</span>
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
