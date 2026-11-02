@@ -38,6 +38,7 @@ export default function HotelBudgets() {
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
   const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: () => base44.entities.Department.list() });
+  const { data: deptStaff = [] } = useQuery({ queryKey: ['deptStaff'], queryFn: () => base44.entities.DeptStaff.list() });
 
   // Use scenario data if active, otherwise use DB employees
   const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
@@ -118,7 +119,17 @@ export default function HotelBudgets() {
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
-  const deptRecord = departments.find(d => d.department === dept);
+  const DEPTS = [
+    { key: 'COMMERCIAL', label: 'Commercial' },
+    { key: 'FINANCE', label: 'Finance' },
+    { key: 'HR', label: 'HR' },
+    { key: 'ENGINEERING', label: 'Engineering' },
+  ];
+  const deptPayroll = {
+    FINANCE: deptStaff.filter(s => s.department === 'FINANCE' && !s.suppressed).reduce((s, e) => s + (e.annual_salary || 0), 0),
+    HR: deptStaff.filter(s => s.department === 'HR' && !s.suppressed).reduce((s, e) => s + (e.annual_salary || 0), 0),
+    ENGINEERING: deptStaff.filter(s => s.department === 'ENGINEERING' && !s.suppressed).reduce((s, e) => s + (e.annual_salary || 0), 0),
+  };
   const totalPayroll = activeEmployees.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const totalBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalAllocated = propertyHotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
@@ -156,12 +167,20 @@ export default function HotelBudgets() {
       </div>
 
       {dept === 'COMMERCIAL' ? (<>
-      <DeptBudgetPanel
-        deptLabel="Commercial"
-        budget={deptRecord?.payroll_budget || 0}
-        payroll={totalPayroll}
-        onSave={(v) => deptBudgetMutation.mutate({ id: deptRecord?.id, data: { department: 'COMMERCIAL', payroll_budget: v } })}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {DEPTS.map(({ key, label }) => {
+          const rec = departments.find(d => d.department === key);
+          return (
+            <DeptBudgetPanel
+              key={key}
+              deptLabel={label}
+              budget={rec?.payroll_budget || 0}
+              payroll={key === 'COMMERCIAL' ? totalPayroll : (deptPayroll[key] || 0)}
+              onSave={(v) => deptBudgetMutation.mutate({ id: rec?.id, data: { department: key, payroll_budget: v } })}
+            />
+          );
+        })}
+      </div>
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
