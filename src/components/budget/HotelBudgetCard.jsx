@@ -15,6 +15,9 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
   const [editing, setEditing] = useState(false);
   const [roomRev, setRoomRev] = useState(hotel.total_revenue_budget);
   const [payroll, setPayroll] = useState(hotel.sm_payroll_budget);
+  const [finBudget, setFinBudget] = useState(hotel.finance_payroll_budget || 0);
+  const [hrBudget, setHrBudget] = useState(hotel.hr_payroll_budget || 0);
+  const [engBudget, setEngBudget] = useState(hotel.engineering_payroll_budget || 0);
 
   const budget = hotel.sm_payroll_budget || 0;
   const deptBreakdown = DEPTS.map(d => {
@@ -36,6 +39,9 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
     onUpdate({
       total_revenue_budget: roomRev,
       sm_payroll_budget: payroll,
+      finance_payroll_budget: finBudget,
+      hr_payroll_budget: hrBudget,
+      engineering_payroll_budget: engBudget,
     });
     setEditing(false);
   };
@@ -87,6 +93,9 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
           <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
             <div><label className="text-xs text-muted-foreground">Total Revenue Budget</label><Input type="number" value={roomRev} onChange={(e) => setRoomRev(parseFloat(e.target.value) || 0)} /></div>
             <div><label className="text-xs text-muted-foreground">S&M Payroll Budget (Commercial)</label><Input type="number" value={payroll} onChange={(e) => setPayroll(parseFloat(e.target.value) || 0)} /></div>
+            <div><label className="text-xs text-muted-foreground">Finance Payroll Budget</label><Input type="number" value={finBudget} onChange={(e) => setFinBudget(parseFloat(e.target.value) || 0)} /></div>
+            <div><label className="text-xs text-muted-foreground">HR Payroll Budget</label><Input type="number" value={hrBudget} onChange={(e) => setHrBudget(parseFloat(e.target.value) || 0)} /></div>
+            <div><label className="text-xs text-muted-foreground">Engineering Payroll Budget</label><Input type="number" value={engBudget} onChange={(e) => setEngBudget(parseFloat(e.target.value) || 0)} /></div>
           </div>
         ) : (
           <>
