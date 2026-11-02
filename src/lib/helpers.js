@@ -84,3 +84,31 @@ export const HOTEL_COLORS = {
   SMYTH:   { bg: 'bg-rose-500',    text: 'text-rose-600',    badge: 'bg-rose-100 text-rose-700',      hex: '#f43f5e' },
   CORP:    { bg: 'bg-slate-400',   text: 'text-slate-600',   badge: 'bg-slate-100 text-slate-700',    hex: '#94a3b8' },
 };
+
+// Order hotels largest total revenue budget first; CORP always last.
+export function orderHotelsByRevenue(hotels) {
+  return [...(hotels || [])].sort((a, b) => {
+    const aCorp = a.short_code === 'CORP';
+    const bCorp = b.short_code === 'CORP';
+    if (aCorp !== bCorp) return aCorp ? 1 : -1;
+    return (b.total_revenue_budget || 0) - (a.total_revenue_budget || 0);
+  });
+}
+
+// Rescale allocations to exactly 100%, holding locked hotels fixed.
+export function spreadTo100(allocations, lockedHotels = []) {
+  const allocs = { ...(allocations || {}) };
+  const locked = new Set(lockedHotels || []);
+  const lockedSum = Object.keys(allocs).reduce((s, c) => s + (locked.has(c) ? (allocs[c] || 0) : 0), 0);
+  const remainder = 1 - lockedSum;
+  if (remainder <= 0) return allocs;
+  const targets = Object.keys(allocs).filter(c => !locked.has(c) && (allocs[c] || 0) > 0);
+  if (targets.length === 0) return allocs;
+  const unlockedSum = targets.reduce((s, c) => s + allocs[c], 0);
+  if (unlockedSum > 0) {
+    targets.forEach(c => { allocs[c] = remainder * (allocs[c] / unlockedSum); });
+  } else {
+    targets.forEach(c => { allocs[c] = remainder / targets.length; });
+  }
+  return allocs;
+}

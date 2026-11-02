@@ -3,7 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import OrgTreeNode from '@/components/org/OrgTreeNode';
-import { getTotalAllocation } from '@/lib/helpers';
+import { getTotalAllocation, orderHotelsByRevenue } from '@/lib/helpers';
 import { GitBranch, Download, Image, Search, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import jsPDF from 'jspdf';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useRedactedIds } from '@/lib/RedactionContext';
 
-const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+
 
 const ZOOM_MIN = 0.4;
 const ZOOM_MAX = 1.5;
@@ -101,7 +101,7 @@ export default function OrgChart() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['employees'] }),
   });
 
-  const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const sortedHotels = orderHotelsByRevenue(hotels);
   const hotelMap = Object.fromEntries(hotels.map(h => [h.short_code, h.name]));
 
   // Discipline filter: show selected departments plus their management chain up to roots

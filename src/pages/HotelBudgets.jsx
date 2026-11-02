@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -8,7 +8,7 @@ import HotelDrillDown from '@/components/budget/HotelDrillDown';
 import DeptBreakdownRollup from '@/components/budget/DeptBreakdownRollup';
 import StatCard from '@/components/ui/StatCard';
 import EmployeeForm from '@/components/salary/EmployeeForm';
-import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
+import { getHotelAllocatedTotal, formatCurrency, orderHotelsByRevenue } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -18,8 +18,6 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from '@/components/ui/alert-dialog';
-
-const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 export default function HotelBudgets() {
   const [addOpen, setAddOpen] = useState(false);
@@ -106,7 +104,19 @@ export default function HotelBudgets() {
     }
   };
 
-  const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const sortedHotels = orderHotelsByRevenue(hotels);
+
+  // Deep link from Alerts: ?focus=<short_code> opens this hotel's drill-down
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusCode = urlParams.get('focus');
+    if (!focusCode) return;
+    const h = hotels.find(x => x.short_code === focusCode);
+    if (h) {
+      setDrillHotel(h);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [hotels]);
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
   const totalBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);

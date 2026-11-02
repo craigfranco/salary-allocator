@@ -5,7 +5,7 @@ import { Pencil, Trash2, EyeOff, Eye, Copy } from 'lucide-react';
 import AllocationCell from './AllocationCell';
 import { getTotalAllocation, getAllocationStatus, getAllocationColor, formatCurrency, getDeptColor } from '@/lib/helpers';
 
-export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit, onDelete, onToggleSuppress, onDuplicate, isOdd, highlight, managerName, isRedacted }) {
+export default function SalaryTableRow({ employee, hotels, onAllocChange, onFix, onEdit, onDelete, onToggleSuppress, onDuplicate, isOdd, highlight, managerName, isRedacted }) {
   const suppressed = !!employee.suppressed;
   const total = getTotalAllocation(employee.allocations);
   const status = getAllocationStatus(total);
@@ -42,9 +42,20 @@ export default function SalaryTableRow({ employee, hotels, onAllocChange, onEdit
         {isRedacted ? <span className="font-mono tracking-widest text-muted-foreground">██████</span> : formatCurrency(employee.annual_salary)}
       </td>
       <td className="px-1.5 py-2 text-center">
-        <span className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>
-          {Math.round(total * 100)}%
-        </span>
+        <div className="flex flex-col items-center gap-1">
+          <span className={`inline-block px-1.5 py-0.5 rounded-full text-xs font-bold ${colorClass}`}>
+            {totalPct}%
+          </span>
+          {status !== 'exact' && !suppressed && onFix && (
+            <button
+              onClick={() => onFix(employee)}
+              className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+              title="Spread this row's remaining % across its hotels to reach exactly 100%"
+            >
+              Fix to 100%
+            </button>
+          )}
+        </div>
       </td>
       {hotels.map(hotel => (
         <AllocationCell

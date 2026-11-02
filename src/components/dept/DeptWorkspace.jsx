@@ -13,11 +13,9 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from '@/components/ui/alert-dialog';
-import { getHotelAllocatedTotal, getTotalAllocation } from '@/lib/helpers';
+import { getHotelAllocatedTotal, getTotalAllocation, orderHotelsByRevenue } from '@/lib/helpers';
 import ScenarioManager from '@/components/salary/ScenarioManager';
 import { useScenario } from '@/lib/ScenarioContext';
-
-const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 const DEPT_CONFIG = {
   FINANCE: { title: 'Finance Team', deptLabel: 'Finance' },
@@ -58,7 +56,7 @@ export default function DeptWorkspace({ dept }) {
   const suppressedCount = sortedStaff.length - activeStaff.length;
   const tableStaff = showSuppressed ? sortedStaff : activeStaff;
 
-  const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const sortedHotels = orderHotelsByRevenue(hotels);
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
   const totalPayroll = activeStaff.reduce((s, e) => s + (e.annual_salary || 0), 0);

@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
-import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
+import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES, orderHotelsByRevenue } from '@/lib/helpers';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+
 const CHART_COLORS = ['#2d4b5e', '#f59e0b', '#0d9488', '#a855f7'];
 
 export default function ScenarioComparison() {
@@ -87,7 +87,7 @@ export default function ScenarioComparison() {
     return { variance, pct, payroll, budget };
   };
 
-  const sortedHotels = HOTEL_ORDER.map(code => hotels.find(h => h.short_code === code)).filter(Boolean);
+  const sortedHotels = orderHotelsByRevenue(hotels);
 
   // Filter to only hotels with changes across selected scenarios
   const getHotelsWithChanges = () => {

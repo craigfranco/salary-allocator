@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -8,15 +8,13 @@ import SearchBar from '@/components/salary/SearchBar';
 import ExportButton from '@/components/salary/ExportButton';
 import ScenarioManager from '@/components/salary/ScenarioManager';
 import EmployeeForm from '@/components/salary/EmployeeForm';
-import { getTotalAllocation, getAllocationStatus, formatCurrency, HOTEL_SHORT_NAMES } from '@/lib/helpers';
+import { getTotalAllocation, getAllocationStatus, formatCurrency, HOTEL_SHORT_NAMES, orderHotelsByRevenue, spreadTo100 } from '@/lib/helpers';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useRedactedIds } from '@/lib/RedactionContext';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from '@/components/ui/alert-dialog';
-
-const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 export default function SalaryTable() {
   const [formOpen, setFormOpen] = useState(false);
@@ -36,7 +34,22 @@ export default function SalaryTable() {
   // Use scenario data if scenario is active, otherwise use DB employees
   const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
 
-  const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  // Deep link from Alerts: ?focus=<employeeId> filters the table to that row
+  const handledFocus = useRef(false);
+  useEffect(() => {
+    if (handledFocus.current) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusId = urlParams.get('focus');
+    if (!focusId) return;
+    const emp = displayEmployees.find(e => e.id === focusId);
+    if (!emp) return;
+    handledFocus.current = true;
+    setSearch(emp.name);
+    setDeptFilter(''); setAllocFilter(''); setHotelFilter('');
+    window.history.replaceState({}, '', window.location.pathname);
+  }, [displayEmployees]);
+
+  const sortedHotels = orderHotelsByRevenue(hotels);
   const tableHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
   const createMutation = useMutation({
@@ -75,6 +88,20 @@ export default function SalaryTable() {
     } else {
       const newAllocs = { ...(emp.allocations || {}), [hotelCode]: newPct };
       if (newPct === 0) delete newAllocs[hotelCode];
+      updateMutation.mutate({ id: emp.id, data: { allocations: newAllocs } });
+    }
+  };
+
+  const handleFixTo100 = (emp) => {
+    const newAllocs = spreadTo100(emp.allocations, emp.locked_hotels);
+    if (activeScenario && Array.isArray(scenarioData)) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      const empIdx = updated.findIndex(e => e.id === emp.id);
+      if (empIdx !== -1) {
+        updated[empIdx].allocations = newAllocs;
+        setScenarioData(updated);
+      }
+    } else {
       updateMutation.mutate({ id: emp.id, data: { allocations: newAllocs } });
     }
   };
@@ -235,6 +262,7 @@ export default function SalaryTable() {
                   employee={emp}
                   hotels={sortedHotels}
                   onAllocChange={handleAllocChange}
+                  onFix={handleFixTo100}
                   onEdit={(e) => { setEditEmp(e); setFormOpen(true); }}
                   onDelete={setDeleteEmp}
                   onToggleSuppress={handleToggleSuppress}

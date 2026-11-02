@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +21,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     return new Set(hotels.map(h => h.short_code));
   });
   const [lockedHotels, setLockedHotels] = useState(new Set(employee?.locked_hotels || []));
+  const pctRefs = useRef({});
 
   // Spread the remainder (1 - lockedSum) evenly across unlocked, selected hotels.
   const spreadRemainderEvenly = (lockedSet) => {
@@ -305,6 +306,14 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                         className={`h-8 text-xs text-right ${isLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
                         value={Math.round((form.allocations?.[h.short_code] || 0) * 100)}
                         onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
+                        ref={(el) => { pctRefs.current[h.short_code] = el; }}
+                        onKeyDown={(e) => {
+                          if (e.key !== 'Enter') return;
+                          e.preventDefault();
+                          const codes = hotels.map(x => x.short_code);
+                          const nextCode = codes[codes.indexOf(h.short_code) + 1];
+                          if (nextCode) pctRefs.current[nextCode]?.focus();
+                        }}
                       />
                       <span className="text-xs text-muted-foreground flex-shrink-0">%</span>
                       <button

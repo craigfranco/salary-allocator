@@ -1,7 +1,8 @@
 import React from 'react';
 import { base44 } from '@/api/base44Client';
+import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, ArrowUp, ArrowDown, Building2, User, Bell } from 'lucide-react';
+import { CheckCircle2, ArrowUp, ArrowDown, Building2, User, Bell, Zap, ArrowRight } from 'lucide-react';
 import { getTotalAllocation, getAllocationStatus, formatCurrency, getHotelAllocatedTotal } from '@/lib/helpers';
 import { useScenario } from '@/lib/ScenarioContext';
 
@@ -31,6 +32,16 @@ export default function Alerts() {
     return null;
   }).filter(Boolean);
 
+  const nextActions = [
+    ...budgetAlerts.filter(b => b.type === 'over').sort((a, b) => b.amount - a.amount)
+      .map(b => ({ key: `over-${b.hotel.id}`, icon: Building2, label: b.hotel.name, detail: `Over S&M budget by ${formatCurrency(b.amount)}`, to: `/budgets?focus=${b.hotel.short_code}` })),
+    ...budgetAlerts.filter(b => b.type === 'near').sort((a, b) => a.amount - b.amount)
+      .map(b => ({ key: `near-${b.hotel.id}`, icon: Building2, label: b.hotel.name, detail: `Near limit — ${formatCurrency(b.amount)} left in budget`, to: `/budgets?focus=${b.hotel.short_code}` })),
+    ...allocAlerts
+      .sort((a, b) => Math.abs(1 - b.total) - Math.abs(1 - a.total))
+      .map(a => ({ key: `alloc-${a.emp.id}`, icon: User, label: a.emp.name, detail: `Allocated at ${Math.round(a.total * 100)}% — ${a.total > 1 ? 'over' : 'under'} 100%`, to: `/?focus=${a.emp.id}` })),
+  ].slice(0, 3);
+
   const hasIssues = allocAlerts.length > 0 || budgetAlerts.length > 0;
   const totalIssues = allocAlerts.length + budgetAlerts.length;
 
@@ -45,6 +56,29 @@ export default function Alerts() {
           {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} employee(s) suppressed</span>}
         </p>
       </div>
+
+      {nextActions.length > 0 && (
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <Zap className="w-4 h-4 text-primary" />
+            <h3 className="font-semibold text-sm">Next Actions — top {nextActions.length} things to fix</h3>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {nextActions.map(action => (
+              <Link key={action.key} to={action.to} className="group flex items-center gap-3 p-3 rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-sm transition-all">
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <action.icon className="w-4 h-4 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{action.label}</p>
+                  <p className="text-xs text-muted-foreground truncate">{action.detail}</p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
       {!hasIssues && (
         <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-8 flex items-center gap-4">

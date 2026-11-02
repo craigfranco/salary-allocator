@@ -23,7 +23,7 @@ const navItems = [
 
 export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(true);
+  const [helpOpen, setHelpOpen] = useState(() => localStorage.getItem('rebel:helpOpen') !== 'false');
   const location = useLocation();
   const navigate = useNavigate();
   const DEPT_LABELS = { COMMERCIAL: 'Commercial', FINANCE: 'Finance', HR: 'HR', ENGINEERING: 'Engineering' };
@@ -34,6 +34,23 @@ export default function AppLayout() {
     : 'COMMERCIAL';
   const { dark, toggle } = useTheme();
   const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario();
+
+  // Remember help-section visibility on this device
+  useEffect(() => {
+    localStorage.setItem('rebel:helpOpen', helpOpen ? 'true' : 'false');
+  }, [helpOpen]);
+
+  // Remember the last department workspace and restore it on load
+  useEffect(() => {
+    localStorage.setItem('rebel:lastDept', routeDept);
+  }, [routeDept]);
+  const restoredDept = useRef(false);
+  useEffect(() => {
+    if (restoredDept.current) return;
+    restoredDept.current = true;
+    const saved = localStorage.getItem('rebel:lastDept');
+    if (saved && DEPT_ROUTES[saved] && saved !== routeDept) navigate(DEPT_ROUTES[saved]);
+  }, []);
 
   const { data: scenarios = [] } = useQuery({
     queryKey: ['scenarios'],

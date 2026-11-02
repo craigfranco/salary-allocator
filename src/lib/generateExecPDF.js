@@ -1,6 +1,6 @@
 // Executive PDF Generator for Rebel Hotel Co.
 
-const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+import { orderHotelsByRevenue } from './helpers';
 const PROPERTY_HOTELS = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH'];
 
 const HOTEL_NAMES = {
@@ -98,8 +98,7 @@ function buildExecSummary(employees, hotels) {
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
   const totalPayroll = active.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const avgSalary = active.length ? totalPayroll / active.length : 0;
-  const propHotels = hotels.filter(h => PROPERTY_HOTELS.includes(h.short_code))
-    .sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const propHotels = orderHotelsByRevenue(hotels.filter(h => PROPERTY_HOTELS.includes(h.short_code)));
 
   // Hotel payroll totals
   const hotelTotals = {};
@@ -197,8 +196,7 @@ function buildExecSummary(employees, hotels) {
 
 // ─── PAGE 3+: SALARY ALLOCATION TABLE (SPLIT BY HOTEL GROUP) ──────────────
 function buildSalaryTables(employees, hotels) {
-  const hotelOrder = hotels
-    .sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const hotelOrder = orderHotelsByRevenue(hotels);
   const propHotels = hotelOrder.filter(h => h.short_code !== 'CORP');
   const corpHotel = hotelOrder.find(h => h.short_code === 'CORP');
 
@@ -295,9 +293,7 @@ function buildSalaryTables(employees, hotels) {
 // ─── PAGE 4: HOTEL BUDGET BREAKDOWN ──────────────────────────────────────────
 function buildHotelBreakdown(employees, hotels) {
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
-  const propHotels = hotels
-    .filter(h => PROPERTY_HOTELS.includes(h.short_code))
-    .sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
+  const propHotels = orderHotelsByRevenue(hotels.filter(h => PROPERTY_HOTELS.includes(h.short_code)));
 
   const hotelSections = propHotels.map(h => {
     const code = h.short_code;

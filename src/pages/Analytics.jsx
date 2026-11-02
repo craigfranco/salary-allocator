@@ -5,7 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
-import { formatCurrency, getHotelAllocatedTotal, getDeptAccent, HOTEL_SHORT_NAMES } from '@/lib/helpers';
+import { formatCurrency, getHotelAllocatedTotal, getDeptAccent, HOTEL_SHORT_NAMES, orderHotelsByRevenue } from '@/lib/helpers';
 import StatCard from '@/components/ui/StatCard';
 import { Users, DollarSign, Building2, TrendingUp } from 'lucide-react';
 import { useScenario } from '@/lib/ScenarioContext';
@@ -17,7 +17,7 @@ const HOTEL_COLORS_HEX = {
   LIFE: '#10b981', RENWICK: '#f59e0b', SMYTH: '#f43f5e', CORP: '#94a3b8'
 };
 
-const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH'];
+
 
 function TooltipStyle({ active, payload, label }) {
   if (!active || !payload?.length) return null;
@@ -48,9 +48,7 @@ export default function Analytics() {
   const totalPayroll = activeEmployees.reduce((s, e) => s + e.annual_salary, 0);
   const avgSalary = activeEmployees.length > 0 ? totalPayroll / activeEmployees.length : 0;
 
-  const sortedHotels = useMemo(() => [...hotels].sort((a, b) =>
-    HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code)
-  ), [hotels]);
+  const sortedHotels = useMemo(() => orderHotelsByRevenue(hotels), [hotels]);
 
   // Hotel payroll vs budget
   const hotelData = sortedHotels
