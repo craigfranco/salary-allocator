@@ -4,11 +4,15 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { CheckCircle2, ArrowUp, ArrowDown, Building2, User, Bell, Zap, ArrowRight } from 'lucide-react';
 import { getTotalAllocation, getAllocationStatus, formatCurrency, getHotelAllocatedTotal } from '@/lib/helpers';
+import { DEPT_LABELS, DEPT_BASE_ROUTES, DEPT_BUDGET_FIELDS } from '@/lib/deptConfig';
 import { useScenario } from '@/lib/ScenarioContext';
 
-export default function Alerts() {
-  const { activeScenario, scenarioData } = useScenario();
-  const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
+export default function Alerts({ dept = 'COMMERCIAL' }) {
+  const { activeScenario, scenarioData } = useScenario(dept);
+  const { data: employees = [] } = useQuery({
+    queryKey: dept === 'COMMERCIAL' ? ['employees'] : ['deptstaff', dept],
+    queryFn: () => dept === 'COMMERCIAL' ? base44.entities.Employee.list() : base44.entities.DeptStaff.filter({ department: dept }),
+  });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   // Use scenario data if active, otherwise use DB employees
@@ -23,9 +27,11 @@ export default function Alerts() {
     return { emp, total, status };
   }).filter(Boolean);
 
-  const budgetAlerts = hotels.filter(h => h.short_code !== 'CORP' && h.sm_payroll_budget > 0).map(hotel => {
+  const budgetField = DEPT_BUDGET_FIELDS[dept];
+  const deptPrefix = dept === 'COMMERCIAL' ? '' : DEPT_BASE_ROUTES[dept];
+  const budgetAlerts = hotels.filter(h => h.short_code !== 'CORP' && h[budgetField] > 0).map(hotel => {
     const allocated = getHotelAllocatedTotal(activeEmployees, hotel.short_code);
-    const budget = hotel.sm_payroll_budget;
+    const budget = hotel[budgetField];
     const pctUsed = (allocated / budget) * 100;
     if (pctUsed > 100) return { hotel, allocated, budget, type: 'over', amount: allocated - budget };
     if (pctUsed > 95) return { hotel, allocated, budget, type: 'near', amount: budget - allocated };
@@ -34,12 +40,12 @@ export default function Alerts() {
 
   const nextActions = [
     ...budgetAlerts.filter(b => b.type === 'over').sort((a, b) => b.amount - a.amount)
-      .map(b => ({ key: `over-${b.hotel.id}`, icon: Building2, label: b.hotel.name, detail: `Over S&M budget by ${formatCurrency(b.amount)}`, to: `/budgets?focus=${b.hotel.short_code}` })),
+      .map(b => ({ key: `over-${b.hotel.id}`, icon: Building2, label: b.hotel.name, detail: `Over ${dept === 'COMMERCIAL' ? 'S&M' : DEPT_LABELS[dept]} budget by ${formatCurrency(b.amount)}`, to: `${deptPrefix}/budgets?focus=${b.hotel.short_code}` })),
     ...budgetAlerts.filter(b => b.type === 'near').sort((a, b) => a.amount - b.amount)
-      .map(b => ({ key: `near-${b.hotel.id}`, icon: Building2, label: b.hotel.name, detail: `Near limit — ${formatCurrency(b.amount)} left in budget`, to: `/budgets?focus=${b.hotel.short_code}` })),
+      .map(b => ({ key: `near-${b.hotel.id}`, icon: Building2, label: b.hotel.name, detail: `Near limit — ${formatCurrency(b.amount)} left in budget`, to: `${deptPrefix}/budgets?focus=${b.hotel.short_code}` })),
     ...allocAlerts
       .sort((a, b) => Math.abs(1 - b.total) - Math.abs(1 - a.total))
-      .map(a => ({ key: `alloc-${a.emp.id}`, icon: User, label: a.emp.name, detail: `Allocated at ${Math.round(a.total * 100)}% — ${a.total > 1 ? 'over' : 'under'} 100%`, to: `/?focus=${a.emp.id}` })),
+      .map(a => ({ key: `alloc-${a.emp.id}`, icon: User, label: a.emp.name, detail: `Allocated at ${Math.round(a.total * 100)}% — ${a.total > 1 ? 'over' : 'under'} 100%`, to: `${deptPrefix || '/'}?focus=${a.emp.id}` })),
   ].slice(0, 3);
 
   const hasIssues = allocAlerts.length > 0 || budgetAlerts.length > 0;

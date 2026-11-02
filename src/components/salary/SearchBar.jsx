@@ -3,7 +3,7 @@ import { HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import { Search, X, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export default function SearchBar({ search, setSearch, department, setDepartment, allocationFilter, setAllocationFilter, hotelFilter, setHotelFilter, hotels = [] }) {
+export default function SearchBar({ search, setSearch, department, setDepartment, allocationFilter, setAllocationFilter, hotelFilter, setHotelFilter, hotels = [], showDepartment = true }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <div className="relative flex-1 min-w-[200px]">
@@ -22,6 +22,7 @@ export default function SearchBar({ search, setSearch, department, setDepartment
         )}
       </div>
 
+      {showDepartment && (
       <select
         value={department}
         onChange={e => setDepartment(e.target.value)}
@@ -32,6 +33,7 @@ export default function SearchBar({ search, setSearch, department, setDepartment
         <option value="ECOMM">E-Commerce</option>
         <option value="SALES">Sales</option>
       </select>
+      )}
 
       <select
         value={allocationFilter}

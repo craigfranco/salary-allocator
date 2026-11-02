@@ -6,12 +6,13 @@ import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
 import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES, orderHotelsByRevenue } from '@/lib/helpers';
+import { DEPT_BUDGET_FIELDS } from '@/lib/deptConfig';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
 const CHART_COLORS = ['#2d4b5e', '#f59e0b', '#0d9488', '#a855f7'];
 
-export default function ScenarioComparison() {
+export default function ScenarioComparison({ dept = 'COMMERCIAL' }) {
   const [selectedScenarios, setSelectedScenarios] = useState([]);
   const qc = useQueryClient();
 
@@ -19,7 +20,7 @@ export default function ScenarioComparison() {
     queryKey: ['scenarios'],
     queryFn: () => base44.entities.Scenario.list(),
   });
-  const commercialScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === 'COMMERCIAL');
+  const commercialScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === dept);
 
   const { data: employees = [] } = useQuery({
     queryKey: ['employees'],
@@ -80,7 +81,7 @@ export default function ScenarioComparison() {
     if (!hotel) return { variance: 0, pct: 0 };
     
     const payroll = hotelMetrics[hotelCode]?.totalPayroll || 0;
-    const budget = hotel.sm_payroll_budget || 0;
+    const budget = hotel[DEPT_BUDGET_FIELDS[dept]] || 0;
     const variance = payroll - budget;
     const pct = budget > 0 ? (variance / budget) * 100 : 0;
     

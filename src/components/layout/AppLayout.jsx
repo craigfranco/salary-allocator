@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
+import { DEPT_LABELS, DEPT_BASE_ROUTES } from '@/lib/deptConfig';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
 import HelpGuide from '@/components/layout/HelpGuide';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -24,14 +25,16 @@ export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const DEPT_LABELS = { COMMERCIAL: 'Commercial', FINANCE: 'Finance', HR: 'HR', ENGINEERING: 'Engineering' };
-  const DEPT_ROUTES = { COMMERCIAL: '/', FINANCE: '/finance', HR: '/hr', ENGINEERING: '/engineering' };
+  const navBase = routeDept === 'COMMERCIAL' ? '' : DEPT_BASE_ROUTES[routeDept];
+  const items = navItems
+    .filter(({ path }) => routeDept === 'COMMERCIAL' || path !== '/org-chart')
+    .map(({ path, label, icon }) => ({ path: path === '/' ? (navBase || '/') : `${navBase}${path}`, label, icon }));
   const routeDept = location.pathname.startsWith('/finance') ? 'FINANCE'
     : location.pathname.startsWith('/hr') ? 'HR'
     : location.pathname.startsWith('/engineering') ? 'ENGINEERING'
     : 'COMMERCIAL';
   const { dark, toggle } = useTheme();
-  const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario();
+  const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario(routeDept);
 
   // Remember the last department workspace and restore it on load
   useEffect(() => {
@@ -42,20 +45,20 @@ export default function AppLayout() {
     if (restoredDept.current) return;
     restoredDept.current = true;
     const saved = localStorage.getItem('rebel:lastDept');
-    if (saved && DEPT_ROUTES[saved] && saved !== routeDept) navigate(DEPT_ROUTES[saved]);
+    if (saved && DEPT_BASE_ROUTES[saved] !== undefined && saved !== routeDept) navigate(DEPT_BASE_ROUTES[saved] || '/');
   }, []);
 
   const { data: scenarios = [] } = useQuery({
     queryKey: ['scenarios'],
     queryFn: () => base44.entities.Scenario.list('-updated_date', 50),
   });
-  const commercialScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === 'COMMERCIAL');
+  const deptScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === routeDept);
 
   const autoLoaded = useRef(false);
   useEffect(() => {
-    if (!autoLoaded.current && commercialScenarios.length > 0 && !activeScenario) {
+    if (!autoLoaded.current && deptScenarios.length > 0 && !activeScenario) {
       autoLoaded.current = true;
-      doRestore(commercialScenarios[0]);
+      doRestore(deptScenarios[0]);
     }
   }, [scenarios]);
 
@@ -86,7 +89,7 @@ export default function AppLayout() {
                 <h1 className="text-lg font-display font-bold text-white leading-tight tracking-tight">Salary Allocations</h1>
                 <p className="text-[11px] text-white/60 font-inter tracking-wider uppercase">{DEPT_LABELS[routeDept]}</p>
               </div>
-              <Select value={routeDept} onValueChange={(v) => navigate(DEPT_ROUTES[v])}>
+              <Select value={routeDept} onValueChange={(v) => navigate(DEPT_BASE_ROUTES[v] || '/')}>
                 <SelectTrigger
                   className="h-10 px-4 rounded-xl bg-white/10 border-white/30 text-white font-semibold shadow hover:bg-white/20 transition-colors"
                   title="Switch department"
@@ -121,7 +124,7 @@ export default function AppLayout() {
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between">
             <div className="flex gap-0.5 overflow-x-auto py-1.5">
-              {navItems.map(({ path, label, icon: Icon }) => {
+              {items.map(({ path, label, icon: Icon }) => {
                 const active = location.pathname === path;
                 return (
                   <Link
@@ -164,8 +167,8 @@ export default function AppLayout() {
                   </>
                 )}
                 <div className="px-2 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Saved Scenarios</div>
-                {commercialScenarios.length > 0 ? (
-                  commercialScenarios.map(s => (
+                {deptScenarios.length > 0 ? (
+                  deptScenarios.map(s => (
                     <button
                       key={s.id}
                       className={`flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent ${

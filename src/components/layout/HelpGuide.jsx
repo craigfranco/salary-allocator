@@ -58,10 +58,10 @@ const SECTIONS = [
   },
   {
     id: 'dept', icon: Users, label: 'Department Workspaces', title: 'Department Workspaces',
-    intro: 'Finance, HR, and Engineering each get their own workspace: staff table, per-hotel budgets, and scenario planning scoped to that department.',
+    intro: 'Finance, HR, and Engineering each get the same full set of pages as Commercial, driven by that department\'s own staff and budgets.',
     blocks: [
-      { label: 'How to use it —', text: 'Switch departments with the dropdown in the top header. Each workspace has its own staff table, its own hotel budget cards, and its own saved scenarios — one department never sees another\'s plan.' },
-      { label: 'Budgets —', text: 'Department budgets are set per hotel, exactly like on the Hotel Budgets page.' },
+      { label: 'How to use it —', text: 'Switch departments with the dropdown in the top header. Every department has its own salary table, hotel budgets, analytics, alerts, and scenario comparison — one department never sees another\'s plan. The Org Chart stays Commercial-only for now.' },
+      { label: 'Budgets —', text: 'Each department\'s per-hotel payroll budgets are edited from the Commercial workspace\'s Hotel Budgets page, where all departments\' budgets can be set.' },
     ],
   },
   {

@@ -9,6 +9,7 @@ import ExportButton from '@/components/salary/ExportButton';
 import ScenarioManager from '@/components/salary/ScenarioManager';
 import EmployeeForm from '@/components/salary/EmployeeForm';
 import { getTotalAllocation, getAllocationStatus, formatCurrency, HOTEL_SHORT_NAMES, orderHotelsByRevenue, spreadTo100 } from '@/lib/helpers';
+import { DEPT_LABELS, DEPT_BUDGET_FIELDS } from '@/lib/deptConfig';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useRedactedIds } from '@/lib/RedactionContext';
 import {
@@ -16,7 +17,14 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 
-export default function SalaryTable() {
+export default function SalaryTable({ dept = 'COMMERCIAL' }) {
+  const isCommercial = dept === 'COMMERCIAL';
+  const budgetField = DEPT_BUDGET_FIELDS[dept];
+  const budgetLabel = dept === 'COMMERCIAL' ? 'S&M Payroll Budget' : `${DEPT_LABELS[dept]} Payroll Budget`;
+  const pctBudgetLabel = dept === 'COMMERCIAL' ? '% of S&M Budget' : '% of Budget';
+  const budgetSummaryLabel = dept === 'COMMERCIAL' ? 'S&M Payroll\nBudget' : `${DEPT_LABELS[dept]}\nBudget`;
+  const pctBudgetSummaryLabel = dept === 'COMMERCIAL' ? '% of S&M\nBudget' : '% of\nBudget';
+  const memberNoun = dept === 'COMMERCIAL' ? 'employees' : 'team members';
   const [formOpen, setFormOpen] = useState(false);
   const [editEmp, setEditEmp] = useState(null);
   const [deleteEmp, setDeleteEmp] = useState(null);
@@ -25,10 +33,14 @@ export default function SalaryTable() {
   const [allocFilter, setAllocFilter] = useState('');
   const [hotelFilter, setHotelFilter] = useState('');
   const qc = useQueryClient();
-  const { activeScenario, scenarioData, setScenarioData } = useScenario();
+  const { activeScenario, scenarioData, setScenarioData } = useScenario(dept);
   const { redactedIds } = useRedactedIds();
 
-  const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
+  const entity = isCommercial ? base44.entities.Employee : base44.entities.DeptStaff;
+  const { data: employees = [] } = useQuery({
+    queryKey: isCommercial ? ['employees'] : ['deptstaff', dept],
+    queryFn: () => isCommercial ? base44.entities.Employee.list() : base44.entities.DeptStaff.filter({ department: dept }),
+  });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   // Use scenario data if scenario is active, otherwise use DB employees
@@ -52,17 +64,18 @@ export default function SalaryTable() {
   const sortedHotels = orderHotelsByRevenue(hotels);
   const tableHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
+  const invalidateStaff = () => qc.invalidateQueries({ queryKey: isCommercial ? ['employees'] : ['deptstaff', dept] });
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.Employee.create(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setFormOpen(false); setEditEmp(null); },
+    mutationFn: (data) => entity.create(data),
+    onSuccess: () => { invalidateStaff(); setFormOpen(false); setEditEmp(null); },
   });
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Employee.update(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setFormOpen(false); setEditEmp(null); },
+    mutationFn: ({ id, data }) => entity.update(id, data),
+    onSuccess: () => { invalidateStaff(); setFormOpen(false); setEditEmp(null); },
   });
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.Employee.delete(id),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setDeleteEmp(null); },
+    mutationFn: (id) => entity.delete(id),
+    onSuccess: () => { invalidateStaff(); setDeleteEmp(null); },
   });
 
   const handleDelete = (emp) => {
@@ -107,6 +120,7 @@ export default function SalaryTable() {
   };
 
   const handleSave = (form) => {
+    const payload = isCommercial ? form : (() => { const { manager_id, ...rest } = form; return { ...rest, department: dept }; })();
     if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
       if (editEmp) {
@@ -115,15 +129,15 @@ export default function SalaryTable() {
           updated[empIdx] = { ...updated[empIdx], ...form };
         }
       } else {
-        updated.push({ ...form, id: 'new_' + Date.now() });
+        updated.push({ ...payload, id: 'new_' + Date.now() });
       }
       setScenarioData(updated);
       setFormOpen(false);
       setEditEmp(null);
     } else if (editEmp) {
-      updateMutation.mutate({ id: editEmp.id, data: form });
+      updateMutation.mutate({ id: editEmp.id, data: payload });
     } else {
-      createMutation.mutate(form);
+      createMutation.mutate(payload);
     }
   };
 
@@ -167,15 +181,18 @@ export default function SalaryTable() {
   }, 0);
   const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.total_revenue_budget || 0), 0);
   const totalPayrollPct = totalRoomRev > 0 ? (totalPayroll / totalRoomRev) * 100 : null;
-  const totalSmBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
-  const totalBudgetDiff = totalSmBudget > 0 ? totalPayroll - totalSmBudget : null;
+  const totalDeptBudget = propertyHotels.reduce((s, h) => s + (h[budgetField] || 0), 0);
+  const totalBudgetDiff = totalDeptBudget > 0 ? totalPayroll - totalDeptBudget : null;
 
   const sortedEmployees = [...displayEmployees].sort((a, b) => {
     if (a.suppressed && !b.suppressed) return -1;
     if (!a.suppressed && b.suppressed) return 1;
-    const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
-    const d = deptOrder.indexOf(a.department) - deptOrder.indexOf(b.department);
-    return d !== 0 ? d : b.annual_salary - a.annual_salary;
+    if (isCommercial) {
+      const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
+      const d = deptOrder.indexOf(a.department) - deptOrder.indexOf(b.department);
+      if (d !== 0) return d;
+    }
+    return b.annual_salary - a.annual_salary;
   });
 
   const q = search.toLowerCase();
@@ -199,7 +216,7 @@ export default function SalaryTable() {
         <div>
           <h2 className="text-2xl font-display font-bold text-foreground">Salary Allocations</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {activeEmployees.length} employees · {sortedHotels.filter(h => h.short_code !== 'CORP').length} properties
+            {activeEmployees.length} {memberNoun} · {sortedHotels.filter(h => h.short_code !== 'CORP').length} properties
             {suppressedCount > 0 && (
               <button
                 onClick={() => setAllocFilter(allocFilter === 'suppressed' ? '' : 'suppressed')}
@@ -211,15 +228,16 @@ export default function SalaryTable() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <ScenarioManager employees={employees} />
+          <ScenarioManager employees={employees} department={dept} />
           <ExportButton employees={sortedEmployees} hotels={sortedHotels} hotelTotals={hotelTotals} />
           <Button onClick={() => { setEditEmp(null); setFormOpen(true); }} className="gap-2">
-            <Plus className="w-4 h-4" /> Add Employee
+            <Plus className="w-4 h-4" /> {isCommercial ? 'Add Employee' : 'Add Team Member'}
           </Button>
         </div>
       </div>
 
       <SearchBar
+        showDepartment={isCommercial}
         search={search} setSearch={setSearch}
         department={deptFilter} setDepartment={setDeptFilter}
         allocationFilter={allocFilter} setAllocationFilter={setAllocFilter}
@@ -311,11 +329,11 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/40">
-                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">S&M Payroll Budget</td>
+                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">{budgetLabel}</td>
                 <td />
                 {sortedHotels.map(h => {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
-                  const budget = h.sm_payroll_budget || 0;
+                  const budget = h[budgetField] || 0;
                   const allocated = hotelTotals[h.short_code] || 0;
                   const isOver = budget > 0 && allocated > budget;
                   const isNear = budget > 0 && allocated / budget > 0.95 && allocated <= budget;
@@ -347,7 +365,7 @@ export default function SalaryTable() {
                 <td />
                 {sortedHotels.map(h => {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
-                  const budget = h.sm_payroll_budget || 0;
+                  const budget = h[budgetField] || 0;
                   const allocated = hotelTotals[h.short_code] || 0;
                   const budgetDiff = budget > 0 ? allocated - budget : null;
                   return (
@@ -379,12 +397,12 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/40">
-                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">% of S&M Budget</td>
+                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">{pctBudgetLabel}</td>
                 <td />
                 {sortedHotels.map(h => {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
                   const allocated = hotelTotals[h.short_code] || 0;
-                  const budget = h.sm_payroll_budget || 0;
+                  const budget = h[budgetField] || 0;
                   const budgetPct = budget > 0 ? (allocated / budget) * 100 : null;
                   return (
                     <td key={h.short_code} className="px-1.5 py-1.5 text-center">
@@ -405,11 +423,11 @@ export default function SalaryTable() {
                   <div className="grid grid-cols-6 gap-2">
                     {[
                       { label: 'Total Room\nRevenue', value: totalRoomRev > 0 ? formatCurrency(totalRoomRev) : '—', color: 'text-foreground' },
-                      { label: 'S&M Payroll\nBudget', value: totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—', color: 'text-foreground' },
+                      { label: budgetSummaryLabel, value: totalDeptBudget > 0 ? formatCurrency(totalDeptBudget) : '—', color: 'text-foreground' },
                       { label: 'Total Allocated\nPayroll', value: formatCurrency(totalPayroll), color: 'text-foreground' },
                       { label: 'Over /\n(Short) Budget', value: totalBudgetDiff !== null ? (totalBudgetDiff > 0 ? '+' : '') + formatCurrency(totalBudgetDiff) : '—', color: totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400' },
                       { label: '% of\nTotal Rev', value: totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—', color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' },
-                      { label: '% of S&M\nBudget', value: totalSmBudget > 0 ? `${((totalPayroll / totalSmBudget) * 100).toFixed(1)}%` : '—', color: totalSmBudget === 0 ? 'text-muted-foreground' : (totalPayroll / totalSmBudget) > 1 ? 'text-red-500' : (totalPayroll / totalSmBudget) > 0.95 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }
+                      { label: pctBudgetSummaryLabel, value: totalDeptBudget > 0 ? `${((totalPayroll / totalDeptBudget) * 100).toFixed(1)}%` : '—', color: totalDeptBudget === 0 ? 'text-muted-foreground' : (totalPayroll / totalDeptBudget) > 1 ? 'text-red-500' : (totalPayroll / totalDeptBudget) > 0.95 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }
                     ].map((item, idx) => (
                       <div key={idx} className="text-center">
                         <div className="text-[10px] text-muted-foreground leading-tight whitespace-pre-line">{item.label}</div>
@@ -425,7 +443,7 @@ export default function SalaryTable() {
       </div>
 
       {formOpen && (
-        <EmployeeForm open={formOpen} onClose={setFormOpen} onSave={handleSave} employee={editEmp} hotels={sortedHotels} allEmployees={displayEmployees} />
+        <EmployeeForm open={formOpen} onClose={setFormOpen} onSave={handleSave} employee={editEmp} hotels={sortedHotels} allEmployees={isCommercial ? displayEmployees : []} fixedDepartment={isCommercial ? undefined : dept} />
       )}
 
       <AlertDialog open={!!deleteEmp} onOpenChange={() => setDeleteEmp(null)}>

@@ -6,12 +6,13 @@ import {
   PieChart, Pie, Cell, LineChart, Line
 } from 'recharts';
 import { formatCurrency, getHotelAllocatedTotal, getDeptAccent, HOTEL_SHORT_NAMES, orderHotelsByRevenue } from '@/lib/helpers';
+import { DEPT_BUDGET_FIELDS } from '@/lib/deptConfig';
 import StatCard from '@/components/ui/StatCard';
 import { Users, DollarSign, Building2, TrendingUp } from 'lucide-react';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useRedactedIds } from '@/lib/RedactionContext';
 
-const DEPT_COLORS = { REVENUE: '#0d9488', ECOMM: '#f97316', SALES: '#9333ea' };
+const DEPT_COLORS = { REVENUE: '#0d9488', ECOMM: '#f97316', SALES: '#9333ea', FINANCE: '#0ea5e9', HR: '#d946ef', ENGINEERING: '#6366f1' };
 const HOTEL_COLORS_HEX = {
   AURA: '#3b82f6', HAFA: '#6366f1', INK48: '#8b5cf6',
   LIFE: '#10b981', RENWICK: '#f59e0b', SMYTH: '#f43f5e', CORP: '#94a3b8'
@@ -35,10 +36,14 @@ function TooltipStyle({ active, payload, label }) {
   );
 }
 
-export default function Analytics() {
-  const { activeScenario, scenarioData } = useScenario();
+export default function Analytics({ dept = 'COMMERCIAL' }) {
+  const isCommercial = dept === 'COMMERCIAL';
+  const { activeScenario, scenarioData } = useScenario(dept);
   const { redactedIds } = useRedactedIds();
-  const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
+  const { data: employees = [] } = useQuery({
+    queryKey: isCommercial ? ['employees'] : ['deptstaff', dept],
+    queryFn: () => isCommercial ? base44.entities.Employee.list() : base44.entities.DeptStaff.filter({ department: dept }),
+  });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   // Use scenario data if active, otherwise use DB employees
@@ -56,7 +61,7 @@ export default function Analytics() {
     .map(h => ({
       name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code,
       allocated: Math.round(getHotelAllocatedTotal(activeEmployees, h.short_code)),
-      budget: h.sm_payroll_budget || 0,
+      budget: h[DEPT_BUDGET_FIELDS[dept]] || 0,
       roomRev: h.total_revenue_budget || 0,
     }));
 
@@ -180,6 +185,7 @@ export default function Analytics() {
           </ResponsiveContainer>
         </div>
 
+        {isCommercial && (<>
         {/* Headcount Donut */}
         <div className={cardClass}>
           <h3 className="text-sm font-semibold mb-4 text-foreground">Headcount by Department</h3>
@@ -222,8 +228,10 @@ export default function Analytics() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+        </>)}
       </div>
 
+      {isCommercial && (<>
       {/* Avg Salary per Property by Dept */}
       <div className={cardClass}>
         <h3 className="text-sm font-semibold mb-1 text-foreground">Average Dept Salary per Property</h3>
@@ -258,9 +266,11 @@ export default function Analytics() {
           </BarChart>
         </ResponsiveContainer>
       </div>
+      </>)}
 
       {/* Dept cost table + top earners */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {isCommercial && (
         <div className={cardClass}>
           <h3 className="text-sm font-semibold mb-4 text-foreground">Department Cost Breakdown</h3>
           <table className="w-full text-sm">
@@ -299,6 +309,7 @@ export default function Analytics() {
             </tbody>
           </table>
         </div>
+        )}
 
         <div className={cardClass}>
           <h3 className="text-sm font-semibold mb-4 text-foreground">Top Earners</h3>

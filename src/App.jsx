@@ -12,7 +12,7 @@ import OrgChart from '@/pages/OrgChart.jsx';
 import Alerts from '@/pages/Alerts';
 import Analytics from '@/pages/Analytics';
 import ScenarioComparison from '@/pages/ScenarioComparison';
-import DeptTeam from '@/pages/DeptTeam';
+import DeptBudgets from '@/pages/DeptBudgets';
 import { ThemeProvider } from '@/lib/theme.jsx';
 import { ScenarioProvider } from '@/lib/ScenarioContext';
 import { RedactionProvider } from '@/lib/RedactionContext';
@@ -46,9 +46,21 @@ const AuthenticatedApp = () => {
         <Route path="/org-chart" element={<OrgChart />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/compare" element={<ScenarioComparison />} />
-        <Route path="/finance" element={<DeptTeam dept="FINANCE" />} />
-        <Route path="/hr" element={<DeptTeam dept="HR" />} />
-        <Route path="/engineering" element={<DeptTeam dept="ENGINEERING" />} />
+        <Route path="/finance" element={<SalaryTable dept="FINANCE" />} />
+        <Route path="/finance/budgets" element={<DeptBudgets dept="FINANCE" />} />
+        <Route path="/finance/analytics" element={<Analytics dept="FINANCE" />} />
+        <Route path="/finance/alerts" element={<Alerts dept="FINANCE" />} />
+        <Route path="/finance/compare" element={<ScenarioComparison dept="FINANCE" />} />
+        <Route path="/hr" element={<SalaryTable dept="HR" />} />
+        <Route path="/hr/budgets" element={<DeptBudgets dept="HR" />} />
+        <Route path="/hr/analytics" element={<Analytics dept="HR" />} />
+        <Route path="/hr/alerts" element={<Alerts dept="HR" />} />
+        <Route path="/hr/compare" element={<ScenarioComparison dept="HR" />} />
+        <Route path="/engineering" element={<SalaryTable dept="ENGINEERING" />} />
+        <Route path="/engineering/budgets" element={<DeptBudgets dept="ENGINEERING" />} />
+        <Route path="/engineering/analytics" element={<Analytics dept="ENGINEERING" />} />
+        <Route path="/engineering/alerts" element={<Alerts dept="ENGINEERING" />} />
+        <Route path="/engineering/compare" element={<ScenarioComparison dept="ENGINEERING" />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
