@@ -1,0 +1,24 @@
+{
+  "name": "Department",
+  "type": "object",
+  "properties": {
+    "department": {
+      "type": "string",
+      "enum": [
+        "COMMERCIAL",
+        "FINANCE",
+        "HR",
+        "ENGINEERING"
+      ],
+      "description": "Department this budget record belongs to"
+    },
+    "payroll_budget": {
+      "type": "number",
+      "description": "2026 department payroll budget in dollars",
+      "default": 0
+    }
+  },
+  "required": [
+    "department"
+  ]
+}

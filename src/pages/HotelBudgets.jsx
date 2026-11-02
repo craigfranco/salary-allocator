@@ -8,6 +8,9 @@ import HotelDrillDown from '@/components/budget/HotelDrillDown';
 import DeptBreakdownRollup from '@/components/budget/DeptBreakdownRollup';
 import StatCard from '@/components/ui/StatCard';
 import EmployeeForm from '@/components/salary/EmployeeForm';
+import DeptWorkspace from '@/components/dept/DeptWorkspace';
+import DeptBudgetPanel from '@/components/dept/DeptBudgetPanel';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -28,11 +31,13 @@ export default function HotelBudgets() {
   const [editEmp, setEditEmp] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 });
+  const [dept, setDept] = useState('COMMERCIAL');
   const qc = useQueryClient();
   const { activeScenario, scenarioData, setScenarioData } = useScenario();
 
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
+  const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: () => base44.entities.Department.list() });
 
   // Use scenario data if active, otherwise use DB employees
   const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
@@ -46,6 +51,10 @@ export default function HotelBudgets() {
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Hotel.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 }); },
+  });
+  const deptBudgetMutation = useMutation({
+    mutationFn: ({ id, data }) => id ? base44.entities.Department.update(id, data) : base44.entities.Department.create(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
   });
 
   const hotelDeleteMutation = useMutation({
@@ -109,6 +118,8 @@ export default function HotelBudgets() {
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
+  const deptRecord = departments.find(d => d.department === dept);
+  const totalPayroll = activeEmployees.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const totalBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalAllocated = propertyHotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
   const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
@@ -122,14 +133,35 @@ export default function HotelBudgets() {
         <div>
           <h2 className="text-2xl font-display font-bold">Hotel Budgets</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            2026 Room Revenue & S&M Payroll Budgets
-            {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} employee(s) suppressed</span>}
+            2026 department budgets & hotel allocations
+            {dept === 'COMMERCIAL' && suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} employee(s) suppressed</span>}
           </p>
         </div>
-        <Button onClick={() => setAddOpen(true)} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Hotel
-        </Button>
+        <div className="flex items-center gap-3">
+          <Select value={dept} onValueChange={setDept}>
+            <SelectTrigger className="w-44">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="COMMERCIAL">Commercial</SelectItem>
+              <SelectItem value="FINANCE">Finance</SelectItem>
+              <SelectItem value="HR">HR</SelectItem>
+              <SelectItem value="ENGINEERING">Engineering</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button onClick={() => setAddOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Hotel
+          </Button>
+        </div>
       </div>
+
+      {dept === 'COMMERCIAL' ? (<>
+      <DeptBudgetPanel
+        deptLabel="Commercial"
+        budget={deptRecord?.payroll_budget || 0}
+        payroll={totalPayroll}
+        onSave={(v) => deptBudgetMutation.mutate({ id: deptRecord?.id, data: { department: 'COMMERCIAL', payroll_budget: v } })}
+      />
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
@@ -167,6 +199,10 @@ export default function HotelBudgets() {
           );
         })}
       </div>
+
+      </>) : (
+        <DeptWorkspace dept={dept} />
+      )}
 
       {drillHotel && (
         <HotelDrillDown

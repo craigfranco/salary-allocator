@@ -9,6 +9,7 @@ import EmployeeForm from '@/components/salary/EmployeeForm';
 import DeptBudgetCard from '@/components/dept/DeptBudgetCard';
 import DeptStaffRow from '@/components/dept/DeptStaffRow';
 import DeptHotelDialog from '@/components/dept/DeptHotelDialog';
+import DeptBudgetPanel from '@/components/dept/DeptBudgetPanel';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
@@ -34,6 +35,8 @@ export default function DeptWorkspace({ dept }) {
 
   const { data: staff = [] } = useQuery({ queryKey: ['deptstaff', dept], queryFn: () => base44.entities.DeptStaff.filter({ department: dept }) });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
+  const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: () => base44.entities.Department.list() });
+  const deptRecord = departments.find(d => d.department === dept);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['deptstaff', dept] });
   const createMutation = useMutation({
@@ -47,6 +50,10 @@ export default function DeptWorkspace({ dept }) {
   const deleteMutation = useMutation({
     mutationFn: (id) => base44.entities.DeptStaff.delete(id),
     onSuccess: () => { invalidate(); setDeleteStaff(null); },
+  });
+  const deptBudgetMutation = useMutation({
+    mutationFn: ({ id, data }) => id ? base44.entities.Department.update(id, data) : base44.entities.Department.create(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
   });
 
   const sortedStaff = [...staff].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
@@ -94,6 +101,13 @@ export default function DeptWorkspace({ dept }) {
           <Plus className="w-4 h-4" /> Add Team Member
         </Button>
       </div>
+
+      <DeptBudgetPanel
+        deptLabel={config.deptLabel}
+        budget={deptRecord?.payroll_budget || 0}
+        payroll={totalPayroll}
+        onSave={(v) => deptBudgetMutation.mutate({ id: deptRecord?.id, data: { department: dept, payroll_budget: v } })}
+      />
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <StatCard label="Total Payroll" value={totalPayroll} prefix="$" icon={DollarSign} color="blue" />
