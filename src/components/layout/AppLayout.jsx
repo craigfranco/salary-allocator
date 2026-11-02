@@ -25,16 +25,16 @@ export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const navBase = routeDept === 'COMMERCIAL' ? '' : DEPT_BASE_ROUTES[routeDept];
-  const items = navItems
-    .filter(({ path }) => routeDept === 'COMMERCIAL' || path !== '/org-chart')
-    .map(({ path, label, icon }) => ({ path: path === '/' ? (navBase || '/') : `${navBase}${path}`, label, icon }));
   const routeDept = location.pathname.startsWith('/finance') ? 'FINANCE'
     : location.pathname.startsWith('/hr') ? 'HR'
     : location.pathname.startsWith('/engineering') ? 'ENGINEERING'
     : 'COMMERCIAL';
   const { dark, toggle } = useTheme();
   const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario(routeDept);
+  const navBase = routeDept === 'COMMERCIAL' ? '' : DEPT_BASE_ROUTES[routeDept];
+  const items = navItems
+    .filter(({ path }) => routeDept === 'COMMERCIAL' || path !== '/org-chart')
+    .map(({ path, label, icon }) => ({ path: path === '/' ? (navBase || '/') : `${navBase}${path}`, label, icon }));
 
   // Remember the last department workspace and restore it on load
   useEffect(() => {
