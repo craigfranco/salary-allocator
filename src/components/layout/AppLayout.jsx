@@ -7,6 +7,7 @@ import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
 import HelpButton from '@/components/layout/HelpButton';
+import HelpBanner from '@/components/layout/HelpBanner';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,6 +23,7 @@ const navItems = [
 
 export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
   const DEPT_LABELS = { COMMERCIAL: 'Commercial', FINANCE: 'Finance', HR: 'HR', ENGINEERING: 'Engineering' };
@@ -90,7 +92,7 @@ export default function AppLayout() {
               </Select>
             </div>
             <div className="flex items-center gap-3">
-              <HelpButton />
+              <HelpButton onToggle={() => setHelpOpen(o => !o)} />
               <ExecPDFButton />
               <button
                 onClick={toggle}
@@ -177,6 +179,7 @@ export default function AppLayout() {
       </nav>
 
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
+        <HelpBanner open={helpOpen} onToggle={() => setHelpOpen(false)} />
         <Outlet />
       </main>
     </div>
