@@ -16,7 +16,22 @@
     },
     "sm_payroll_budget": {
       "type": "number",
-      "description": "2027 S&M Payroll Budget"
+      "description": "2027 S&M (Commercial) Payroll Budget"
+    },
+    "finance_payroll_budget": {
+      "type": "number",
+      "description": "2027 Finance Payroll Budget for this hotel",
+      "default": 0
+    },
+    "hr_payroll_budget": {
+      "type": "number",
+      "description": "2027 HR Payroll Budget for this hotel",
+      "default": 0
+    },
+    "engineering_payroll_budget": {
+      "type": "number",
+      "description": "2027 Engineering Payroll Budget for this hotel",
+      "default": 0
     },
     "room_count": {
       "type": "number",

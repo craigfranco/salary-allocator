@@ -30,7 +30,7 @@ export default function HotelBudgets() {
   const [deleteHotel, setDeleteHotel] = useState(null);
   const [editEmp, setEditEmp] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 });
+  const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0, finance_payroll_budget: 0, hr_payroll_budget: 0, engineering_payroll_budget: 0 });
   const [dept, setDept] = useState('COMMERCIAL');
   const qc = useQueryClient();
   const { activeScenario, scenarioData, setScenarioData } = useScenario();
@@ -51,7 +51,7 @@ export default function HotelBudgets() {
   });
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Hotel.create(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0 }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0, finance_payroll_budget: 0, hr_payroll_budget: 0, engineering_payroll_budget: 0 }); },
   });
   const deptBudgetMutation = useMutation({
     mutationFn: ({ id, data }) => id ? base44.entities.Department.update(id, data) : base44.entities.Department.create(data),
@@ -119,17 +119,7 @@ export default function HotelBudgets() {
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
-  const DEPTS = [
-    { key: 'COMMERCIAL', label: 'Commercial' },
-    { key: 'FINANCE', label: 'Finance' },
-    { key: 'HR', label: 'HR' },
-    { key: 'ENGINEERING', label: 'Engineering' },
-  ];
-  const deptPayroll = {
-    FINANCE: deptStaff.filter(s => s.department === 'FINANCE' && !s.suppressed).reduce((s, e) => s + (e.annual_salary || 0), 0),
-    HR: deptStaff.filter(s => s.department === 'HR' && !s.suppressed).reduce((s, e) => s + (e.annual_salary || 0), 0),
-    ENGINEERING: deptStaff.filter(s => s.department === 'ENGINEERING' && !s.suppressed).reduce((s, e) => s + (e.annual_salary || 0), 0),
-  };
+  const deptRecord = departments.find(d => d.department === dept);
   const totalPayroll = activeEmployees.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const totalBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalAllocated = propertyHotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
@@ -167,20 +157,12 @@ export default function HotelBudgets() {
       </div>
 
       {dept === 'COMMERCIAL' ? (<>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {DEPTS.map(({ key, label }) => {
-          const rec = departments.find(d => d.department === key);
-          return (
-            <DeptBudgetPanel
-              key={key}
-              deptLabel={label}
-              budget={rec?.payroll_budget || 0}
-              payroll={key === 'COMMERCIAL' ? totalPayroll : (deptPayroll[key] || 0)}
-              onSave={(v) => deptBudgetMutation.mutate({ id: rec?.id, data: { department: key, payroll_budget: v } })}
-            />
-          );
-        })}
-      </div>
+      <DeptBudgetPanel
+        deptLabel="Commercial"
+        budget={deptRecord?.payroll_budget || 0}
+        payroll={totalPayroll}
+        onSave={(v) => deptBudgetMutation.mutate({ id: deptRecord?.id, data: { department: 'COMMERCIAL', payroll_budget: v } })}
+      />
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
@@ -211,6 +193,7 @@ export default function HotelBudgets() {
               allocatedTotal={getHotelAllocatedTotal(activeEmployees, hotel.short_code)}
               employeeCount={empCount}
               employees={activeEmployees}
+              deptStaff={deptStaff}
               onUpdate={(data) => updateMutation.mutate({ id: hotel.id, data })}
               onDelete={() => setDeleteHotel(hotel)}
               onClick={() => setDrillHotel(hotel)}
@@ -250,7 +233,10 @@ export default function HotelBudgets() {
             <div><Label>Hotel Name</Label><Input value={newHotel.name} onChange={(e) => setNewHotel(p => ({ ...p, name: e.target.value }))} /></div>
             <div><Label>Short Code</Label><Input value={newHotel.short_code} onChange={(e) => setNewHotel(p => ({ ...p, short_code: e.target.value.toUpperCase() }))} /></div>
             <div><Label>Room Revenue Budget</Label><Input type="number" value={newHotel.room_revenue_budget} onChange={(e) => setNewHotel(p => ({ ...p, room_revenue_budget: parseFloat(e.target.value) || 0 }))} /></div>
-            <div><Label>S&M Payroll Budget</Label><Input type="number" value={newHotel.sm_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, sm_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>
+            <div><Label>S&M Payroll Budget (Commercial)</Label><Input type="number" value={newHotel.sm_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, sm_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>
+            <div><Label>Finance Payroll Budget</Label><Input type="number" value={newHotel.finance_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, finance_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>
+            <div><Label>HR Payroll Budget</Label><Input type="number" value={newHotel.hr_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, hr_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>
+            <div><Label>Engineering Payroll Budget</Label><Input type="number" value={newHotel.engineering_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, engineering_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
