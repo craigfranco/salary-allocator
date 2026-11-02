@@ -8,7 +8,6 @@ import HotelDrillDown from '@/components/budget/HotelDrillDown';
 import DeptBreakdownRollup from '@/components/budget/DeptBreakdownRollup';
 import StatCard from '@/components/ui/StatCard';
 import EmployeeForm from '@/components/salary/EmployeeForm';
-import DeptBudgetPanel from '@/components/dept/DeptBudgetPanel';
 import { getHotelAllocatedTotal, formatCurrency } from '@/lib/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -34,7 +33,6 @@ export default function HotelBudgets() {
 
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
   const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
-  const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: () => base44.entities.Department.list() });
   const { data: deptStaff = [] } = useQuery({ queryKey: ['deptStaff'], queryFn: () => base44.entities.DeptStaff.list() });
 
   // Use scenario data if active, otherwise use DB employees
@@ -50,11 +48,6 @@ export default function HotelBudgets() {
     mutationFn: (data) => base44.entities.Hotel.create(data),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0, finance_payroll_budget: 0, hr_payroll_budget: 0, engineering_payroll_budget: 0 }); },
   });
-  const deptBudgetMutation = useMutation({
-    mutationFn: ({ id, data }) => id ? base44.entities.Department.update(id, data) : base44.entities.Department.create(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
-  });
-
   const hotelDeleteMutation = useMutation({
     mutationFn: async (hotel) => {
       // Remove the hotel's allocation from all employees, then delete the hotel
@@ -116,8 +109,6 @@ export default function HotelBudgets() {
   const sortedHotels = [...hotels].sort((a, b) => HOTEL_ORDER.indexOf(a.short_code) - HOTEL_ORDER.indexOf(b.short_code));
   const propertyHotels = sortedHotels.filter(h => h.short_code !== 'CORP');
 
-  const deptRecord = departments.find(d => d.department === 'COMMERCIAL');
-  const totalPayroll = activeEmployees.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const totalBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalAllocated = propertyHotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
   const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
@@ -141,13 +132,6 @@ export default function HotelBudgets() {
           </Button>
         </div>
       </div>
-
-      <DeptBudgetPanel
-        deptLabel="Commercial"
-        budget={deptRecord?.payroll_budget || 0}
-        payroll={totalPayroll}
-        onSave={(v) => deptBudgetMutation.mutate({ id: deptRecord?.id, data: { department: 'COMMERCIAL', payroll_budget: v } })}
-      />
 
       {/* Summary stats */}
       <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">

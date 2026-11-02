@@ -2,10 +2,21 @@ import React from 'react';
 import { Building2, Users } from 'lucide-react';
 import { formatCurrency, HOTEL_COLORS } from '@/lib/helpers';
 
-export default function DeptBudgetCard({ hotel, deptLabel, allocatedTotal, employeeCount, onClick }) {
+const DEPT_BUDGET_FIELDS = {
+  FINANCE: 'finance_payroll_budget',
+  HR: 'hr_payroll_budget',
+  ENGINEERING: 'engineering_payroll_budget',
+};
+
+export default function DeptBudgetCard({ hotel, dept, deptLabel, allocatedTotal, employeeCount, onClick }) {
   const accent = HOTEL_COLORS[hotel.short_code] || HOTEL_COLORS.CORP;
   const rev = hotel.room_revenue_budget || 0;
   const pct = rev > 0 ? (allocatedTotal / rev) * 100 : 0;
+  const budget = (dept && DEPT_BUDGET_FIELDS[dept] ? hotel[DEPT_BUDGET_FIELDS[dept]] : hotel.sm_payroll_budget) || 0;
+  const remaining = budget - allocatedTotal;
+  const isOver = budget > 0 && allocatedTotal > budget;
+  const pctUsed = budget > 0 ? Math.min((allocatedTotal / budget) * 100, 100) : 0;
+  const isNear = !isOver && pctUsed > 95;
 
   return (
     <div
@@ -31,22 +42,47 @@ export default function DeptBudgetCard({ hotel, deptLabel, allocatedTotal, emplo
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <div className="bg-muted/30 rounded-xl p-3">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Room Revenue</p>
             <p className="text-sm font-bold tabular-nums">{formatCurrency(rev)}</p>
           </div>
           <div className="bg-muted/30 rounded-xl p-3">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">{deptLabel} Budget</p>
+            <p className="text-sm font-bold tabular-nums">{formatCurrency(budget)}</p>
+          </div>
+          <div className="bg-muted/30 rounded-xl p-3">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">{deptLabel} Allocated</p>
             <p className="text-sm font-bold tabular-nums">{formatCurrency(allocatedTotal)}</p>
           </div>
+          <div className={`rounded-xl p-3 ${isOver ? 'bg-red-500/10' : 'bg-emerald-500/10'}`}>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Remaining</p>
+            <p className={`text-sm font-bold tabular-nums ${isOver ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'}`}>{formatCurrency(remaining)}</p>
+          </div>
         </div>
 
-        <div className="mt-3 flex justify-between items-center">
+        <div className="flex justify-between items-center mb-2">
           <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">% of Room Revenue</span>
           <span className="text-xs font-bold tabular-nums" style={pct > 0 ? { color: accent.hex } : undefined}>
             {rev > 0 ? `${pct.toFixed(2)}%` : '—'}
           </span>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Budget Used</span>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+              isOver ? 'bg-red-500/15 text-red-500' : isNear ? 'bg-amber-500/15 text-amber-500' : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+            }`}>
+              {budget > 0 ? `${Math.round((allocatedTotal / budget) * 100)}%` : '—'}
+            </span>
+          </div>
+          <div className="h-2 rounded-full bg-muted/60 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ${isOver ? 'bg-red-500' : isNear ? 'bg-amber-500' : accent.bg}`}
+              style={{ width: `${pctUsed}%` }}
+            />
+          </div>
         </div>
       </div>
     </div>
