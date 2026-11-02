@@ -301,9 +301,16 @@ export default function SalaryTable({ dept = 'COMMERCIAL' }) {
             </tbody>
             <tfoot>
               <tr className="bg-primary/10 border-t-2 border-primary/20">
-                <td colSpan={14} className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-foreground sticky left-0 bg-primary/10 z-10">
+                <td colSpan={5} className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-foreground sticky left-0 bg-primary/10 z-10">
                   Budget vs. Allocated Payroll
                 </td>
+                <td />
+                {sortedHotels.map(h => (
+                  <td key={h.short_code} className="px-1.5 py-2 text-[10px] font-semibold leading-tight text-center text-foreground" title={h.name}>
+                    {h.name}
+                  </td>
+                ))}
+                <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/40">
                 <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Allocated Payroll</td>
