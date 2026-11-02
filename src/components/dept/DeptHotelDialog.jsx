@@ -9,7 +9,7 @@ export default function DeptHotelDialog({ hotel, staff, deptLabel, onClose }) {
     .filter(s => (s.allocations?.[hotel.short_code] || 0) > 0)
     .sort((a, b) => (b.allocations[hotel.short_code] * (b.annual_salary || 0)) - (a.allocations[hotel.short_code] * (a.annual_salary || 0)));
   const total = rows.reduce((s, e) => s + e.allocations[hotel.short_code] * (e.annual_salary || 0), 0);
-  const rev = hotel.room_revenue_budget || 0;
+  const rev = hotel.total_revenue_budget || 0;
   const pct = rev > 0 ? (total / rev) * 100 : 0;
 
   return (
@@ -40,7 +40,7 @@ export default function DeptHotelDialog({ hotel, staff, deptLabel, onClose }) {
             ))}
             <div className="rounded-xl bg-muted/40 border border-border/60 px-3 py-3 grid grid-cols-3 gap-2 text-center">
               <div>
-                <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Room Revenue</p>
+                <p className="text-[10px] uppercase font-semibold text-muted-foreground tracking-wider">Total Revenue</p>
                 <p className="text-sm font-bold mt-0.5">{formatCurrency(rev)}</p>
               </div>
               <div>

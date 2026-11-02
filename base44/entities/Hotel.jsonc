@@ -10,9 +10,9 @@
       "type": "string",
       "description": "Short identifier for the hotel"
     },
-    "room_revenue_budget": {
+    "total_revenue_budget": {
       "type": "number",
-      "description": "2027 Room Revenue Budget"
+      "description": "2027 Total Revenue Budget"
     },
     "sm_payroll_budget": {
       "type": "number",

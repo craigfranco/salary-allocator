@@ -138,7 +138,7 @@ export default function SalaryTable() {
   const totalPayroll = activeEmployees.reduce((sum, emp) => {
     return sum + propertyHotels.reduce((s, h) => s + ((emp.allocations?.[h.short_code] || 0) * emp.annual_salary), 0);
   }, 0);
-  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
+  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.total_revenue_budget || 0), 0);
   const totalPayrollPct = totalRoomRev > 0 ? (totalPayroll / totalRoomRev) * 100 : null;
   const totalSmBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalBudgetDiff = totalSmBudget > 0 ? totalPayroll - totalSmBudget : null;
@@ -270,13 +270,13 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/40">
-                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Budget Room Revenue</td>
+                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">Budget Total Revenue</td>
                 <td />
                 {sortedHotels.map(h => {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
                   return (
                     <td key={h.short_code} className="px-1.5 py-1.5 text-center">
-                      <span className="text-xs font-medium tabular-nums text-muted-foreground">{h.room_revenue_budget > 0 ? formatCurrency(h.room_revenue_budget) : '—'}</span>
+                      <span className="text-xs font-medium tabular-nums text-muted-foreground">{h.total_revenue_budget > 0 ? formatCurrency(h.total_revenue_budget) : '—'}</span>
                     </td>
                   );
                 })}
@@ -333,12 +333,12 @@ export default function SalaryTable() {
                 <td />
               </tr>
               <tr className="bg-primary/5 border-t border-border/40">
-                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">% of Room Revenue</td>
+                <td colSpan={5} className="px-3 py-1.5 text-xs font-semibold text-muted-foreground sticky left-0 bg-primary/5 z-10">% of Total Revenue</td>
                 <td />
                 {sortedHotels.map(h => {
                   if (h.short_code === 'CORP') return <td key={h.short_code} />;
                   const allocated = hotelTotals[h.short_code] || 0;
-                  const roomRev = h.room_revenue_budget || 0;
+                  const roomRev = h.total_revenue_budget || 0;
                   const payrollPct = roomRev > 0 ? (allocated / roomRev) * 100 : null;
                   return (
                     <td key={h.short_code} className="px-1.5 py-1.5 text-center">
@@ -380,7 +380,7 @@ export default function SalaryTable() {
                       { label: 'S&M Payroll\nBudget', value: totalSmBudget > 0 ? formatCurrency(totalSmBudget) : '—', color: 'text-foreground' },
                       { label: 'Total Allocated\nPayroll', value: formatCurrency(totalPayroll), color: 'text-foreground' },
                       { label: 'Over /\n(Short) Budget', value: totalBudgetDiff !== null ? (totalBudgetDiff > 0 ? '+' : '') + formatCurrency(totalBudgetDiff) : '—', color: totalBudgetDiff > 0 ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400' },
-                      { label: '% of\nRoom Rev', value: totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—', color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' },
+                      { label: '% of\nTotal Rev', value: totalPayrollPct !== null ? `${totalPayrollPct.toFixed(1)}%` : '—', color: totalPayrollPct === null ? 'text-muted-foreground' : totalPayrollPct > 5 ? 'text-red-500' : totalPayrollPct > 3 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' },
                       { label: '% of S&M\nBudget', value: totalSmBudget > 0 ? `${((totalPayroll / totalSmBudget) * 100).toFixed(1)}%` : '—', color: totalSmBudget === 0 ? 'text-muted-foreground' : (totalPayroll / totalSmBudget) > 1 ? 'text-red-500' : (totalPayroll / totalSmBudget) > 0.95 ? 'text-amber-500' : 'text-emerald-600 dark:text-emerald-400' }
                     ].map((item, idx) => (
                       <div key={idx} className="text-center">

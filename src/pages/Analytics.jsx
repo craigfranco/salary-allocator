@@ -59,7 +59,7 @@ export default function Analytics() {
       name: HOTEL_SHORT_NAMES[h.short_code] || h.short_code,
       allocated: Math.round(getHotelAllocatedTotal(activeEmployees, h.short_code)),
       budget: h.sm_payroll_budget || 0,
-      roomRev: h.room_revenue_budget || 0,
+      roomRev: h.total_revenue_budget || 0,
     }));
 
   const hotelPctRevData = hotelData
@@ -164,16 +164,16 @@ export default function Analytics() {
           </ResponsiveContainer>
         </div>
 
-        {/* Payroll % of Room Rev */}
+        {/* Payroll % of Total Rev */}
         <div className={cardClass}>
-          <h3 className="text-sm font-semibold mb-4 text-foreground">Payroll as % of Room Revenue</h3>
+          <h3 className="text-sm font-semibold mb-4 text-foreground">Payroll as % of Total Revenue</h3>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={hotelPctRevData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }} />
               <YAxis tickFormatter={(v) => `${v}%`} tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }} />
               <Tooltip content={<TooltipStyle />} />
-              <Bar dataKey="pct" name="% of Room Rev" radius={[4, 4, 0, 0]}>
+              <Bar dataKey="pct" name="% of Total Rev" radius={[4, 4, 0, 0]}>
                 {hotelPctRevData.map((entry, i) => (
                   <Cell key={i} fill={entry.pct > 5 ? '#f43f5e' : entry.pct > 3 ? '#f59e0b' : '#10b981'} />
                 ))}

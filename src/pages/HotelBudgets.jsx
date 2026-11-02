@@ -27,7 +27,7 @@ export default function HotelBudgets() {
   const [deleteHotel, setDeleteHotel] = useState(null);
   const [editEmp, setEditEmp] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
-  const [newHotel, setNewHotel] = useState({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0, finance_payroll_budget: 0, hr_payroll_budget: 0, engineering_payroll_budget: 0 });
+  const [newHotel, setNewHotel] = useState({ name: '', short_code: '', total_revenue_budget: 0, sm_payroll_budget: 0, finance_payroll_budget: 0, hr_payroll_budget: 0, engineering_payroll_budget: 0 });
   const qc = useQueryClient();
   const { activeScenario, scenarioData, setScenarioData } = useScenario();
 
@@ -46,7 +46,7 @@ export default function HotelBudgets() {
   });
   const createMutation = useMutation({
     mutationFn: (data) => base44.entities.Hotel.create(data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', room_revenue_budget: 0, sm_payroll_budget: 0, finance_payroll_budget: 0, hr_payroll_budget: 0, engineering_payroll_budget: 0 }); },
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['hotels'] }); setAddOpen(false); setNewHotel({ name: '', short_code: '', total_revenue_budget: 0, sm_payroll_budget: 0, finance_payroll_budget: 0, hr_payroll_budget: 0, engineering_payroll_budget: 0 }); },
   });
   const hotelDeleteMutation = useMutation({
     mutationFn: async (hotel) => {
@@ -111,7 +111,7 @@ export default function HotelBudgets() {
 
   const totalBudget = propertyHotels.reduce((s, h) => s + (h.sm_payroll_budget || 0), 0);
   const totalAllocated = propertyHotels.reduce((s, h) => s + getHotelAllocatedTotal(activeEmployees, h.short_code), 0);
-  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
+  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.total_revenue_budget || 0), 0);
   const overBudgetCount = propertyHotels.filter(h => getHotelAllocatedTotal(activeEmployees, h.short_code) > (h.sm_payroll_budget || 0)).length;
   const corpAllocated = getHotelAllocatedTotal(activeEmployees, 'CORP');
   const corpEmpCount = activeEmployees.filter(e => (e.allocations?.CORP || 0) > 0).length;
@@ -138,7 +138,7 @@ export default function HotelBudgets() {
         <StatCard label="Total S&M Budget" value={totalBudget} prefix="$" icon={DollarSign} color="blue" />
         <StatCard label="Total Allocated" value={totalAllocated} prefix="$" icon={TrendingUp} color={totalAllocated > totalBudget ? 'rose' : 'teal'} />
         <StatCard label="Allocated to Corp" value={corpAllocated} prefix="$" icon={Building2} color="amber" trend={`${corpEmpCount} employee${corpEmpCount !== 1 ? 's' : ''}`} />
-        <StatCard label="Total Room Revenue" value={totalRoomRev} prefix="$" icon={Building2} color="purple" />
+        <StatCard label="Total Revenue" value={totalRoomRev} prefix="$" icon={Building2} color="purple" />
         <StatCard label="Over Budget" value={overBudgetCount} suffix=" hotels" icon={TrendingDown} color={overBudgetCount > 0 ? 'rose' : 'teal'} />
         <StatCard
           label="Budget Overage"
@@ -197,7 +197,7 @@ export default function HotelBudgets() {
           <div className="space-y-3">
             <div><Label>Hotel Name</Label><Input value={newHotel.name} onChange={(e) => setNewHotel(p => ({ ...p, name: e.target.value }))} /></div>
             <div><Label>Short Code</Label><Input value={newHotel.short_code} onChange={(e) => setNewHotel(p => ({ ...p, short_code: e.target.value.toUpperCase() }))} /></div>
-            <div><Label>Room Revenue Budget</Label><Input type="number" value={newHotel.room_revenue_budget} onChange={(e) => setNewHotel(p => ({ ...p, room_revenue_budget: parseFloat(e.target.value) || 0 }))} /></div>
+            <div><Label>Total Revenue Budget</Label><Input type="number" value={newHotel.total_revenue_budget} onChange={(e) => setNewHotel(p => ({ ...p, total_revenue_budget: parseFloat(e.target.value) || 0 }))} /></div>
             <div><Label>S&M Payroll Budget (Commercial)</Label><Input type="number" value={newHotel.sm_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, sm_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>
             <div><Label>Finance Payroll Budget</Label><Input type="number" value={newHotel.finance_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, finance_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>
             <div><Label>HR Payroll Budget</Label><Input type="number" value={newHotel.hr_payroll_budget} onChange={(e) => setNewHotel(p => ({ ...p, hr_payroll_budget: parseFloat(e.target.value) || 0 }))} /></div>

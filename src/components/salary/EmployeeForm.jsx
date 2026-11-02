@@ -90,8 +90,8 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     const locked = hotels.filter(h => lockedHotels.has(h.short_code));
     const lockedSum = locked.reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
     const remainder = locked.length > 0 ? Math.max(0, 1 - lockedSum) : 1;
-    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code) && (h.room_revenue_budget || 0) > 0);
-    const totalRev = unlocked.reduce((s, h) => s + h.room_revenue_budget, 0);
+    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code) && (h.total_revenue_budget || 0) > 0);
+    const totalRev = unlocked.reduce((s, h) => s + h.total_revenue_budget, 0);
     if (locked.length === 0 && totalRev === 0) return;
     const newAllocs = {};
     hotels.forEach(h => {
@@ -100,7 +100,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
       } else if (!selectedHotels.has(h.short_code)) {
         newAllocs[h.short_code] = 0;
       } else {
-        const rev = h.room_revenue_budget || 0;
+        const rev = h.total_revenue_budget || 0;
         newAllocs[h.short_code] = (totalRev > 0 && rev > 0) ? (rev / totalRev) * remainder : 0;
       }
     });
@@ -259,7 +259,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                     className="h-7 text-xs px-2"
                     onClick={applyRevenueSplit}
                   >
-                    By Room Rev ({selectedHotels.size})
+                    By Revenue ({selectedHotels.size})
                   </Button>
                 </div>
                 {(() => {

@@ -121,7 +121,7 @@ function buildExecSummary(employees, hotels) {
     const allocated = hotelTotals[h.short_code] || 0;
     const variance = h.sm_payroll_budget ? allocated - h.sm_payroll_budget : null;
     const pctUsed = h.sm_payroll_budget ? (allocated / h.sm_payroll_budget * 100).toFixed(1) : null;
-    return { name: HOTEL_NAMES[h.short_code], roomRev: h.room_revenue_budget, smBudget: h.sm_payroll_budget, allocated, variance, pctUsed };
+    return { name: HOTEL_NAMES[h.short_code], roomRev: h.total_revenue_budget, smBudget: h.sm_payroll_budget, allocated, variance, pctUsed };
   });
 
   return `<div class="page">
@@ -173,7 +173,7 @@ function buildExecSummary(employees, hotels) {
         <table style="width:100%;border-collapse:collapse;font-family:Inter,Arial,sans-serif;font-size:9px;">
           <thead>
             <tr style="background:#2d4b5e;">
-              ${['Hotel','Room Rev Budget','S&M Payroll Budget','Salary Allocated','Variance','% Used'].map(h =>
+              ${['Hotel','Total Rev Budget','S&M Payroll Budget','Salary Allocated','Variance','% Used'].map(h =>
                 `<th style="padding:7px 10px;color:rgba(255,255,255,0.85);font-weight:600;text-align:${h==='Hotel'?'left':'right'};letter-spacing:0.05em;">${h}</th>`
               ).join('')}
             </tr>
@@ -331,7 +331,7 @@ function buildHotelBreakdown(employees, hotels) {
       <div style="font-family:'Playfair Display',Georgia,serif;font-size:16px;color:#2d4b5e;font-weight:600;border-bottom:2px solid #e2e7ed;padding-bottom:8px;margin-bottom:12px;">${HOTEL_NAMES[code]}</div>
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
         ${[
-          { l: 'Room Rev Budget', v: h.room_revenue_budget ? fmt(h.room_revenue_budget) : '—' },
+          { l: 'Total Rev Budget', v: h.total_revenue_budget ? fmt(h.total_revenue_budget) : '—' },
           { l: 'S&M Payroll Budget', v: h.sm_payroll_budget ? fmt(h.sm_payroll_budget) : '—' },
           { l: 'Salary Allocated', v: fmt(allocated) },
           { l: 'Remaining Budget', v: remaining !== null ? fmt(remaining) : '—', color: remaining !== null ? (remaining < 0 ? '#dc2626' : '#16a34a') : '#6b7280' },

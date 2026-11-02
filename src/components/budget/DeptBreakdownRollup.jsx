@@ -32,7 +32,7 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
   const grandTotal = Object.values(deptTotals).reduce((s, v) => s + v, 0);
 
   // Total room revenue across properties
-  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.room_revenue_budget || 0), 0);
+  const totalRoomRev = propertyHotels.reduce((s, h) => s + (h.total_revenue_budget || 0), 0);
 
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
@@ -65,7 +65,7 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
                 </td>
                 {propertyHotels.map(h => {
                   const val = matrix[d.key][h.short_code];
-                  const rev = h.room_revenue_budget || 0;
+                  const rev = h.total_revenue_budget || 0;
                   const pct = rev > 0 ? (val / rev) * 100 : 0;
                   return (
                     <td key={h.short_code} className="px-3 py-3 text-center tabular-nums text-xs font-medium">
@@ -92,7 +92,7 @@ export default function DeptBreakdownRollup({ employees, hotels }) {
               <td className="px-4 py-3 text-xs font-bold uppercase tracking-wider sticky left-0 bg-primary/5">Total</td>
               {propertyHotels.map(h => {
                 const colTotal = DEPTS.reduce((s, d) => s + matrix[d.key][h.short_code], 0);
-                const rev = h.room_revenue_budget || 0;
+                const rev = h.total_revenue_budget || 0;
                 const colPct = rev > 0 ? (colTotal / rev) * 100 : 0;
                 return (
                   <td key={h.short_code} className="px-3 py-3 text-center tabular-nums text-xs font-bold">

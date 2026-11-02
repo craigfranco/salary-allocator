@@ -10,7 +10,7 @@ const DEPT_BUDGET_FIELDS = {
 
 export default function DeptBudgetCard({ hotel, dept, deptLabel, allocatedTotal, employeeCount, onClick }) {
   const accent = HOTEL_COLORS[hotel.short_code] || HOTEL_COLORS.CORP;
-  const rev = hotel.room_revenue_budget || 0;
+  const rev = hotel.total_revenue_budget || 0;
   const pct = rev > 0 ? (allocatedTotal / rev) * 100 : 0;
   const budget = (dept && DEPT_BUDGET_FIELDS[dept] ? hotel[DEPT_BUDGET_FIELDS[dept]] : hotel.sm_payroll_budget) || 0;
   const remaining = budget - allocatedTotal;
@@ -44,7 +44,7 @@ export default function DeptBudgetCard({ hotel, dept, deptLabel, allocatedTotal,
 
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div className="bg-muted/30 rounded-xl p-3">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Room Revenue</p>
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Total Revenue</p>
             <p className="text-sm font-bold tabular-nums">{formatCurrency(rev)}</p>
           </div>
           <div className="bg-muted/30 rounded-xl p-3">
@@ -62,7 +62,7 @@ export default function DeptBudgetCard({ hotel, dept, deptLabel, allocatedTotal,
         </div>
 
         <div className="flex justify-between items-center mb-2">
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">% of Room Revenue</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">% of Total Revenue</span>
           <span className="text-xs font-bold tabular-nums" style={pct > 0 ? { color: accent.hex } : undefined}>
             {rev > 0 ? `${pct.toFixed(2)}%` : '—'}
           </span>
