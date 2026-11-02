@@ -21,7 +21,7 @@ export default function DeptBudgetPanel({ deptLabel, budget = 0, payroll = 0, on
           </div>
           <div>
             <h3 className="text-sm font-semibold">{deptLabel} Department Budget</h3>
-            <p className="text-xs text-muted-foreground">2026 payroll budget for the {deptLabel} department</p>
+            <p className="text-xs text-muted-foreground">2027 payroll budget for the {deptLabel} department</p>
           </div>
         </div>
         {editing ? (

@@ -52,7 +52,7 @@ function pageFooter(pageNum) {
   return `<div class="page-footer">
     <div style="display:flex;align-items:center;gap:8px;">
       ${RH_MARK_SMALL}
-      <span style="font-family:Inter,Arial,sans-serif;font-size:8px;color:#6b7280;">Rebel Hotel Co. — Commercial Talent Report 2026</span>
+      <span style="font-family:Inter,Arial,sans-serif;font-size:8px;color:#6b7280;">Rebel Hotel Co. — Commercial Talent Report 2027</span>
     </div>
     <span style="font-family:Inter,Arial,sans-serif;font-size:7px;font-weight:600;letter-spacing:0.1em;color:#fff;background:#2d4b5e;padding:2px 8px;border-radius:20px;">CONFIDENTIAL</span>
     <span style="font-family:Inter,Arial,sans-serif;font-size:8px;color:#9ca3af;">${pageNum}</span>
@@ -72,7 +72,7 @@ function buildCover(employees, hotels, date) {
       <div style="font-family:'Playfair Display',Georgia,serif;font-size:52px;font-weight:400;color:#fff;letter-spacing:0.02em;text-align:center;line-height:1.1;">Commercial Talent</div>
       <div style="font-family:Inter,Arial,sans-serif;font-size:18px;font-weight:300;color:rgba(255,255,255,0.75);margin-top:10px;">Executive Dashboard</div>
       <div style="width:60px;height:2px;background:#fff;margin:28px auto;opacity:0.35;"></div>
-      <div style="font-family:Inter,Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.45);margin-top:20px;">2026 &nbsp;·&nbsp; Prepared ${date}</div>
+      <div style="font-family:Inter,Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.45);margin-top:20px;">2027 &nbsp;·&nbsp; Prepared ${date}</div>
     </div>
     ${RH_WATERMARK}
     <div style="background:#1a3347;height:100px;display:flex;align-items:center;justify-content:space-around;padding:0 60px;flex-shrink:0;">
@@ -564,7 +564,7 @@ export function generateExecPDF(employees, hotels, redactedIds = new Set()) {
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Rebel Hotel Co. — Commercial Talent Executive Report 2026</title>
+<title>Rebel Hotel Co. — Commercial Talent Executive Report 2027</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 <style>

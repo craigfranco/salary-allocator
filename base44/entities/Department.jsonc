@@ -14,7 +14,7 @@
     },
     "payroll_budget": {
       "type": "number",
-      "description": "2026 department payroll budget in dollars",
+      "description": "2027 department payroll budget in dollars",
       "default": 0
     }
   },

@@ -133,7 +133,7 @@ export default function HotelBudgets() {
         <div>
           <h2 className="text-2xl font-display font-bold">Hotel Budgets</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            2026 department budgets & hotel allocations
+            2027 department budgets & hotel allocations
             {dept === 'COMMERCIAL' && suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} employee(s) suppressed</span>}
           </p>
         </div>

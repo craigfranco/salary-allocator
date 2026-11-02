@@ -12,11 +12,11 @@
     },
     "room_revenue_budget": {
       "type": "number",
-      "description": "2026 Room Revenue Budget"
+      "description": "2027 Room Revenue Budget"
     },
     "sm_payroll_budget": {
       "type": "number",
-      "description": "2026 S&M Payroll Budget"
+      "description": "2027 S&M Payroll Budget"
     },
     "room_count": {
       "type": "number",

@@ -150,7 +150,7 @@ export default function ScenarioManager({ employees, onRestore, department = 'CO
               <Input
                 value={name}
                 onChange={e => setName(e.target.value)}
-                placeholder="e.g. Base Plan 2026"
+                placeholder="e.g. Base Plan 2027"
                 autoFocus
               />
             </div>

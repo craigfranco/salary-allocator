@@ -143,7 +143,7 @@ export default function DeptWorkspace({ dept }) {
         <div>
           <h2 className="text-2xl font-display font-bold">{config.title}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Payroll allocation across hotels · 2026 room revenue budgets
+            Payroll allocation across hotels · 2027 room revenue budgets
             {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed</span>}
           </p>
         </div>
