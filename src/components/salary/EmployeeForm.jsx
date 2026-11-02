@@ -288,7 +288,10 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                       onCheckedChange={() => toggleHotel(h.short_code)}
                       className="flex-shrink-0"
                     />
-                    <span className={`text-xs w-14 truncate ${selectedHotels.has(h.short_code) ? 'text-foreground font-medium' : 'text-muted-foreground'}`}>{h.short_code}</span>
+                    <div className="flex-1 min-w-0 leading-tight">
+                      <div className={`text-xs font-semibold truncate ${selectedHotels.has(h.short_code) ? 'text-foreground' : 'text-muted-foreground'}`}>{h.name}</div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{h.short_code}</div>
+                    </div>
                     <Input
                       type="number"
                       min="0" max="100"
