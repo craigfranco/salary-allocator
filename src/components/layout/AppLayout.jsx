@@ -6,6 +6,7 @@ import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Su
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
+import HelpButton from '@/components/layout/HelpButton';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -89,6 +90,7 @@ export default function AppLayout() {
               </Select>
             </div>
             <div className="flex items-center gap-3">
+              <HelpButton />
               <ExecPDFButton />
               <button
                 onClick={toggle}
