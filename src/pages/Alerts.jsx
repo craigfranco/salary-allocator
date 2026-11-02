@@ -134,7 +134,7 @@ export default function Alerts({ dept = 'COMMERCIAL' }) {
                     </div>
                     <div>
                       <p className="text-sm font-semibold">{emp.name}</p>
-                      <p className="text-xs text-muted-foreground">{emp.title} · {emp.exclude_from_table ? 'Corporate' : emp.department}</p>
+                      <p className="text-xs text-muted-foreground">{emp.title} · {emp.exclude_from_table ? 'Department Head' : emp.department}</p>
                     </div>
                   </div>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${

@@ -36,6 +36,11 @@
       "type": "string",
       "description": "ID of the member's direct manager (another DeptStaff record in the same department)"
     },
+    "exclude_from_table": {
+      "type": "boolean",
+      "description": "If true, this member is a department head with no salary: excluded from the table and calculations, shown only in the org chart",
+      "default": false
+    },
     "sort_order": {
       "type": "number",
       "description": "Optional sort order for org chart display. Lower numbers appear first among siblings."

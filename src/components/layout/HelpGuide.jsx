@@ -11,7 +11,7 @@ const SECTIONS = [
     blocks: [
       { label: 'What it does —', text: "Each employee's annual salary is charged to hotels as allocation percentages, and every row should total exactly 100%. The footer rolls up allocated payroll, hotel budgets, and payroll as a share of revenue for every property." },
       { label: 'How to use it —', text: 'Click any allocation cell to edit it in place; the row total and the running total indicator update live. Rows that don\'t total 100% show a Fix to 100% button that rescales the remaining percentage across that person\'s hotels, keeping locked hotels fixed. Use the search bar to filter by name, department, hotel, or allocation status.' },
-      { label: 'Editing a person —', text: 'Add Employee opens the allocation popup: set a salary, pick hotels, and split with Even Split, By Room Count, or By Revenue. Press Enter in a hotel\'s percentage field to jump straight to the next hotel. Suppress an employee to hide them from tables and calculations while keeping them in the org chart.' },
+      { label: 'Editing a person —', text: 'Add Employee opens the allocation popup: set a salary, pick hotels, and split with Even Split, By Room Count, or By Revenue. Press Enter in a hotel\'s percentage field to jump straight to the next hotel. Mark someone as Department Head when no salary is required: they drop out of the tables and calculations and appear only in the org chart.' },
     ],
     examples: 'Even Split across Aura, HAFA, and Ink 48 · Lock HAFA at 30%, then press By Revenue to spread the remaining 70% by each hotel\'s revenue budget · Filter to Allocation: Issues to see only rows that don\'t total 100%.',
   },

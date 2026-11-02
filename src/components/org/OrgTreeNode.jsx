@@ -14,7 +14,7 @@ const DEPT_STYLES = {
   ENGINEERING: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-400', headerBg: 'bg-slate-500', label: 'Engineering', dot: 'bg-slate-400' },
 };
 
-const CRAIG_STYLE = { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400', headerBg: 'bg-amber-500', label: 'Head of Commercial', dot: 'bg-amber-400' };
+const HEAD_STYLE = { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400', headerBg: 'bg-amber-500', label: 'Department Head', dot: 'bg-amber-400' };
 
 // Total pixel width a subtree occupies (collapsed branches count as one card)
 export function subtreeWidth(employeeId, childrenMap, collapsedIds) {
@@ -33,7 +33,7 @@ function EmployeeCard({
   employee, stats, childCount, isCollapsed, onClick, hotelMap, redactedIds,
   isHighlighted, isSearchMatch, isDropTarget, isDragged, onToggleCollapse, onHover, drag,
 }) {
-  const dept = employee.exclude_from_table ? CRAIG_STYLE : (DEPT_STYLES[employee.department] || {});
+  const dept = employee.exclude_from_table ? HEAD_STYLE : (DEPT_STYLES[employee.department] || {});
   const suppressed = !!employee.suppressed && !employee.exclude_from_table;
   const redacted = redactedIds.has(employee.id);
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
@@ -112,7 +112,7 @@ function EmployeeCard({
       {/* Salary + subtree rollup footer */}
       <div className="flex items-center justify-between px-3 py-1.5 bg-white/85 border-t border-gray-100">
         <span className={`text-[9px] font-bold text-gray-600 tabular-nums ${suppressed ? 'line-through' : ''}`}>
-          {redacted ? '$••••' : formatCurrency(employee.annual_salary)}
+          {redacted ? '$••••' : employee.exclude_from_table ? 'No salary' : formatCurrency(employee.annual_salary)}
         </span>
         {showRollup && (
           <span className="flex items-center gap-1 text-[9px] font-semibold text-gray-500 tabular-nums" title="Total payroll allocated across this branch">

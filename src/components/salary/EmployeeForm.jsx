@@ -137,8 +137,10 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   };
 
   const handleSubmit = () => {
-    if (!form.name || !form.title || !form.annual_salary) return;
-    onSave({ ...form, locked_hotels: Array.from(lockedHotels) });
+    if (!form.name || !form.title) return;
+    if (!form.exclude_from_table && !form.annual_salary) return;
+    const payload = form.exclude_from_table ? { ...form, annual_salary: 0, allocations: {} } : form;
+    onSave({ ...payload, locked_hotels: Array.from(lockedHotels) });
   };
 
   return (
@@ -176,17 +178,21 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
             </div>
             <div>
               <Label>Annual Salary</Label>
-              <Input type="number" value={form.annual_salary} onChange={(e) => handleChange('annual_salary', parseFloat(e.target.value) || 0)} />
+              {form.exclude_from_table ? (
+                <div className="flex h-9 items-center px-3 rounded-md border border-dashed border-input bg-muted/30 text-sm text-muted-foreground">Not required</div>
+              ) : (
+                <Input type="number" value={form.annual_salary} onChange={(e) => handleChange('annual_salary', parseFloat(e.target.value) || 0)} />
+              )}
             </div>
           </div>
           <div className="flex items-center justify-between rounded-lg border border-border p-3 bg-muted/30">
             <div>
-              <Label className="cursor-pointer">Suppress Employee</Label>
-              <p className="text-xs text-muted-foreground mt-0.5">Hidden from tables and calculations, still visible in org chart</p>
+              <Label className="cursor-pointer">Department Head</Label>
+              <p className="text-xs text-muted-foreground mt-0.5">No salary required — excluded from the salary table and calculations, shown only in the org chart</p>
             </div>
             <Checkbox
-              checked={!!form.suppressed}
-              onCheckedChange={(v) => handleChange('suppressed', !!v)}
+              checked={!!form.exclude_from_table}
+              onCheckedChange={(v) => handleChange('exclude_from_table', !!v)}
             />
           </div>
           {allEmployees.length > 0 && (
@@ -209,6 +215,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
               </Select>
             </div>
           )}
+          {!form.exclude_from_table && (
           <div>
             <div className="flex items-center justify-between mb-2 flex-wrap gap-2">
               <Label>Hotel Allocations (%)</Label>
@@ -332,6 +339,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
               })}
             </div>
           </div>
+          )}
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onClose(false)}>Cancel</Button>
