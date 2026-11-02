@@ -64,7 +64,7 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
   return (
     <div
       className="rounded-2xl border border-border bg-card shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 overflow-hidden group cursor-pointer"
-      onClick={onClick}
+      onClick={(e) => { if (!editing) onClick?.(); }}
     >
       {/* Color banner */}
       <div className={`h-1.5 w-full ${accent.bg}`} />
@@ -103,7 +103,7 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
         </div>
 
         {editing ? (
-          <div className="space-y-3">
+          <div className="space-y-3" onClick={(e) => e.stopPropagation()}>
             <div><label className="text-xs text-muted-foreground">Room Revenue Budget</label><Input type="number" value={roomRev} onChange={(e) => setRoomRev(parseFloat(e.target.value) || 0)} /></div>
             <div><label className="text-xs text-muted-foreground">S&M Payroll Budget (Commercial)</label><Input type="number" value={payroll} onChange={(e) => setPayroll(parseFloat(e.target.value) || 0)} /></div>
             <div><label className="text-xs text-muted-foreground">Finance Payroll Budget</label><Input type="number" value={finBudget} onChange={(e) => setFinBudget(parseFloat(e.target.value) || 0)} /></div>
