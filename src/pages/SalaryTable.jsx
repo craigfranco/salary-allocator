@@ -307,7 +307,7 @@ export default function SalaryTable({ dept = 'COMMERCIAL' }) {
                 <td />
                 {sortedHotels.map(h => (
                   <td key={h.short_code} className="px-1.5 py-2 text-[10px] font-semibold leading-tight text-center text-foreground" title={h.name}>
-                    {h.name}
+                    {h.short_code}
                   </td>
                 ))}
                 <td />
