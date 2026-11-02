@@ -9,6 +9,9 @@ const DEPT_STYLES = {
   REVENUE: { bg: 'bg-teal-50', text: 'text-teal-700', border: 'border-teal-400', headerBg: 'bg-teal-500', label: 'Revenue', dot: 'bg-teal-400' },
   ECOMM:   { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-400', headerBg: 'bg-orange-500', label: 'E-Commerce', dot: 'bg-orange-400' },
   SALES:   { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-400', headerBg: 'bg-purple-500', label: 'Sales & Marketing', dot: 'bg-purple-400' },
+  FINANCE: { bg: 'bg-sky-50', text: 'text-sky-700', border: 'border-sky-400', headerBg: 'bg-sky-500', label: 'Finance', dot: 'bg-sky-400' },
+  HR:      { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-400', headerBg: 'bg-rose-500', label: 'Human Resources', dot: 'bg-rose-400' },
+  ENGINEERING: { bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-400', headerBg: 'bg-slate-500', label: 'Engineering', dot: 'bg-slate-400' },
 };
 
 const CRAIG_STYLE = { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-400', headerBg: 'bg-amber-500', label: 'Head of Commercial', dot: 'bg-amber-400' };

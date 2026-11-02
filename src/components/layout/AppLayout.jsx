@@ -33,7 +33,6 @@ export default function AppLayout() {
   const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario(routeDept);
   const navBase = routeDept === 'COMMERCIAL' ? '' : DEPT_BASE_ROUTES[routeDept];
   const items = navItems
-    .filter(({ path }) => routeDept === 'COMMERCIAL' || path !== '/org-chart')
     .map(({ path, label, icon }) => ({ path: path === '/' ? (navBase || '/') : `${navBase}${path}`, label, icon }));
 
   // Remember the last department workspace and restore it on load

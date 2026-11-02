@@ -23,7 +23,9 @@ const ZOOM_MIN = 0.4;
 const ZOOM_MAX = 1.5;
 const roundZoom = (z) => Math.round(z * 100) / 100;
 
-export default function OrgChart() {
+export default function OrgChart({ dept = 'COMMERCIAL' }) {
+  const isCommercial = dept === 'COMMERCIAL';
+  const entity = isCommercial ? base44.entities.Employee : base44.entities.DeptStaff;
   const [editEmp, setEditEmp] = useState(null);
   const [exporting, setExporting] = useState(null);
   const [deptFilter, setDeptFilter] = useState([]); // empty = all disciplines
@@ -85,20 +87,24 @@ export default function OrgChart() {
     }
   };
 
-  const { activeScenario, scenarioData, setScenarioData } = useScenario();
-  const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
+  const { activeScenario, scenarioData, setScenarioData } = useScenario(dept);
+  const { data: employees = [] } = useQuery({
+    queryKey: isCommercial ? ['employees'] : ['deptstaff', dept],
+    queryFn: () => isCommercial ? base44.entities.Employee.list() : base44.entities.DeptStaff.filter({ department: dept }),
+  });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   // Use scenario data if active, otherwise use DB employees
   const displayEmployees = Array.isArray(scenarioData) ? scenarioData : (Array.isArray(employees) ? employees : []);
 
+  const invalidateStaff = () => { qc.invalidateQueries({ queryKey: ['employees'] }); qc.invalidateQueries({ queryKey: ['deptstaff', dept] }); };
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Employee.update(id, data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); setEditEmp(null); },
+    mutationFn: ({ id, data }) => entity.update(id, data),
+    onSuccess: () => { invalidateStaff(); setEditEmp(null); },
   });
   const reassignMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.Employee.update(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['employees'] }),
+    mutationFn: ({ id, data }) => entity.update(id, data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['employees'] }); qc.invalidateQueries({ queryKey: ['deptstaff', dept] }); },
   });
 
   const sortedHotels = orderHotelsByRevenue(hotels);
@@ -345,7 +351,8 @@ export default function OrgChart() {
         </div>
       </div>
 
-      {/* Legend / discipline filter */}
+      {/* Legend / discipline filter (Commercial only: dept workspaces have a single discipline) */}
+      {isCommercial && (
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => setDeptFilter([])}
@@ -376,6 +383,7 @@ export default function OrgChart() {
           );
         })}
       </div>
+      )}
 
       <div ref={scrollRef} className="overflow-auto rounded-2xl border border-border shadow-sm" style={{ background: '#f8fafc', maxHeight: 'calc(100vh - 240px)' }}>
         {/* Zoom wrapper: outer box sized to scaled content, inner scaled at natural size */}
@@ -413,10 +421,11 @@ export default function OrgChart() {
         <EmployeeForm
           open={!!editEmp}
           onClose={() => setEditEmp(null)}
-          onSave={(form) => updateMutation.mutate({ id: editEmp.id, data: form })}
+          onSave={(form) => updateMutation.mutate({ id: editEmp.id, data: isCommercial ? form : { ...form, department: dept } })}
           employee={editEmp}
           hotels={sortedHotels}
           allEmployees={displayEmployees}
+          fixedDepartment={isCommercial ? undefined : dept}
         />
       )}
 

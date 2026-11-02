@@ -32,6 +32,14 @@
       "description": "If true, hide this member from the table and calculations",
       "default": false
     },
+    "manager_id": {
+      "type": "string",
+      "description": "ID of the member's direct manager (another DeptStaff record in the same department)"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Optional sort order for org chart display. Lower numbers appear first among siblings."
+    },
     "locked_hotels": {
       "type": "array",
       "items": {

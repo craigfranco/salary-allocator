@@ -120,7 +120,7 @@ export default function SalaryTable({ dept = 'COMMERCIAL' }) {
   };
 
   const handleSave = (form) => {
-    const payload = isCommercial ? form : (() => { const { manager_id, ...rest } = form; return { ...rest, department: dept }; })();
+    const payload = isCommercial ? form : { ...form, department: dept };
     if (activeScenario && Array.isArray(scenarioData)) {
       const updated = JSON.parse(JSON.stringify(scenarioData));
       if (editEmp) {
@@ -443,7 +443,7 @@ export default function SalaryTable({ dept = 'COMMERCIAL' }) {
       </div>
 
       {formOpen && (
-        <EmployeeForm open={formOpen} onClose={setFormOpen} onSave={handleSave} employee={editEmp} hotels={sortedHotels} allEmployees={isCommercial ? displayEmployees : []} fixedDepartment={isCommercial ? undefined : dept} />
+        <EmployeeForm open={formOpen} onClose={setFormOpen} onSave={handleSave} employee={editEmp} hotels={sortedHotels} allEmployees={displayEmployees} fixedDepartment={isCommercial ? undefined : dept} />
       )}
 
       <AlertDialog open={!!deleteEmp} onOpenChange={() => setDeleteEmp(null)}>

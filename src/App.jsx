@@ -51,16 +51,19 @@ const AuthenticatedApp = () => {
         <Route path="/finance/analytics" element={<Analytics dept="FINANCE" />} />
         <Route path="/finance/alerts" element={<Alerts dept="FINANCE" />} />
         <Route path="/finance/compare" element={<ScenarioComparison dept="FINANCE" />} />
+        <Route path="/finance/org-chart" element={<OrgChart dept="FINANCE" />} />
         <Route path="/hr" element={<SalaryTable dept="HR" />} />
         <Route path="/hr/budgets" element={<DeptBudgets dept="HR" />} />
         <Route path="/hr/analytics" element={<Analytics dept="HR" />} />
         <Route path="/hr/alerts" element={<Alerts dept="HR" />} />
         <Route path="/hr/compare" element={<ScenarioComparison dept="HR" />} />
+        <Route path="/hr/org-chart" element={<OrgChart dept="HR" />} />
         <Route path="/engineering" element={<SalaryTable dept="ENGINEERING" />} />
         <Route path="/engineering/budgets" element={<DeptBudgets dept="ENGINEERING" />} />
         <Route path="/engineering/analytics" element={<Analytics dept="ENGINEERING" />} />
         <Route path="/engineering/alerts" element={<Alerts dept="ENGINEERING" />} />
         <Route path="/engineering/compare" element={<ScenarioComparison dept="ENGINEERING" />} />
+        <Route path="/engineering/org-chart" element={<OrgChart dept="ENGINEERING" />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
