@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Minus, Users, EyeOff } from 'lucide-react';
-import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
+import { HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 
 export const CARD_W = 208;
 export const CARD_GAP = 16;
@@ -35,7 +35,6 @@ function EmployeeCard({
 }) {
   const dept = employee.exclude_from_table ? HEAD_STYLE : (DEPT_STYLES[employee.department] || {});
   const suppressed = !!employee.suppressed && !employee.exclude_from_table;
-  const redacted = redactedIds.has(employee.id);
   const allocEntries = Object.entries(employee.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
   const nonCorpCodes = Object.keys(hotelMap).filter(c => c !== 'CORP');
   const allocedNonCorp = allocEntries.filter(([c]) => c !== 'CORP');
@@ -109,18 +108,15 @@ function EmployeeCard({
           </>
         )}
       </div>
-      {/* Salary + subtree rollup footer */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-white/85 border-t border-gray-100">
-        <span className={`text-[9px] font-bold text-gray-600 tabular-nums ${suppressed ? 'line-through' : ''}`}>
-          {redacted ? '$••••' : employee.exclude_from_table ? 'No salary' : formatCurrency(employee.annual_salary)}
-        </span>
-        {showRollup && (
-          <span className="flex items-center gap-1 text-[9px] font-semibold text-gray-500 tabular-nums" title="Total payroll allocated across this branch">
+      {/* Headcount rollup footer (salaries intentionally not shown in the org chart) */}
+      {showRollup && (
+        <div className="flex items-center justify-end px-3 py-1.5 bg-white/85 border-t border-gray-100">
+          <span className="flex items-center gap-1 text-[9px] font-semibold text-gray-500 tabular-nums" title="Headcount in this branch">
             <Users className="w-2.5 h-2.5" />
-            {stats.headcount} · {formatCurrency(stats.payroll)}
+            {stats.headcount}
           </span>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
