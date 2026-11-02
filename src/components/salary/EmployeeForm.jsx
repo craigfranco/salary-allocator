@@ -281,35 +281,43 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
             <div className="grid grid-cols-2 gap-3">
               {hotels.map(h => {
                 const isLocked = lockedHotels.has(h.short_code);
+                const isSelected = selectedHotels.has(h.short_code);
                 return (
-                  <div key={h.short_code} className="flex items-center gap-2">
-                    <Checkbox
-                      checked={selectedHotels.has(h.short_code)}
-                      onCheckedChange={() => toggleHotel(h.short_code)}
-                      className="flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0 leading-tight">
-                      <div className={`text-xs font-semibold truncate ${selectedHotels.has(h.short_code) ? 'text-foreground' : 'text-muted-foreground'}`}>{h.name}</div>
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{h.short_code}</div>
+                  <div
+                    key={h.short_code}
+                    className={`rounded-xl border p-3 space-y-2 transition-colors ${
+                      isSelected ? 'border-border bg-muted/30' : 'border-border/50 bg-muted/10 opacity-60'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggleHotel(h.short_code)}
+                        className="flex-shrink-0"
+                      />
+                      <div className={`flex-1 min-w-0 text-sm font-semibold truncate ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>{h.name}</div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted text-muted-foreground flex-shrink-0">{h.short_code}</span>
                     </div>
-                    <Input
-                      type="number"
-                      min="0" max="100"
-                      className={`h-8 text-xs ${isLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
-                      value={Math.round((form.allocations?.[h.short_code] || 0) * 100)}
-                      onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
-                    />
-                    <span className="text-xs text-muted-foreground">%</span>
-                    <button
-                      type="button"
-                      onClick={() => toggleLock(h.short_code)}
-                      title={isLocked ? 'Unlock this hotel' : 'Lock this % and spread the rest'}
-                      className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors"
-                    >
-                      {isLocked
-                        ? <Lock className="w-3.5 h-3.5 text-primary" />
-                        : <Unlock className="w-3.5 h-3.5 text-muted-foreground" />}
-                    </button>
+                    <div className="flex items-center gap-2 pl-7">
+                      <Input
+                        type="number"
+                        min="0" max="100"
+                        className={`h-8 text-xs text-right ${isLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
+                        value={Math.round((form.allocations?.[h.short_code] || 0) * 100)}
+                        onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
+                      />
+                      <span className="text-xs text-muted-foreground flex-shrink-0">%</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleLock(h.short_code)}
+                        title={isLocked ? 'Unlock this hotel' : 'Lock this % and spread the rest'}
+                        className="flex-shrink-0 p-1.5 rounded-lg hover:bg-muted transition-colors"
+                      >
+                        {isLocked
+                          ? <Lock className="w-3.5 h-3.5 text-primary" />
+                          : <Unlock className="w-3.5 h-3.5 text-muted-foreground" />}
+                      </button>
+                    </div>
                   </div>
                 );
               })}
