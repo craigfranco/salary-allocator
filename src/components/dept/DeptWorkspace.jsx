@@ -15,6 +15,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { getHotelAllocatedTotal, getTotalAllocation } from '@/lib/helpers';
+import ScenarioManager from '@/components/salary/ScenarioManager';
+import { useScenario } from '@/lib/ScenarioContext';
 
 const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
@@ -37,6 +39,8 @@ export default function DeptWorkspace({ dept }) {
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
   const { data: departments = [] } = useQuery({ queryKey: ['departments'], queryFn: () => base44.entities.Department.list() });
   const deptRecord = departments.find(d => d.department === dept);
+  const { activeScenario, scenarioData, setScenarioData } = useScenario(dept);
+  const inScenario = activeScenario && Array.isArray(scenarioData);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ['deptstaff', dept] });
   const createMutation = useMutation({
@@ -56,7 +60,8 @@ export default function DeptWorkspace({ dept }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['departments'] }),
   });
 
-  const sortedStaff = [...staff].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  const displayStaff = Array.isArray(scenarioData) ? scenarioData : staff;
+  const sortedStaff = [...displayStaff].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   const activeStaff = sortedStaff.filter(s => !s.suppressed);
   const suppressedCount = sortedStaff.length - activeStaff.length;
   const tableStaff = showSuppressed ? sortedStaff : activeStaff;
@@ -76,15 +81,60 @@ export default function DeptWorkspace({ dept }) {
   const handleSave = (form) => {
     const { manager_id, ...payload } = form;
     const data = { ...payload, department: dept };
-    if (editStaff) updateMutation.mutate({ id: editStaff.id, data });
+    if (inScenario) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      if (editStaff) {
+        const idx = updated.findIndex(s => s.id === editStaff.id);
+        if (idx !== -1) updated[idx] = { ...updated[idx], ...data };
+      } else {
+        updated.push({ ...data, id: 'new_' + Date.now() });
+      }
+      setScenarioData(updated);
+      setFormOpen(false);
+      setEditStaff(null);
+    } else if (editStaff) updateMutation.mutate({ id: editStaff.id, data });
     else createMutation.mutate(data);
   };
 
   const handleAllocChange = (staffRec, code, value) => {
-    updateMutation.mutate({
-      id: staffRec.id,
-      data: { allocations: { ...(staffRec.allocations || {}), [code]: value } },
-    });
+    if (inScenario) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      const idx = updated.findIndex(s => s.id === staffRec.id);
+      if (idx !== -1) {
+        const newAllocs = { ...(updated[idx].allocations || {}), [code]: value };
+        if (value === 0) delete newAllocs[code];
+        updated[idx].allocations = newAllocs;
+        setScenarioData(updated);
+      }
+    } else {
+      updateMutation.mutate({
+        id: staffRec.id,
+        data: { allocations: { ...(staffRec.allocations || {}), [code]: value } },
+      });
+    }
+  };
+
+  const handleDelete = () => {
+    if (!deleteStaff) return;
+    if (inScenario) {
+      setScenarioData(scenarioData.filter(s => s.id !== deleteStaff.id));
+      setDeleteStaff(null);
+    } else {
+      deleteMutation.mutate(deleteStaff.id);
+    }
+  };
+
+  const handleToggleSuppress = (staffRec) => {
+    if (inScenario) {
+      const updated = JSON.parse(JSON.stringify(scenarioData));
+      const idx = updated.findIndex(s => s.id === staffRec.id);
+      if (idx !== -1) {
+        updated[idx].suppressed = !updated[idx].suppressed;
+        setScenarioData(updated);
+      }
+    } else {
+      updateMutation.mutate({ id: staffRec.id, data: { suppressed: !staffRec.suppressed } });
+    }
   };
 
   return (
@@ -97,9 +147,12 @@ export default function DeptWorkspace({ dept }) {
             {suppressedCount > 0 && <span className="ml-2 text-amber-500 font-medium">· {suppressedCount} suppressed</span>}
           </p>
         </div>
-        <Button onClick={() => { setEditStaff(null); setFormOpen(true); }} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Team Member
-        </Button>
+        <div className="flex items-center gap-2">
+          <ScenarioManager employees={staff} department={dept} />
+          <Button onClick={() => { setEditStaff(null); setFormOpen(true); }} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Team Member
+          </Button>
+        </div>
       </div>
 
       <DeptBudgetPanel
@@ -172,7 +225,7 @@ export default function DeptWorkspace({ dept }) {
                     onAllocChange={(code, v) => handleAllocChange(s, code, v)}
                     onEdit={() => { setEditStaff(s); setFormOpen(true); }}
                     onDelete={() => setDeleteStaff(s)}
-                    onToggleSuppress={() => updateMutation.mutate({ id: s.id, data: { suppressed: !s.suppressed } })}
+                    onToggleSuppress={() => handleToggleSuppress(s)}
                   />
                 ))}
               </tbody>
@@ -223,7 +276,7 @@ export default function DeptWorkspace({ dept }) {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive text-destructive-foreground"
-              onClick={() => deleteMutation.mutate(deleteStaff.id)}
+              onClick={handleDelete}
             >
               Remove Member
             </AlertDialogAction>

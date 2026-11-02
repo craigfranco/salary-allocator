@@ -19,6 +19,7 @@ export default function ScenarioComparison() {
     queryKey: ['scenarios'],
     queryFn: () => base44.entities.Scenario.list(),
   });
+  const commercialScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === 'COMMERCIAL');
 
   const { data: employees = [] } = useQuery({
     queryKey: ['employees'],
@@ -122,7 +123,7 @@ export default function ScenarioComparison() {
               <Select 
                 value={selectedScenarios[idx]?.id || ''}
                 onValueChange={(scenarioId) => {
-                  const scenario = scenarios.find(s => s.id === scenarioId);
+                  const scenario = commercialScenarios.find(s => s.id === scenarioId);
                   if (scenario) {
                     const updated = [...selectedScenarios];
                     updated[idx] = scenario;
@@ -135,7 +136,7 @@ export default function ScenarioComparison() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={null}>— Clear —</SelectItem>
-                  {scenarios.map(scenario => (
+                  {commercialScenarios.map(scenario => (
                     <SelectItem key={scenario.id} value={scenario.id}>
                       {scenario.name}
                     </SelectItem>

@@ -31,12 +31,13 @@ export default function AppLayout() {
     queryKey: ['scenarios'],
     queryFn: () => base44.entities.Scenario.list('-updated_date', 50),
   });
+  const commercialScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === 'COMMERCIAL');
 
   const autoLoaded = useRef(false);
   useEffect(() => {
-    if (!autoLoaded.current && scenarios.length > 0 && !activeScenario) {
+    if (!autoLoaded.current && commercialScenarios.length > 0 && !activeScenario) {
       autoLoaded.current = true;
-      doRestore(scenarios[0]);
+      doRestore(commercialScenarios[0]);
     }
   }, [scenarios]);
 
@@ -130,8 +131,8 @@ export default function AppLayout() {
                   </>
                 )}
                 <div className="px-2 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Saved Scenarios</div>
-                {scenarios.length > 0 ? (
-                  scenarios.map(s => (
+                {commercialScenarios.length > 0 ? (
+                  commercialScenarios.map(s => (
                     <button
                       key={s.id}
                       className={`flex items-center justify-between w-full px-2 py-1.5 text-sm rounded-sm cursor-pointer hover:bg-accent ${

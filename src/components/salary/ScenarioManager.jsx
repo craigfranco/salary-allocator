@@ -9,10 +9,10 @@ import { BookMarked, Save, Trash2, ChevronDown, Check } from 'lucide-react';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useToast } from '@/components/ui/use-toast';
 
-export default function ScenarioManager({ employees, onRestore }) {
+export default function ScenarioManager({ employees, onRestore, department = 'COMMERCIAL' }) {
   const [open, setOpen] = useState(false);
   const [saveOpen, setSaveOpen] = useState(false);
-  const { activeScenario, setActiveScenario, scenarioData, restoreScenario } = useScenario();
+  const { activeScenario, setActiveScenario, scenarioData, restoreScenario } = useScenario(department);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const qc = useQueryClient();
@@ -22,6 +22,7 @@ export default function ScenarioManager({ employees, onRestore }) {
     queryKey: ['scenarios'],
     queryFn: () => base44.entities.Scenario.list('-created_date', 50),
   });
+  const deptScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === department);
 
   const saveMutation = useMutation({
     mutationFn: (data) => base44.entities.Scenario.create(data),
@@ -57,7 +58,7 @@ export default function ScenarioManager({ employees, onRestore }) {
     if (!name.trim()) return;
     const source = Array.isArray(scenarioData) ? scenarioData : employees;
     const snapshot = Array.isArray(source) ? JSON.parse(JSON.stringify(source)) : [];
-    saveMutation.mutate({ name: name.trim(), description: description.trim(), snapshot });
+    saveMutation.mutate({ name: name.trim(), description: description.trim(), snapshot, department });
   };
 
   const handleRestore = (scenario) => {
@@ -97,11 +98,11 @@ export default function ScenarioManager({ employees, onRestore }) {
               <Save className="w-4 h-4" /> Save Current as Scenario
             </button>
 
-            {scenarios.length > 0 && (
+            {deptScenarios.length > 0 && (
               <>
                 <div className="my-1 h-px bg-border" />
                 <div className="px-2 py-1 text-xs text-muted-foreground font-semibold uppercase tracking-wider">Saved Scenarios</div>
-                {scenarios.map(s => (
+                {deptScenarios.map(s => (
                   <div
                     key={s.id}
                     className="flex items-center justify-between px-2 py-1.5 hover:bg-accent rounded-sm cursor-pointer group"
@@ -131,7 +132,7 @@ export default function ScenarioManager({ employees, onRestore }) {
               </>
             )}
 
-            {scenarios.length === 0 && (
+            {deptScenarios.length === 0 && (
               <div className="px-3 py-2 text-xs text-muted-foreground italic">No saved scenarios yet</div>
             )}
           </PopoverContent>

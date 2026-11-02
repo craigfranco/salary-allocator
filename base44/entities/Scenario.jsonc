@@ -10,6 +10,17 @@
       "type": "string",
       "description": "Optional notes about this scenario"
     },
+    "department": {
+      "type": "string",
+      "enum": [
+        "COMMERCIAL",
+        "FINANCE",
+        "HR",
+        "ENGINEERING"
+      ],
+      "description": "Department this scenario belongs to",
+      "default": "COMMERCIAL"
+    },
     "snapshot": {
       "type": "array",
       "items": {
