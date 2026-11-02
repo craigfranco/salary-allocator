@@ -17,7 +17,7 @@ import { getHotelAllocatedTotal, getTotalAllocation } from '@/lib/helpers';
 import ScenarioManager from '@/components/salary/ScenarioManager';
 import { useScenario } from '@/lib/ScenarioContext';
 
-const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 const DEPT_CONFIG = {
   FINANCE: { title: 'Finance Team', deptLabel: 'Finance' },

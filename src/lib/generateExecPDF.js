@@ -1,15 +1,15 @@
 // Executive PDF Generator for Rebel Hotel Co.
 
-const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
-const PROPERTY_HOTELS = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH'];
+const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+const PROPERTY_HOTELS = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH'];
 
 const HOTEL_NAMES = {
-  AURA: 'Aura', H5A: 'H5A', INK48: 'Ink 48', LIFE: 'Life',
+  AURA: 'Aura', HAFA: 'HAFA', INK48: 'Ink 48', LIFE: 'Life',
   RENWICK: 'Renwick', SMYTH: 'Smyth', CORP: 'Corp'
 };
 
 const HOTEL_COLORS_HEX = {
-  AURA: '#2d4b5e', H5A: '#3d6b84', INK48: '#4a7d96',
+  AURA: '#2d4b5e', HAFA: '#3d6b84', INK48: '#4a7d96',
   LIFE: '#5a8fa8', RENWICK: '#6aa1ba', SMYTH: '#7ab3cc', CORP: '#94a3b8'
 };
 

@@ -13,11 +13,11 @@ import { useRedactedIds } from '@/lib/RedactionContext';
 
 const DEPT_COLORS = { REVENUE: '#0d9488', ECOMM: '#f97316', SALES: '#9333ea' };
 const HOTEL_COLORS_HEX = {
-  AURA: '#3b82f6', H5A: '#6366f1', INK48: '#8b5cf6',
+  AURA: '#3b82f6', HAFA: '#6366f1', INK48: '#8b5cf6',
   LIFE: '#10b981', RENWICK: '#f59e0b', SMYTH: '#f43f5e', CORP: '#94a3b8'
 };
 
-const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH'];
+const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH'];
 
 function TooltipStyle({ active, payload, label }) {
   if (!active || !payload?.length) return null;

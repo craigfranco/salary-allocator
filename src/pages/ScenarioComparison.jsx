@@ -8,7 +8,7 @@ import { X } from 'lucide-react';
 import { formatCurrency, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 const CHART_COLORS = ['#2d4b5e', '#f59e0b', '#0d9488', '#a855f7'];
 
 export default function ScenarioComparison() {

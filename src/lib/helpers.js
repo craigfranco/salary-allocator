@@ -67,7 +67,7 @@ export function getDeptAccent(dept) {
 
 export const HOTEL_SHORT_NAMES = {
   AURA:    'Aura',
-  H5A:     'HAFA',
+  HAFA:    'HAFA',
   INK48:   'Ink 48',
   LIFE:    'Life',
   RENWICK: 'Renwick',
@@ -77,7 +77,7 @@ export const HOTEL_SHORT_NAMES = {
 
 export const HOTEL_COLORS = {
   AURA:    { bg: 'bg-blue-500',    text: 'text-blue-600',    badge: 'bg-blue-100 text-blue-700',    hex: '#3b82f6' },
-  H5A:     { bg: 'bg-indigo-500',  text: 'text-indigo-600',  badge: 'bg-indigo-100 text-indigo-700',  hex: '#6366f1' },
+  HAFA:    { bg: 'bg-indigo-500',  text: 'text-indigo-600',  badge: 'bg-indigo-100 text-indigo-700',  hex: '#6366f1' },
   INK48:   { bg: 'bg-violet-500',  text: 'text-violet-600',  badge: 'bg-violet-100 text-violet-700',  hex: '#8b5cf6' },
   LIFE:    { bg: 'bg-emerald-500', text: 'text-emerald-600', badge: 'bg-emerald-100 text-emerald-700', hex: '#10b981' },
   RENWICK: { bg: 'bg-amber-500',   text: 'text-amber-600',   badge: 'bg-amber-100 text-amber-700',    hex: '#f59e0b' },

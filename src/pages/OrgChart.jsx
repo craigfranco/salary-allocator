@@ -17,7 +17,7 @@ import jsPDF from 'jspdf';
 import { useScenario } from '@/lib/ScenarioContext';
 import { useRedactedIds } from '@/lib/RedactionContext';
 
-const HOTEL_ORDER = ['AURA', 'H5A', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
+const HOTEL_ORDER = ['AURA', 'HAFA', 'INK48', 'LIFE', 'RENWICK', 'SMYTH', 'CORP'];
 
 const ZOOM_MIN = 0.4;
 const ZOOM_MAX = 1.5;
