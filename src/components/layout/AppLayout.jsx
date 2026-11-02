@@ -6,8 +6,7 @@ import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Su
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import ExecPDFButton from '@/components/layout/ExecPDFButton';
-import HelpButton from '@/components/layout/HelpButton';
-import HelpBanner from '@/components/layout/HelpBanner';
+import HelpGuide from '@/components/layout/HelpGuide';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,7 +22,6 @@ const navItems = [
 
 export default function AppLayout() {
   const [scenarioOpen, setScenarioOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(() => localStorage.getItem('rebel:helpOpen') !== 'false');
   const location = useLocation();
   const navigate = useNavigate();
   const DEPT_LABELS = { COMMERCIAL: 'Commercial', FINANCE: 'Finance', HR: 'HR', ENGINEERING: 'Engineering' };
@@ -34,11 +32,6 @@ export default function AppLayout() {
     : 'COMMERCIAL';
   const { dark, toggle } = useTheme();
   const { activeScenario, scenarioData, restoreScenario, clearScenario } = useScenario();
-
-  // Remember help-section visibility on this device
-  useEffect(() => {
-    localStorage.setItem('rebel:helpOpen', helpOpen ? 'true' : 'false');
-  }, [helpOpen]);
 
   // Remember the last department workspace and restore it on load
   useEffect(() => {
@@ -109,7 +102,7 @@ export default function AppLayout() {
               </Select>
             </div>
             <div className="flex items-center gap-3">
-              <HelpButton onToggle={() => setHelpOpen(o => !o)} />
+              <HelpGuide />
               <ExecPDFButton />
               <button
                 onClick={toggle}
@@ -196,7 +189,6 @@ export default function AppLayout() {
       </nav>
 
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
-        <HelpBanner open={helpOpen} onToggle={() => setHelpOpen(false)} />
         <Outlet />
       </main>
     </div>
