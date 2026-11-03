@@ -271,7 +271,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                   </Button>
                 </div>
                 {(() => {
-                  const totalPct = Math.round(Object.values(form.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 100);
+                  const totalPct = Math.round(Object.values(form.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 1000) / 10;
                   const color = totalPct === 100 ? 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30' : totalPct > 100 ? 'text-red-500 bg-red-500/10 border-red-500/30' : 'text-amber-500 bg-amber-500/10 border-amber-500/30';
                   return (
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${color}`}>
@@ -309,9 +309,9 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                     <div className="flex items-center gap-2 pl-7">
                       <Input
                         type="number"
-                        min="0" max="100"
+                        min="0" max="100" step="0.1"
                         className={`h-8 text-xs text-right ${isLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
-                        value={Math.round((form.allocations?.[h.short_code] || 0) * 100)}
+                        value={Math.round((form.allocations?.[h.short_code] || 0) * 1000) / 10}
                         onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
                         ref={(el) => { pctRefs.current[h.short_code] = el; }}
                         onKeyDown={(e) => {

@@ -3,14 +3,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, EyeOff, Eye, Copy } from 'lucide-react';
 import AllocationCell from './AllocationCell';
-import { getTotalAllocation, getAllocationStatus, getAllocationColor, formatCurrency, getDeptColor } from '@/lib/helpers';
+import { getTotalAllocation, getAllocationStatus, getAllocationColor, formatCurrency, getDeptColor, roundPct1 } from '@/lib/helpers';
 
 export default function SalaryTableRow({ employee, hotels, onAllocChange, onFix, onEdit, onDelete, onToggleSuppress, onDuplicate, isOdd, highlight, managerName, isRedacted }) {
   const suppressed = !!employee.suppressed;
   const total = getTotalAllocation(employee.allocations);
   const status = getAllocationStatus(total);
   const colorClass = getAllocationColor(status);
-  const totalPct = Math.round(total * 100);
+  const totalPct = roundPct1(total);
 
   const rowBg = suppressed
     ? 'opacity-40 bg-muted/10'

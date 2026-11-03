@@ -28,7 +28,12 @@ export function formatCurrency(amount) {
 }
 
 export function formatPercent(value) {
-  return `${Math.round(value * 100)}%`;
+  return `${Math.round(value * 1000) / 10}%`;
+}
+
+// Allocation percentage as a one-decimal number (e.g. 13.6, not 14).
+export function roundPct1(value) {
+  return Math.round(value * 1000) / 10;
 }
 
 export function getHotelAllocatedTotal(employees, hotelCode) {

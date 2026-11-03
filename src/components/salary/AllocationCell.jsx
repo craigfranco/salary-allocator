@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { formatCurrency } from '@/lib/helpers';
+import { formatCurrency, roundPct1 } from '@/lib/helpers';
 
 export default function AllocationCell({ value, salary, onSave, disabled, hotelName, currentTotal, onEditingChange, isRedacted, suppressed }) {
   const [editing, setEditing] = useState(false);
@@ -15,7 +15,7 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
 
   const pct = value || 0;
   const dollars = pct * salary;
-  const displayPct = Math.round(pct * 100);
+  const displayPct = roundPct1(pct);
 
   const handleStart = () => {
     if (disabled) return;
@@ -41,7 +41,7 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
   };
 
   const liveVal = parseFloat(inputVal) || 0;
-  const liveTotal = editing ? Math.round((currentTotal - displayPct + liveVal)) : 0;
+  const liveTotal = editing ? Math.round((currentTotal - displayPct + liveVal) * 10) / 10 : 0;
   const liveTotalColor = liveTotal === 100 ? 'text-emerald-500' : liveTotal > 100 ? 'text-red-500' : 'text-amber-500';
 
   if (editing) {
@@ -51,7 +51,7 @@ export default function AllocationCell({ value, salary, onSave, disabled, hotelN
           <input
             ref={inputRef}
             type="number"
-            min="0" max="100"
+            min="0" max="100" step="0.1"
             value={inputVal}
             onChange={e => setInputVal(e.target.value)}
             onBlur={handleSave}

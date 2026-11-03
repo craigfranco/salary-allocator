@@ -1,7 +1,7 @@
 import React from 'react';
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { formatCurrency } from '@/lib/helpers';
+import { formatCurrency, formatPercent } from '@/lib/helpers';
 
 function toCSV(rows, headers) {
   const escape = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
@@ -16,8 +16,8 @@ export default function ExportButton({ employees, hotels, hotelTotals }) {
       emp.name,
       emp.title,
       emp.annual_salary,
-      `${Math.round(Object.values(emp.allocations || {}).reduce((s, v) => s + v, 0) * 100)}%`,
-      ...hotels.map(h => `${Math.round((emp.allocations?.[h.short_code] || 0) * 100)}%`),
+      formatPercent(Object.values(emp.allocations || {}).reduce((s, v) => s + v, 0)),
+      ...hotels.map(h => formatPercent(emp.allocations?.[h.short_code] || 0)),
       ...hotels.map(h => formatCurrency((emp.allocations?.[h.short_code] || 0) * emp.annual_salary)),
     ]);
 

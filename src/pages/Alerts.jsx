@@ -45,7 +45,7 @@ export default function Alerts({ dept = 'COMMERCIAL' }) {
       .map(b => ({ key: `near-${b.hotel.id}`, icon: Building2, label: b.hotel.name, detail: `Near limit — ${formatCurrency(b.amount)} left in budget`, to: `${deptPrefix}/budgets?focus=${b.hotel.short_code}` })),
     ...allocAlerts
       .sort((a, b) => Math.abs(1 - b.total) - Math.abs(1 - a.total))
-      .map(a => ({ key: `alloc-${a.emp.id}`, icon: User, label: a.emp.name, detail: `Allocated at ${Math.round(a.total * 100)}% — ${a.total > 1 ? 'over' : 'under'} 100%`, to: `${deptPrefix || '/'}?focus=${a.emp.id}` })),
+      .map(a => ({ key: `alloc-${a.emp.id}`, icon: User, label: a.emp.name, detail: `Allocated at ${Math.round(a.total * 1000) / 10}% — ${a.total > 1 ? 'over' : 'under'} 100%`, to: `${deptPrefix || '/'}?focus=${a.emp.id}` })),
   ].slice(0, 3);
 
   const hasIssues = allocAlerts.length > 0 || budgetAlerts.length > 0;
@@ -119,7 +119,7 @@ export default function Alerts({ dept = 'COMMERCIAL' }) {
           </div>
           <div className="space-y-2">
             {allocAlerts.map(({ emp, total, status }) => {
-              const pct = Math.round(total * 100);
+              const pct = Math.round(total * 1000) / 10;
               const isOver = status === 'over' || status === 'close-over';
               return (
                 <div key={emp.id} className={`flex items-center justify-between p-3 rounded-xl border ${

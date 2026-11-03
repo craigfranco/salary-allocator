@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Minus, Users, EyeOff } from 'lucide-react';
-import { HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
+import { formatPercent, HOTEL_COLORS, HOTEL_SHORT_NAMES } from '@/lib/helpers';
 
 export const CARD_W = 208;
 export const CARD_GAP = 16;
@@ -91,7 +91,7 @@ function EmployeeCard({
           <>
             <div className="flex h-1.5 rounded-full overflow-hidden bg-gray-200 gap-px mb-1.5">
               {allocEntries.map(([code, pct]) => (
-                <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
+                <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${formatPercent(pct)}`} />
               ))}
             </div>
             {isAll ? (

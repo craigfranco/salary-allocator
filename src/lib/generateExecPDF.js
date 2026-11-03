@@ -226,7 +226,7 @@ function buildSalaryTables(employees, hotels) {
       </tr>`;
 
       deptEmps.forEach((emp, i) => {
-        const totalPct = Math.round(Object.values(emp.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 100);
+        const totalPct = Math.round(Object.values(emp.allocations || {}).reduce((s, v) => s + (v || 0), 0) * 1000) / 10;
         const isExact = totalPct === 100;
         rows += `<tr style="background:${i%2?'#f9f7f6':'#fff'};border-left:3px solid ${dc.border};">
           <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:7.5px;">
@@ -239,7 +239,7 @@ function buildSalaryTables(employees, hotels) {
             const pct = emp.allocations?.[h.short_code] || 0;
             const dollar = emp._redacted ? 0 : pct * emp.annual_salary;
             if (h.short_code !== 'CORP') colTotals[h.short_code] += dollar;
-            return `<td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:center;color:#6b7280;">${pct ? Math.round(pct*100)+'%' : ''}</td>
+            return `<td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:center;color:#6b7280;">${pct ? (Math.round(pct*1000)/10)+'%' : ''}</td>
             <td style="padding:4px 3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;text-align:right;color:#374151;">${emp._redacted && pct > 0 ? '<span style="font-family:monospace;color:#9ca3af;font-size:7px;">████</span>' : (dollar > 0 ? fmtK(dollar) : '')}</td>`;
           }).join('')}
           <td style="padding:4px 6px;font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-align:center;color:${isExact ? '#16a34a' : '#dc2626'};">${totalPct}%</td>
@@ -430,7 +430,7 @@ function buildAlertsAnalytics(employees, hotels) {
   // Allocation status
   const allocRows = active.map(e => {
     const total = Object.values(e.allocations || {}).reduce((s, v) => s + (v || 0), 0);
-    const pct = Math.round(total * 100);
+    const pct = Math.round(total * 1000) / 10;
     const isExact = pct === 100;
     const isOver = pct > 100;
     const badge = isExact ? '✅ 100%' : isOver ? `⚠️ Over (${pct}%)` : `❌ Under (${pct}%)`;

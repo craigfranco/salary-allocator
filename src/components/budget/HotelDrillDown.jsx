@@ -1,6 +1,6 @@
 import React from 'react';
 import { Building2, X, Users } from 'lucide-react';
-import { HOTEL_COLORS, formatCurrency } from '@/lib/helpers';
+import { HOTEL_COLORS, formatCurrency, formatPercent } from '@/lib/helpers';
 
 const DEPT_STYLES = {
   REVENUE: { label: 'Revenue Management', bg: 'bg-teal-500/15', text: 'text-teal-600 dark:text-teal-400', dot: 'bg-teal-500' },
@@ -97,7 +97,7 @@ export default function HotelDrillDown({ hotel, employees, onClose, onEditEmploy
                       </button>
                       <div className="text-right flex-shrink-0">
                         <p className="text-sm font-bold text-foreground">{formatCurrency(emp.dollars)}</p>
-                        <p className="text-[11px] text-muted-foreground">{Math.round(emp.pct * 100)}% of salary</p>
+                        <p className="text-[11px] text-muted-foreground">{formatPercent(emp.pct)} of salary</p>
                       </div>
                     </div>
                   ))}
@@ -134,7 +134,7 @@ export default function HotelDrillDown({ hotel, employees, onClose, onEditEmploy
             </div>
             <div className="bg-muted/40 rounded-xl p-3 text-center">
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-1">Avg Alloc %</p>
-              <p className="text-lg font-bold">{Math.round(avgPct * 100)}%</p>
+              <p className="text-lg font-bold">{formatPercent(avgPct)}</p>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { formatCurrency, HOTEL_COLORS } from '@/lib/helpers';
+import { formatCurrency, formatPercent, HOTEL_COLORS } from '@/lib/helpers';
 
 export default function DeptHotelDialog({ hotel, staff, deptLabel, onClose }) {
   if (!hotel) return null;
@@ -30,7 +30,7 @@ export default function DeptHotelDialog({ hotel, staff, deptLabel, onClose }) {
                 </div>
                 <div className="flex items-center gap-4">
                   <span className="text-xs font-semibold tabular-nums" style={{ color: accent.hex }}>
-                    {Math.round(s.allocations[hotel.short_code] * 100)}%
+                    {formatPercent(s.allocations[hotel.short_code])}
                   </span>
                   <span className="text-sm font-bold tabular-nums w-24 text-right">
                     {formatCurrency(s.allocations[hotel.short_code] * (s.annual_salary || 0))}

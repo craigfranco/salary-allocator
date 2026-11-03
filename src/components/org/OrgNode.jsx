@@ -1,6 +1,6 @@
 import React from 'react';
 import { Droppable, Draggable } from '@hello-pangea/dnd';
-import { formatCurrency, HOTEL_COLORS } from '@/lib/helpers';
+import { formatCurrency, formatPercent, HOTEL_COLORS } from '@/lib/helpers';
 import { User, EyeOff, ChevronDown, ChevronRight } from 'lucide-react';
 
 const DEPT_STYLES = {
@@ -46,7 +46,7 @@ function EmployeeMiniCard({ employee, provided, snapshot, onClick }) {
       {allocEntries.length > 0 && (
         <div className="mt-2 flex h-1 rounded-full overflow-hidden bg-muted/50 gap-px">
           {allocEntries.map(([code, pct]) => (
-            <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${Math.round(pct * 100)}%`} />
+            <div key={code} className={`${HOTEL_COLORS[code]?.bg || 'bg-slate-400'}`} style={{ width: `${pct * 100}%` }} title={`${code}: ${formatPercent(pct)}`} />
           ))}
         </div>
       )}
