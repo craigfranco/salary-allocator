@@ -74,10 +74,10 @@ export default function HotelBudgetCard({ hotel, allocatedTotal, employeeCount, 
                   <Users className="w-3 h-3" />{employeeCount}
                 </span>
               )}
-              <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Remove hotel">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={(e) => { e.stopPropagation(); onDelete(); }} title="Remove hotel">
                 <Trash2 className="w-3.5 h-3.5" />
               </Button>
-            <Button variant="ghost" size="icon" className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => { e.stopPropagation(); setEditing(true); }}>
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setEditing(true); }}>
               <Pencil className="w-3.5 h-3.5" />
             </Button>
             </div>
