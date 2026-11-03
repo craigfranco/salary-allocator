@@ -105,7 +105,7 @@ export default function AppLayout() {
             </div>
             <div className="flex items-center gap-3">
               <HelpGuide />
-              <ExecPDFButton />
+              <ExecPDFButton dept={routeDept} />
               <button
                 onClick={toggle}
                 className="w-9 h-9 rounded-lg bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-all duration-200"

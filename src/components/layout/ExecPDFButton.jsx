@@ -7,13 +7,17 @@ import SalaryRedactionManager from '@/components/salary/SalaryRedactionManager';
 import { useRedactedIds } from '@/lib/RedactionContext';
 import { useScenario } from '@/lib/ScenarioContext';
 
-export default function ExecPDFButton() {
+export default function ExecPDFButton({ dept = 'COMMERCIAL' }) {
+  const isCommercial = dept === 'COMMERCIAL';
   const [loading, setLoading] = useState(false);
   const [redactionOpen, setRedactionOpen] = useState(false);
   const { redactedIds } = useRedactedIds();
-  const { scenarioData } = useScenario();
+  const { scenarioData } = useScenario(dept);
 
-  const { data: employees = [] } = useQuery({ queryKey: ['employees'], queryFn: () => base44.entities.Employee.list() });
+  const { data: employees = [] } = useQuery({
+    queryKey: isCommercial ? ['employees'] : ['deptstaff', dept],
+    queryFn: () => isCommercial ? base44.entities.Employee.list() : base44.entities.DeptStaff.filter({ department: dept }),
+  });
   const { data: hotels = [] } = useQuery({ queryKey: ['hotels'], queryFn: () => base44.entities.Hotel.list() });
 
   const handleClick = () => {
@@ -21,7 +25,7 @@ export default function ExecPDFButton() {
     if (loading || !pdfEmployees.length) return;
     setLoading(true);
     try {
-      generateExecPDF(pdfEmployees, hotels, redactedIds);
+      generateExecPDF(pdfEmployees, hotels, redactedIds, dept);
     } finally {
       setTimeout(() => setLoading(false), 1000);
     }
@@ -81,7 +85,7 @@ export default function ExecPDFButton() {
         </button>
       </div>
 
-      <SalaryRedactionManager open={redactionOpen} onOpenChange={setRedactionOpen} />
+      <SalaryRedactionManager open={redactionOpen} onOpenChange={setRedactionOpen} dept={dept} />
     </>
   );
 }

@@ -8,10 +8,11 @@ import { useRedactedIds } from '@/lib/RedactionContext';
 
 export { useRedactedIds };
 
-export default function SalaryRedactionManager({ open, onOpenChange }) {
+export default function SalaryRedactionManager({ open, onOpenChange, dept = 'COMMERCIAL' }) {
+  const isCommercial = dept === 'COMMERCIAL';
   const { data: employees = [] } = useQuery({
-    queryKey: ['employees'],
-    queryFn: () => base44.entities.Employee.list(),
+    queryKey: isCommercial ? ['employees'] : ['deptstaff', dept],
+    queryFn: () => isCommercial ? base44.entities.Employee.list() : base44.entities.DeptStaff.filter({ department: dept }),
   });
 
   const { redactedIds, toggle, clearAll } = useRedactedIds();
@@ -20,11 +21,15 @@ export default function SalaryRedactionManager({ open, onOpenChange }) {
     REVENUE: { badge: '#ccf0ed', text: '#0d9488', label: 'Revenue' },
     ECOMM:   { badge: '#fde8d4', text: '#f97316', label: 'E-Commerce' },
     SALES:   { badge: '#ede9fe', text: '#9333ea', label: 'Sales' },
+    FINANCE: { badge: '#dbeafe', text: '#2563eb', label: 'Finance' },
+    HR: { badge: '#ffe4e6', text: '#e11d48', label: 'HR' },
+    ENGINEERING: { badge: '#fef3c7', text: '#d97706', label: 'Engineering' },
   };
 
   const active = employees
     .filter(e => !e.suppressed && !e.exclude_from_table)
     .sort((a, b) => {
+      if (!isCommercial) return b.annual_salary - a.annual_salary;
       const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
       const dd = deptOrder.indexOf(a.department) - deptOrder.indexOf(b.department);
       return dd !== 0 ? dd : b.annual_salary - a.annual_salary;

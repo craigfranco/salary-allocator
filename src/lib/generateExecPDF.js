@@ -19,6 +19,20 @@ const DEPT_COLORS = {
   SALES:   { border: '#9333ea', badge: '#ede9fe', text: '#9333ea', label: 'Sales' },
 };
 
+const EXT_DEPT_COLORS = {
+  ...DEPT_COLORS,
+  FINANCE: { border: '#2563eb', badge: '#dbeafe', text: '#2563eb', label: 'Finance' },
+  HR: { border: '#e11d48', badge: '#ffe4e6', text: '#e11d48', label: 'HR' },
+  ENGINEERING: { border: '#d97706', badge: '#fef3c7', text: '#d97706', label: 'Engineering' },
+};
+
+const DEPT_CONFIG = {
+  COMMERCIAL: { label: 'Commercial', departments: ['REVENUE', 'ECOMM', 'SALES'], budgetField: 'sm_payroll_budget', budgetLabel: 'S&M Payroll Budget' },
+  FINANCE: { label: 'Finance', departments: ['FINANCE'], budgetField: 'finance_payroll_budget', budgetLabel: 'Finance Payroll Budget' },
+  HR: { label: 'HR', departments: ['HR'], budgetField: 'hr_payroll_budget', budgetLabel: 'HR Payroll Budget' },
+  ENGINEERING: { label: 'Engineering', departments: ['ENGINEERING'], budgetField: 'engineering_payroll_budget', budgetLabel: 'Engineering Payroll Budget' },
+};
+
 function fmt(n) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n || 0);
 }
@@ -48,11 +62,11 @@ function pageHeader(title, pageNum) {
   </div>`;
 }
 
-function pageFooter(pageNum) {
+function pageFooter(pageNum, cfg) {
   return `<div class="page-footer">
     <div style="display:flex;align-items:center;gap:8px;">
       ${RH_MARK_SMALL}
-      <span style="font-family:Inter,Arial,sans-serif;font-size:8px;color:#6b7280;">Rebel Hotel Co. — Commercial Talent Report 2027</span>
+      <span style="font-family:Inter,Arial,sans-serif;font-size:8px;color:#6b7280;">Rebel Hotel Co. — ${cfg.label} Talent Report 2027</span>
     </div>
     <span style="font-family:Inter,Arial,sans-serif;font-size:7px;font-weight:600;letter-spacing:0.1em;color:#fff;background:#2d4b5e;padding:2px 8px;border-radius:20px;">CONFIDENTIAL</span>
     <span style="font-family:Inter,Arial,sans-serif;font-size:8px;color:#9ca3af;">${pageNum}</span>
@@ -60,7 +74,7 @@ function pageFooter(pageNum) {
 }
 
 // ─── PAGE 1: COVER ────────────────────────────────────────────────────────────
-function buildCover(employees, hotels, date) {
+function buildCover(employees, hotels, date, cfg) {
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
   const totalPayroll = active.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const propHotels = hotels.filter(h => PROPERTY_HOTELS.includes(h.short_code));
@@ -69,7 +83,7 @@ function buildCover(employees, hotels, date) {
     <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 60px 40px;">
       <span style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:600;letter-spacing:0.18em;color:rgba(255,255,255,0.6);text-transform:uppercase;">REBEL HOTEL CO.</span>
       <div style="width:60px;height:2px;background:#fff;margin:28px auto;opacity:0.35;"></div>
-      <div style="font-family:'Playfair Display',Georgia,serif;font-size:52px;font-weight:400;color:#fff;letter-spacing:0.02em;text-align:center;line-height:1.1;">Commercial Talent</div>
+      <div style="font-family:'Playfair Display',Georgia,serif;font-size:52px;font-weight:400;color:#fff;letter-spacing:0.02em;text-align:center;line-height:1.1;">${cfg.label} Talent</div>
       <div style="font-family:Inter,Arial,sans-serif;font-size:18px;font-weight:300;color:rgba(255,255,255,0.75);margin-top:10px;">Executive Dashboard</div>
       <div style="width:60px;height:2px;background:#fff;margin:28px auto;opacity:0.35;"></div>
       <div style="font-family:Inter,Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.45);margin-top:20px;">2027 &nbsp;·&nbsp; Prepared ${date}</div>
@@ -80,7 +94,7 @@ function buildCover(employees, hotels, date) {
         { label: 'Total Employees', value: active.length },
         { label: 'Total Payroll', value: fmtK(totalPayroll) },
         { label: 'Hotels', value: propHotels.length },
-        { label: 'Departments', value: 3 },
+        { label: 'Departments', value: cfg.departments.length },
       ].map((s, i, arr) => `
         <div style="text-align:center;${i < arr.length - 1 ? 'border-right:1px solid rgba(255,255,255,0.15);padding-right:40px;margin-right:40px;' : ''}">
           <div style="font-family:'Playfair Display',Georgia,serif;font-size:28px;color:#fff;">${s.value}</div>
@@ -94,7 +108,7 @@ function buildCover(employees, hotels, date) {
 }
 
 // ─── PAGE 2: EXECUTIVE SUMMARY ────────────────────────────────────────────────
-function buildExecSummary(employees, hotels) {
+function buildExecSummary(employees, hotels, cfg) {
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
   const totalPayroll = active.reduce((s, e) => s + (e.annual_salary || 0), 0);
   const avgSalary = active.length ? totalPayroll / active.length : 0;
@@ -108,7 +122,7 @@ function buildExecSummary(employees, hotels) {
   const maxHotelTotal = Math.max(...Object.values(hotelTotals));
 
   // Dept breakdowns
-  const depts = ['REVENUE', 'ECOMM', 'SALES'];
+  const depts = cfg.departments;
   const deptData = depts.map(d => {
     const emps = active.filter(e => e.department === d);
     const total = emps.reduce((s, e) => s + e.annual_salary, 0);
@@ -118,9 +132,10 @@ function buildExecSummary(employees, hotels) {
   // Budget table
   const budgetRows = propHotels.map(h => {
     const allocated = hotelTotals[h.short_code] || 0;
-    const variance = h.sm_payroll_budget ? allocated - h.sm_payroll_budget : null;
-    const pctUsed = h.sm_payroll_budget ? (allocated / h.sm_payroll_budget * 100).toFixed(1) : null;
-    return { name: HOTEL_NAMES[h.short_code], roomRev: h.total_revenue_budget, smBudget: h.sm_payroll_budget, allocated, variance, pctUsed };
+    const budget = h[cfg.budgetField] || 0;
+    const variance = budget ? allocated - budget : null;
+    const pctUsed = budget ? (allocated / budget * 100).toFixed(1) : null;
+    return { name: HOTEL_NAMES[h.short_code], roomRev: h.total_revenue_budget, smBudget: budget, allocated, variance, pctUsed };
   });
 
   return `<div class="page">
@@ -159,7 +174,7 @@ function buildExecSummary(employees, hotels) {
         <div style="font-family:Inter,Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#2d4b5e;margin-bottom:8px;border-bottom:2px solid #e2e7ed;padding-bottom:4px;">Payroll by Department</div>
         <div style="display:flex;gap:16px;">
           ${deptData.map(d => `<div style="flex:1;border-radius:8px;padding:14px;background:#f8fafb;border:1px solid #e2e7ed;">
-            <div style="display:inline-block;padding:2px 10px;border-radius:20px;background:${DEPT_COLORS[d.dept]?.badge};color:${DEPT_COLORS[d.dept]?.text};font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">${DEPT_COLORS[d.dept]?.label}</div>
+            <div style="display:inline-block;padding:2px 10px;border-radius:20px;background:${EXT_DEPT_COLORS[d.dept]?.badge};color:${EXT_DEPT_COLORS[d.dept]?.text};font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">${EXT_DEPT_COLORS[d.dept]?.label}</div>
             <div style="font-family:'Playfair Display',Georgia,serif;font-size:22px;color:#1d1f1c;">${fmt(d.total)}</div>
             <div style="font-family:Inter,Arial,sans-serif;font-size:9px;color:#6b7280;margin-top:4px;">${d.count} employees &nbsp;·&nbsp; ${d.pct}% of payroll</div>
           </div>`).join('')}
@@ -172,7 +187,7 @@ function buildExecSummary(employees, hotels) {
         <table style="width:100%;border-collapse:collapse;font-family:Inter,Arial,sans-serif;font-size:9px;">
           <thead>
             <tr style="background:#2d4b5e;">
-              ${['Hotel','Total Rev Budget','S&M Payroll Budget','Salary Allocated','Variance','% Used'].map(h =>
+              ${['Hotel','Total Rev Budget',cfg.budgetLabel,'Salary Allocated','Variance','% Used'].map(h =>
                 `<th style="padding:7px 10px;color:rgba(255,255,255,0.85);font-weight:600;text-align:${h==='Hotel'?'left':'right'};letter-spacing:0.05em;">${h}</th>`
               ).join('')}
             </tr>
@@ -190,12 +205,12 @@ function buildExecSummary(employees, hotels) {
         </table>
       </div>
     </div>
-    ${pageFooter(2)}
+    ${pageFooter(2, cfg)}
   </div>`;
 }
 
 // ─── PAGE 3+: SALARY ALLOCATION TABLE (SPLIT BY HOTEL GROUP) ──────────────
-function buildSalaryTables(employees, hotels) {
+function buildSalaryTables(employees, hotels, cfg) {
   const hotelOrder = orderHotelsByRevenue(hotels);
   const propHotels = hotelOrder.filter(h => h.short_code !== 'CORP');
   const corpHotel = hotelOrder.find(h => h.short_code === 'CORP');
@@ -205,7 +220,7 @@ function buildSalaryTables(employees, hotels) {
   const pageNum = 3;
 
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
-  const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
+  const deptOrder = cfg.departments;
 
   return hotelGroups.map((cols, pageIdx) => {
     let rows = '';
@@ -216,7 +231,7 @@ function buildSalaryTables(employees, hotels) {
       const deptEmps = active.filter(e => e.department === dept).sort((a, b) => b.annual_salary - a.annual_salary);
       if (!deptEmps.length) return;
 
-      const dc = DEPT_COLORS[dept];
+      const dc = EXT_DEPT_COLORS[dept];
       const deptTotal = deptEmps.reduce((s, e) => s + e.annual_salary, 0);
 
       rows += `<tr style="background:#e8f0f5;">
@@ -285,30 +300,31 @@ function buildSalaryTables(employees, hotels) {
           <tbody>${rows}</tbody>
         </table>
       </div>
-      ${pageFooter(pageNum + pageIdx)}
+      ${pageFooter(pageNum + pageIdx, cfg)}
     </div>`;
   }).join('');
 }
 
 // ─── PAGE 4: HOTEL BUDGET BREAKDOWN ──────────────────────────────────────────
-function buildHotelBreakdown(employees, hotels) {
+function buildHotelBreakdown(employees, hotels, cfg) {
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
   const propHotels = orderHotelsByRevenue(hotels.filter(h => PROPERTY_HOTELS.includes(h.short_code)));
 
   const hotelSections = propHotels.map(h => {
     const code = h.short_code;
     const allocated = active.reduce((s, e) => s + ((e.allocations?.[code] || 0) * e.annual_salary), 0);
-    const remaining = h.sm_payroll_budget ? h.sm_payroll_budget - allocated : null;
-    const pctUsed = h.sm_payroll_budget ? (allocated / h.sm_payroll_budget * 100) : null;
+    const budget = h[cfg.budgetField] || 0;
+    const remaining = budget ? budget - allocated : null;
+    const pctUsed = budget ? (allocated / budget * 100) : null;
     const barColor = pctUsed === null ? '#9ca3af' : pctUsed > 100 ? '#dc2626' : pctUsed > 80 ? '#d97706' : '#16a34a';
     const barWidth = pctUsed !== null ? Math.min(pctUsed, 100).toFixed(1) : 0;
 
-    const deptOrder = ['REVENUE', 'ECOMM', 'SALES'];
+    const deptOrder = cfg.departments;
     let empRows = '';
     deptOrder.forEach(dept => {
       const deptEmps = active.filter(e => e.department === dept && (e.allocations?.[code] || 0) > 0);
       if (!deptEmps.length) return;
-      const dc = DEPT_COLORS[dept];
+      const dc = EXT_DEPT_COLORS[dept];
       const deptTotal = deptEmps.reduce((s, e) => s + ((e.allocations?.[code] || 0) * e.annual_salary), 0);
       empRows += `<tr><td colspan="4" style="padding:4px 6px;background:#f0f4f7;font-family:Inter,Arial,sans-serif;font-size:7.5px;font-weight:700;color:${dc.text};text-transform:uppercase;">${dc.label}</td></tr>`;
       deptEmps.forEach(e => {
@@ -328,7 +344,7 @@ function buildHotelBreakdown(employees, hotels) {
       <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
         ${[
           { l: 'Total Rev Budget', v: h.total_revenue_budget ? fmt(h.total_revenue_budget) : '—' },
-          { l: 'S&M Payroll Budget', v: h.sm_payroll_budget ? fmt(h.sm_payroll_budget) : '—' },
+          { l: cfg.budgetLabel, v: h[cfg.budgetField] ? fmt(h[cfg.budgetField]) : '—' },
           { l: 'Salary Allocated', v: fmt(allocated) },
           { l: 'Remaining Budget', v: remaining !== null ? fmt(remaining) : '—', color: remaining !== null ? (remaining < 0 ? '#dc2626' : '#16a34a') : '#6b7280' },
         ].map(s => `<div style="flex:1;min-width:80px;">
@@ -365,12 +381,12 @@ function buildHotelBreakdown(employees, hotels) {
         <div style="display:flex;flex-direction:column;gap:16px;">${right.join('')}</div>
       </div>
     </div>
-    ${pageFooter(4)}
+    ${pageFooter(4, cfg)}
   </div>`;
 }
 
 // ─── PAGE 5: ORG CHART ────────────────────────────────────────────────────────
-function buildOrgChart(employees) {
+function buildOrgChart(employees, cfg) {
   const active = employees.filter(e => !e.suppressed);
 
   // Build children map
@@ -382,7 +398,7 @@ function buildOrgChart(employees) {
     childrenMap[mid].push(emp);
   });
 
-  const DEPT_DOT = { REVENUE: '#0d9488', ECOMM: '#f97316', SALES: '#9333ea' };
+  const DEPT_DOT = { REVENUE: '#0d9488', ECOMM: '#f97316', SALES: '#9333ea', FINANCE: '#2563eb', HR: '#e11d48', ENGINEERING: '#d97706' };
 
   function renderNode(emp, level = 0) {
     const children = childrenMap[emp.id] || [];
@@ -418,12 +434,12 @@ function buildOrgChart(employees) {
         ${roots.map(r => renderNode(r)).join('')}
       </div>
     </div>
-    ${pageFooter(5)}
+    ${pageFooter(5, cfg)}
   </div>`;
 }
 
 // ─── PAGE 6: ALERTS & ANALYTICS ──────────────────────────────────────────────
-function buildAlertsAnalytics(employees, hotels) {
+function buildAlertsAnalytics(employees, hotels, cfg) {
   const active = employees.filter(e => !e.suppressed && !e.exclude_from_table);
   const totalPayroll = active.reduce((s, e) => s + e.annual_salary, 0);
 
@@ -435,7 +451,7 @@ function buildAlertsAnalytics(employees, hotels) {
     const isOver = pct > 100;
     const badge = isExact ? '✅ 100%' : isOver ? `⚠️ Over (${pct}%)` : `❌ Under (${pct}%)`;
     const badgeColor = isExact ? '#16a34a' : isOver ? '#d97706' : '#dc2626';
-    const dc = DEPT_COLORS[e.department];
+    const dc = EXT_DEPT_COLORS[e.department];
     return `<tr style="background:${active.indexOf(e)%2?'#f9f7f6':'#fff'};">
       <td style="padding:5px 8px;font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:600;color:#1d1f1c;">${e.name}</td>
       <td style="padding:5px 8px;"><span style="background:${dc?.badge};color:${dc?.text};padding:1px 6px;border-radius:3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;font-weight:700;">${dc?.label}</span></td>
@@ -447,7 +463,7 @@ function buildAlertsAnalytics(employees, hotels) {
   const propHotels = hotels.filter(h => PROPERTY_HOTELS.includes(h.short_code));
   const alertRows = propHotels.map(h => {
     const allocated = active.reduce((s, e) => s + ((e.allocations?.[h.short_code] || 0) * e.annual_salary), 0);
-    const budget = h.sm_payroll_budget || 0;
+    const budget = h[cfg.budgetField] || 0;
     const over = budget > 0 && allocated > budget;
     if (!over) return '';
     const variance = allocated - budget;
@@ -460,13 +476,13 @@ function buildAlertsAnalytics(employees, hotels) {
   }).join('');
 
   // Dept analytics
-  const depts = ['REVENUE', 'ECOMM', 'SALES'];
+  const depts = cfg.departments;
   const deptRows = depts.map(dept => {
     const emps = active.filter(e => e.department === dept);
     const total = emps.reduce((s, e) => s + e.annual_salary, 0);
     const avg = emps.length ? total / emps.length : 0;
     const pct = totalPayroll ? (total / totalPayroll * 100).toFixed(1) : '0';
-    const dc = DEPT_COLORS[dept];
+    const dc = EXT_DEPT_COLORS[dept];
     return `<tr>
       <td style="padding:6px 8px;"><span style="background:${dc.badge};color:${dc.text};padding:2px 8px;border-radius:3px;font-family:Inter,Arial,sans-serif;font-size:7.5px;font-weight:700;">${dc.label}</span></td>
       <td style="padding:6px 8px;font-family:Inter,Arial,sans-serif;font-size:8.5px;text-align:center;">${emps.length}</td>
@@ -479,7 +495,7 @@ function buildAlertsAnalytics(employees, hotels) {
   // Top earners
   const topEarners = [...active].sort((a, b) => b.annual_salary - a.annual_salary).slice(0, 5);
   const earnerRows = topEarners.map((e, i) => {
-    const dc = DEPT_COLORS[e.department];
+    const dc = EXT_DEPT_COLORS[e.department];
     return `<tr style="background:${i%2?'#f9f7f6':'#fff'};">
       <td style="padding:6px 8px;font-family:'Playfair Display',Georgia,serif;font-size:14px;color:#c0c4c8;font-weight:600;">${i+1}</td>
       <td style="padding:6px 8px;font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:700;color:#1d1f1c;">${e.name}</td>
@@ -515,7 +531,7 @@ function buildAlertsAnalytics(employees, hotels) {
               <th style="padding:6px 8px;color:#fff;font-size:8px;text-align:right;font-family:Inter,Arial,sans-serif;">Over By</th>
             </tr></thead>
             <tbody>${alertRows}</tbody>
-          </table>` : `${sectionTitle('Budget Alerts')}<div style="font-family:Inter,Arial,sans-serif;font-size:9px;color:#16a34a;padding:12px 0;">✅ All hotels are within S&M payroll budget.</div>`}
+          </table>` : `${sectionTitle('Budget Alerts')}<div style="font-family:Inter,Arial,sans-serif;font-size:9px;color:#16a34a;padding:12px 0;">✅ All hotels are within ${cfg.budgetLabel} limits.</div>`}
         </div>
 
         <div>
@@ -542,12 +558,13 @@ function buildAlertsAnalytics(employees, hotels) {
         </div>
       </div>
     </div>
-    ${pageFooter(6)}
+    ${pageFooter(6, cfg)}
   </div>`;
 }
 
 // ─── MAIN EXPORT FUNCTION ─────────────────────────────────────────────────────
-export function generateExecPDF(employees, hotels, redactedIds = new Set()) {
+export function generateExecPDF(employees, hotels, redactedIds = new Set(), dept = 'COMMERCIAL') {
+  const cfg = DEPT_CONFIG[dept] || DEPT_CONFIG.COMMERCIAL;
   // Apply salary redaction — mask salary for any employee whose ID is in the set
   const employeesForPDF = employees.map(e =>
     redactedIds.has(e.id) ? { ...e, annual_salary: null, _redacted: true } : e
@@ -560,7 +577,7 @@ export function generateExecPDF(employees, hotels, redactedIds = new Set()) {
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Rebel Hotel Co. — Commercial Talent Executive Report 2027</title>
+<title>Rebel Hotel Co. — ${cfg.label} Talent Executive Report 2027</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -602,12 +619,12 @@ export function generateExecPDF(employees, hotels, redactedIds = new Set()) {
 </style>
 </head>
 <body>
-${buildCover(employeesForPDF, hotels, dateStr)}
-${buildExecSummary(employeesForPDF, hotels)}
-${buildSalaryTables(employeesForPDF, hotels)}
-${buildHotelBreakdown(employeesForPDF, hotels)}
-${buildOrgChart(employeesForPDF)}
-${buildAlertsAnalytics(employeesForPDF, hotels)}
+${buildCover(employeesForPDF, hotels, dateStr, cfg)}
+${buildExecSummary(employeesForPDF, hotels, cfg)}
+${buildSalaryTables(employeesForPDF, hotels, cfg)}
+${buildHotelBreakdown(employeesForPDF, hotels, cfg)}
+${buildOrgChart(employeesForPDF, cfg)}
+${buildAlertsAnalytics(employeesForPDF, hotels, cfg)}
 </body>
 </html>`;
 
