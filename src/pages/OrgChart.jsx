@@ -426,6 +426,7 @@ export default function OrgChart({ dept = 'COMMERCIAL' }) {
           hotels={sortedHotels}
           allEmployees={displayEmployees}
           fixedDepartment={isCommercial ? undefined : dept}
+          hideSalary
         />
       )}
 

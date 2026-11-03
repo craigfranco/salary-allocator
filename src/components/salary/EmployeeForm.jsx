@@ -9,7 +9,7 @@ import { Lock, Unlock } from 'lucide-react';
 
 const DEPARTMENT_LABELS = { FINANCE: 'Finance', HR: 'Human Resources', ENGINEERING: 'Engineering' };
 
-export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [], fixedDepartment }) {
+export default function EmployeeForm({ open, onClose, onSave, employee, hotels, allEmployees = [], fixedDepartment, hideSalary = false }) {
   const [form, setForm] = useState(employee || {
     name: '', title: '', department: fixedDepartment || 'REVENUE', annual_salary: 0, allocations: {}, manager_id: '', suppressed: false, locked_hotels: []
   });
@@ -178,7 +178,9 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
             </div>
             <div>
               <Label>Annual Salary</Label>
-              {form.exclude_from_table ? (
+              {hideSalary ? (
+                <div className="flex h-9 items-center px-3 rounded-md border border-dashed border-input bg-muted/30 text-sm text-muted-foreground">Hidden on the org chart — edit in the salary table</div>
+              ) : form.exclude_from_table ? (
                 <div className="flex h-9 items-center px-3 rounded-md border border-dashed border-input bg-muted/30 text-sm text-muted-foreground">Not required</div>
               ) : (
                 <Input type="number" value={form.annual_salary} onChange={(e) => handleChange('annual_salary', parseFloat(e.target.value) || 0)} />
