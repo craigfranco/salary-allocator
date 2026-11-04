@@ -413,7 +413,7 @@ function buildOrgChart(employees, cfg) {
       <div style="position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:${dot};"></div>
       <div style="font-family:Inter,Arial,sans-serif;font-size:8.5px;font-weight:600;color:#1d1f1c;padding-right:12px;">${emp.name}</div>
       <div style="font-family:Inter,Arial,sans-serif;font-size:7px;color:#6b7280;margin-top:2px;">${emp.title}</div>
-      <div style="font-family:Inter,Arial,sans-serif;font-size:7.5px;color:#2d4b5e;font-weight:600;margin-top:3px;">${emp._redacted ? '<span style="font-family:monospace;color:#9ca3af;letter-spacing:0.08em;">██████</span>' : fmt(emp.annual_salary)}</div>
+      <div style="font-family:Inter,Arial,sans-serif;font-size:7px;color:#6b7280;margin-top:3px;line-height:1.4;">${Object.entries(emp.allocations || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).map(([code, v]) => code + ' ' + (Math.round(v * 1000) / 10) + '%').join(' · ')}</div>
     </div>`;
 
     if (!children.length) return `<div style="display:flex;flex-direction:column;align-items:center;">${card}</div>`;
