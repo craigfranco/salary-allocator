@@ -141,6 +141,7 @@ function buildExecSummary(employees, hotels, cfg) {
   return `<div class="page">
     ${pageHeader('Executive Summary', 2)}
     <div class="page-content">
+      <div class="autofit-inner">
       <!-- KPI cards -->
       <div style="display:flex;gap:20px;margin-bottom:16px;">
         ${[
@@ -204,6 +205,7 @@ function buildExecSummary(employees, hotels, cfg) {
           </tbody>
         </table>
       </div>
+    </div>
     </div>
     ${pageFooter(2, cfg)}
   </div>`;
@@ -286,6 +288,7 @@ function buildSalaryTables(employees, hotels, cfg) {
     return `<div class="page">
       ${pageHeader('Salary Allocation Table', pageNum + pageIdx)}
       <div class="page-content" style="font-size:7px;">
+        <div class="autofit-inner">
         <table style="width:100%;border-collapse:collapse;">
           <thead>
             <tr style="background:#2d4b5e;">
@@ -299,6 +302,7 @@ function buildSalaryTables(employees, hotels, cfg) {
           </thead>
           <tbody>${rows}</tbody>
         </table>
+        </div>
       </div>
       ${pageFooter(pageNum + pageIdx, cfg)}
     </div>`;
@@ -376,9 +380,11 @@ function buildHotelBreakdown(employees, hotels, cfg) {
   return `<div class="page">
     ${pageHeader('Hotel Budget Breakdown', 4)}
     <div class="page-content">
+      <div class="autofit-inner">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
         <div style="display:flex;flex-direction:column;gap:16px;">${left.join('')}</div>
         <div style="display:flex;flex-direction:column;gap:16px;">${right.join('')}</div>
+      </div>
       </div>
     </div>
     ${pageFooter(4, cfg)}
@@ -510,6 +516,7 @@ function buildAlertsAnalytics(employees, hotels, cfg) {
   return `<div class="page">
     ${pageHeader('Allocation Alerts & Analytics', 6)}
     <div class="page-content">
+      <div class="autofit-inner">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
         <div>
           ${sectionTitle('Allocation Status')}
@@ -556,6 +563,7 @@ function buildAlertsAnalytics(employees, hotels, cfg) {
             <tbody>${earnerRows}</tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
     ${pageFooter(6, cfg)}
@@ -625,6 +633,29 @@ ${buildSalaryTables(employeesForPDF, hotels, cfg)}
 ${buildHotelBreakdown(employeesForPDF, hotels, cfg)}
 ${buildOrgChart(employeesForPDF, cfg)}
 ${buildAlertsAnalytics(employeesForPDF, hotels, cfg)}
+<script>
+  // Shrink each report page's content to fit its fixed-height page before printing.
+  function fitReport() {
+    document.querySelectorAll('.page-content').forEach(function (outer) {
+      var inner = outer.querySelector('.autofit-inner');
+      if (!inner) return;
+      var pt = parseFloat(getComputedStyle(outer).paddingTop) || 0;
+      var avail = outer.clientHeight - pt - 1;
+      if (inner.scrollHeight <= avail) return;
+      var scale = Math.max(0.4, Math.floor((avail / inner.scrollHeight) * 20) / 20);
+      inner.style.transform = 'scale(' + scale + ')';
+      inner.style.transformOrigin = 'top left';
+      inner.style.width = (100 / scale) + '%';
+    });
+  }
+  // Print only after everything (fonts, images) has loaded and the report is fitted.
+  window.addEventListener('load', function () {
+    (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () {
+      fitReport();
+      setTimeout(function () { window.print(); }, 300);
+    });
+  });
+</script>
 </body>
 </html>`;
 
@@ -632,5 +663,5 @@ ${buildAlertsAnalytics(employeesForPDF, hotels, cfg)}
   printWindow.document.write(html);
   printWindow.document.close();
   printWindow.focus();
-  setTimeout(() => printWindow.print(), 1200);
+  // The report page triggers window.print() itself once fully loaded and fitted (see script above).
 }
