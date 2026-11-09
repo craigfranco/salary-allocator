@@ -13,6 +13,7 @@ import Alerts from '@/pages/Alerts';
 import Analytics from '@/pages/Analytics';
 import ScenarioComparison from '@/pages/ScenarioComparison';
 import DeptBudgets from '@/pages/DeptBudgets';
+import UserManagement from '@/pages/UserManagement';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -57,6 +58,7 @@ function AppRoutes() {
           <Route path="/engineering/alerts" element={<Alerts dept="ENGINEERING" />} />
           <Route path="/engineering/compare" element={<ScenarioComparison dept="ENGINEERING" />} />
           <Route path="/engineering/org-chart" element={<OrgChart dept="ENGINEERING" />} />
+          <Route path="/users" element={<UserManagement />} />
         </Route>
       </Route>
 

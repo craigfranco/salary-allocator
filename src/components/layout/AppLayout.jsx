@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
-import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X } from 'lucide-react';
+import { TableProperties, Building2, Network, AlertTriangle, BarChart3, Moon, Sun, BookMarked, GitCompare, ChevronDown, X, Users } from 'lucide-react';
 import { useTheme } from '@/lib/theme.jsx';
 import { useScenario } from '@/lib/ScenarioContext';
 import { DEPT_LABELS, DEPT_BASE_ROUTES } from '@/lib/deptConfig';
@@ -50,6 +50,11 @@ export default function AppLayout() {
   const { data: scenarios = [] } = useQuery({
     queryKey: ['scenarios'],
     queryFn: () => base44.entities.Scenario.list('-updated_date', 50),
+  });
+
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => base44.auth.me(),
   });
   const deptScenarios = scenarios.filter(s => (s.department || 'COMMERCIAL') === routeDept);
 
@@ -140,6 +145,19 @@ export default function AppLayout() {
                   </Link>
                 );
               })}
+              {me?.role === 'admin' && (
+                <Link
+                  to="/users"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                    location.pathname === '/users'
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  }`}
+                >
+                  <Users className="w-4 h-4" />
+                  Users
+                </Link>
+              )}
             </div>
             <Popover open={scenarioOpen} onOpenChange={setScenarioOpen}>
               <PopoverTrigger asChild>
