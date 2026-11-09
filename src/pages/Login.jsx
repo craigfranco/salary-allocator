@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { loginWithMfa } from "@/lib/authMfa";
-import { signInWithProvider } from "@/lib/authMfaFlow";
 import MfaFlow from "@/components/MfaFlow";
 import { MfaScreen } from "@/components/MfaParts";
 import { Button } from "@/components/ui/button";
@@ -9,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
-import GoogleIcon from "@/components/GoogleIcon";
-import { authInput, authSubmit, authGoogle } from "@/lib/authStyles";
+import { authInput, authSubmit } from "@/lib/authStyles";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Login() {
@@ -39,11 +37,6 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogle = async () => {
-    try { await signInWithProvider("google", returnTo); }
-    catch (err) { setError(err.message || 'Unable to sign in with Google'); }
   };
 
   // The second sign-in step (authenticator app or text message) replaces the whole page.
@@ -122,22 +115,6 @@ export default function Login() {
           )}
         </Button>
       </form>
-
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[#e7ebf1]" />
-        </div>
-        <div className="relative flex justify-center">
-          <span className="bg-white px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#94a3b8]">
-            or continue with
-          </span>
-        </div>
-      </div>
-
-      <Button variant="outline" type="button" className={authGoogle} onClick={handleGoogle}>
-        <GoogleIcon className="w-4 h-4 mr-2" />
-        Continue with Google
-      </Button>
     </AuthLayout>
   );
 }
