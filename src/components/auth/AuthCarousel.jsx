@@ -16,7 +16,7 @@ const SLIDES = [
   },
 ];
 
-export default function AuthCarousel() {
+export default function AuthCarousel({ label }) {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -53,6 +53,12 @@ export default function AuthCarousel() {
       >
         <ChevronRight className="w-4 h-4" />
       </button>
+
+      {label && (
+        <div className="absolute bottom-3 left-3 text-[9px] font-semibold tracking-[0.18em] text-white/85">
+          {label}
+        </div>
+      )}
 
       <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
         {SLIDES.map((slide, i) => (
