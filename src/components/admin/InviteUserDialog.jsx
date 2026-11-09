@@ -36,7 +36,7 @@ export default function InviteUserDialog({ open, onClose, onInvited }) {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-display">Invite a user</DialogTitle>
+          <DialogTitle className="text-[15px] font-bold text-[#0f172a]">Add user</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 py-2">
           <div className="space-y-2">
@@ -55,8 +55,8 @@ export default function InviteUserDialog({ open, onClose, onInvited }) {
             <Select value={role} onValueChange={setRole}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="user">Standard user</SelectItem>
-                <SelectItem value="admin">Administrator</SelectItem>
+                <SelectItem value="user">Property user</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">

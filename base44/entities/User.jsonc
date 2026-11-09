@@ -1,4 +1,6 @@
 {
+  "name": "User",
+  "type": "object",
   "properties": {
     "role": {
       "type": "string",
@@ -7,11 +9,29 @@
         "admin",
         "user"
       ]
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Disciplines the user can access (COMMERCIAL, FINANCE, HR, ENGINEERING) or [\"ALL\"] for every discipline",
+      "default": [
+        "ALL"
+      ]
+    },
+    "hotels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Hotel short codes the user can access, or [\"ALL\"] for every hotel",
+      "default": [
+        "ALL"
+      ]
     }
   },
   "required": [
     "role"
-  ],
-  "name": "User",
-  "type": "object"
+  ]
 }
