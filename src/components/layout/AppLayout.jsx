@@ -145,19 +145,6 @@ export default function AppLayout() {
                   </Link>
                 );
               })}
-              {me?.role === 'admin' && (
-                <Link
-                  to="/users"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                    location.pathname === '/users'
-                      ? 'bg-primary text-primary-foreground shadow-md'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Users className="w-4 h-4" />
-                  Users
-                </Link>
-              )}
             </div>
             <Popover open={scenarioOpen} onOpenChange={setScenarioOpen}>
               <PopoverTrigger asChild>
@@ -211,6 +198,33 @@ export default function AppLayout() {
       <main className="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
         <Outlet />
       </main>
+
+      <footer className="border-t border-border bg-muted/40 mt-8">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-h-[24px]">
+            {me?.role === 'admin' && (
+              <>
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Admin</span>
+                <Link
+                  to="/users"
+                  className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
+                    location.pathname === '/users' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  User Management
+                </Link>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded bg-[#2d414d] text-white text-[9px] font-bold flex items-center justify-center">
+              RH
+            </div>
+            <span className="text-xs font-medium text-foreground/80">Rebel Hotel Company</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
