@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Lock, Unlock } from 'lucide-react';
+import { roundUpPoints } from '@/lib/helpers';
 
 const DEPARTMENT_LABELS = { FINANCE: 'Finance', HR: 'Human Resources', ENGINEERING: 'Engineering' };
 
@@ -23,33 +24,18 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   const [lockedHotels, setLockedHotels] = useState(new Set(employee?.locked_hotels || []));
   const pctRefs = useRef({});
 
-  // Spread a remainder into whole percentage points, rounding up and keeping the total exact.
-  const roundUpPoints = (weights, remainder) => {
-    const target = Math.round(remainder * 100);
-    const total = weights.reduce((s, w) => s + w, 0);
-    if (total <= 0 || target <= 0) return weights.map(() => 0);
-    const points = weights.map(w => (w > 0 ? Math.ceil((w / total) * target) : 0));
-    let excess = points.reduce((s, p) => s + p, 0) - target;
-    while (excess > 0) {
-      let idx = 0;
-      points.forEach((p, i) => { if (p > points[idx]) idx = i; });
-      if (points[idx] <= 0) break;
-      points[idx] -= 1;
-      excess -= 1;
-    }
-    return points.map(p => p / 100);
-  };
-
   // Spread the remainder (1 - lockedSum) evenly across unlocked, selected hotels.
   const spreadRemainderEvenly = (lockedSet) => {
     const lockedSum = hotels.filter(h => lockedSet.has(h.short_code)).reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
     const remainder = Math.max(0, 1 - lockedSum);
     const unlocked = hotels.filter(h => !lockedSet.has(h.short_code) && selectedHotels.has(h.short_code));
-    const each = unlocked.length > 0 ? remainder / unlocked.length : 0;
+    const shares = roundUpPoints(unlocked.map(() => 1), remainder);
+    const byCode = {};
+    unlocked.forEach((h, i) => { byCode[h.short_code] = shares[i]; });
     const newAllocs = {};
     hotels.forEach(h => {
       if (lockedSet.has(h.short_code)) newAllocs[h.short_code] = form.allocations?.[h.short_code] || 0;
-      else newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? each : 0;
+      else newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? (byCode[h.short_code] || 0) : 0;
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
   };
@@ -75,10 +61,12 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     if (lockedHotels.size > 0) { spreadRemainderEvenly(lockedHotels); return; }
     const selected = hotels.filter(h => selectedHotels.has(h.short_code));
     if (selected.length === 0) return;
-    const even = 1 / selected.length;
+    const shares = roundUpPoints(selected.map(() => 1), 1);
+    const byCode = {};
+    selected.forEach((h, i) => { byCode[h.short_code] = shares[i]; });
     const newAllocs = {};
     hotels.forEach(h => {
-      newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? even : 0;
+      newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? (byCode[h.short_code] || 0) : 0;
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
   };
@@ -142,11 +130,13 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
       const lockedSum = hotels.filter(h => lockedHotels.has(h.short_code)).reduce((s, h) => s + lockedValues[h.short_code], 0);
       const remainder = Math.max(0, 1 - lockedSum);
       const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code));
-      const each = unlocked.length > 0 ? remainder / unlocked.length : 0;
+      const shares = roundUpPoints(unlocked.map(() => 1), remainder);
+      const byCode = {};
+      unlocked.forEach((h, i) => { byCode[h.short_code] = shares[i]; });
       const newAllocs = {};
       hotels.forEach(h => {
         if (lockedHotels.has(h.short_code)) newAllocs[h.short_code] = lockedValues[h.short_code];
-        else newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? each : 0;
+        else newAllocs[h.short_code] = selectedHotels.has(h.short_code) ? (byCode[h.short_code] || 0) : 0;
       });
       setForm(prev => ({ ...prev, allocations: newAllocs }));
       return;

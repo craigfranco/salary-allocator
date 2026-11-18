@@ -100,7 +100,25 @@ export function orderHotelsByRevenue(hotels) {
   });
 }
 
-// Rescale allocations to exactly 100%, holding locked hotels fixed.
+// Distribute a remainder by weight into whole percentage points, rounding up,
+// while keeping the total exact. Returns decimals (0.33 = 33%).
+export function roundUpPoints(weights, remainder = 1) {
+  const target = Math.round(remainder * 100);
+  const total = (weights || []).reduce((s, w) => s + w, 0);
+  if (total <= 0 || target <= 0) return (weights || []).map(() => 0);
+  const points = weights.map(w => (w > 0 ? Math.ceil((w / total) * target) : 0));
+  let excess = points.reduce((s, p) => s + p, 0) - target;
+  while (excess > 0) {
+    let idx = 0;
+    points.forEach((p, i) => { if (p > points[idx]) idx = i; });
+    if (points[idx] <= 0) break;
+    points[idx] -= 1;
+    excess -= 1;
+  }
+  return points.map(p => p / 100);
+}
+
+// Rescale allocations to exactly 100% in whole points, holding locked hotels fixed.
 export function spreadTo100(allocations, lockedHotels = []) {
   const allocs = { ...(allocations || {}) };
   const locked = new Set(lockedHotels || []);
@@ -109,11 +127,7 @@ export function spreadTo100(allocations, lockedHotels = []) {
   if (remainder <= 0) return allocs;
   const targets = Object.keys(allocs).filter(c => !locked.has(c) && (allocs[c] || 0) > 0);
   if (targets.length === 0) return allocs;
-  const unlockedSum = targets.reduce((s, c) => s + allocs[c], 0);
-  if (unlockedSum > 0) {
-    targets.forEach(c => { allocs[c] = remainder * (allocs[c] / unlockedSum); });
-  } else {
-    targets.forEach(c => { allocs[c] = remainder / targets.length; });
-  }
+  const points = roundUpPoints(targets.map(c => allocs[c]), remainder);
+  targets.forEach((c, i) => { allocs[c] = points[i]; });
   return allocs;
 }
