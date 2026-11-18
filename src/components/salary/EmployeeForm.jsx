@@ -23,6 +23,23 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
   const [lockedHotels, setLockedHotels] = useState(new Set(employee?.locked_hotels || []));
   const pctRefs = useRef({});
 
+  // Spread a remainder into whole percentage points, rounding up and keeping the total exact.
+  const roundUpPoints = (weights, remainder) => {
+    const target = Math.round(remainder * 100);
+    const total = weights.reduce((s, w) => s + w, 0);
+    if (total <= 0 || target <= 0) return weights.map(() => 0);
+    const points = weights.map(w => (w > 0 ? Math.ceil((w / total) * target) : 0));
+    let excess = points.reduce((s, p) => s + p, 0) - target;
+    while (excess > 0) {
+      let idx = 0;
+      points.forEach((p, i) => { if (p > points[idx]) idx = i; });
+      if (points[idx] <= 0) break;
+      points[idx] -= 1;
+      excess -= 1;
+    }
+    return points.map(p => p / 100);
+  };
+
   // Spread the remainder (1 - lockedSum) evenly across unlocked, selected hotels.
   const spreadRemainderEvenly = (lockedSet) => {
     const lockedSum = hotels.filter(h => lockedSet.has(h.short_code)).reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
@@ -70,9 +87,12 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     const locked = hotels.filter(h => lockedHotels.has(h.short_code));
     const lockedSum = locked.reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
     const remainder = locked.length > 0 ? Math.max(0, 1 - lockedSum) : 1;
-    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code) && (h.room_count || 0) > 0);
-    const totalRooms = unlocked.reduce((s, h) => s + h.room_count, 0);
+    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code));
+    const totalRooms = unlocked.reduce((s, h) => s + (h.room_count || 0), 0);
     if (locked.length === 0 && totalRooms === 0) return;
+    const shares = roundUpPoints(unlocked.map(h => h.room_count || 0), remainder);
+    const byCode = {};
+    unlocked.forEach((h, i) => { byCode[h.short_code] = shares[i]; });
     const newAllocs = {};
     hotels.forEach(h => {
       if (lockedHotels.has(h.short_code)) {
@@ -80,8 +100,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
       } else if (!selectedHotels.has(h.short_code)) {
         newAllocs[h.short_code] = 0;
       } else {
-        const rooms = h.room_count || 0;
-        newAllocs[h.short_code] = (totalRooms > 0 && rooms > 0) ? (rooms / totalRooms) * remainder : 0;
+        newAllocs[h.short_code] = byCode[h.short_code] || 0;
       }
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
@@ -91,9 +110,12 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
     const locked = hotels.filter(h => lockedHotels.has(h.short_code));
     const lockedSum = locked.reduce((s, h) => s + (form.allocations?.[h.short_code] || 0), 0);
     const remainder = locked.length > 0 ? Math.max(0, 1 - lockedSum) : 1;
-    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code) && (h.total_revenue_budget || 0) > 0);
-    const totalRev = unlocked.reduce((s, h) => s + h.total_revenue_budget, 0);
+    const unlocked = hotels.filter(h => !lockedHotels.has(h.short_code) && selectedHotels.has(h.short_code));
+    const totalRev = unlocked.reduce((s, h) => s + (h.total_revenue_budget || 0), 0);
     if (locked.length === 0 && totalRev === 0) return;
+    const shares = roundUpPoints(unlocked.map(h => h.total_revenue_budget || 0), remainder);
+    const byCode = {};
+    unlocked.forEach((h, i) => { byCode[h.short_code] = shares[i]; });
     const newAllocs = {};
     hotels.forEach(h => {
       if (lockedHotels.has(h.short_code)) {
@@ -101,8 +123,7 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
       } else if (!selectedHotels.has(h.short_code)) {
         newAllocs[h.short_code] = 0;
       } else {
-        const rev = h.total_revenue_budget || 0;
-        newAllocs[h.short_code] = (totalRev > 0 && rev > 0) ? (rev / totalRev) * remainder : 0;
+        newAllocs[h.short_code] = byCode[h.short_code] || 0;
       }
     });
     setForm(prev => ({ ...prev, allocations: newAllocs }));
