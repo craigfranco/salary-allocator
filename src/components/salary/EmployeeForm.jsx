@@ -307,7 +307,9 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                   <div
                     key={h.short_code}
                     className={`rounded-xl border p-3 space-y-2 transition-colors ${
-                      isSelected ? 'border-border bg-muted/30' : 'border-border/50 bg-muted/10 opacity-60'
+                      isLocked
+                        ? 'border-primary ring-1 ring-primary/30 bg-primary/5'
+                        : isSelected ? 'border-border bg-muted/30' : 'border-border/50 bg-muted/10 opacity-60'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -317,13 +319,18 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                         className="flex-shrink-0"
                       />
                       <div className={`flex-1 min-w-0 text-sm font-semibold truncate ${isSelected ? 'text-foreground' : 'text-muted-foreground'}`}>{h.name}</div>
+                      {isLocked && (
+                        <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-primary text-primary-foreground flex-shrink-0">
+                          <Lock className="w-2.5 h-2.5" /> Locked
+                        </span>
+                      )}
                       <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-muted text-muted-foreground flex-shrink-0">{h.short_code}</span>
                     </div>
                     <div className="flex items-center gap-2 pl-7">
                       <Input
                         type="number"
                         min="0" max="100" step="0.1"
-                        className={`h-8 text-xs text-right ${isLocked ? 'border-primary/40 bg-primary/5 font-semibold' : ''}`}
+                        className={`h-8 text-xs text-right ${isLocked ? 'border-primary bg-primary/10 font-bold text-primary' : ''}`}
                         value={Math.round((form.allocations?.[h.short_code] || 0) * 1000) / 10}
                         onChange={(e) => handleAllocChange(h.short_code, e.target.value)}
                         ref={(el) => { pctRefs.current[h.short_code] = el; }}
@@ -340,11 +347,14 @@ export default function EmployeeForm({ open, onClose, onSave, employee, hotels, 
                         type="button"
                         onClick={() => toggleLock(h.short_code)}
                         title={isLocked ? 'Unlock this hotel' : 'Lock this % and spread the rest'}
-                        className="flex-shrink-0 p-1.5 rounded-lg hover:bg-muted transition-colors"
+                        className={`flex-shrink-0 flex items-center gap-1 h-8 px-2 rounded-md text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                          isLocked
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                            : 'border border-input text-muted-foreground hover:bg-muted hover:text-foreground'
+                        }`}
                       >
-                        {isLocked
-                          ? <Lock className="w-3.5 h-3.5 text-primary" />
-                          : <Unlock className="w-3.5 h-3.5 text-muted-foreground" />}
+                        {isLocked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                        {isLocked ? 'Locked' : 'Lock'}
                       </button>
                     </div>
                   </div>
