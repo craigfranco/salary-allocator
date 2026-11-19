@@ -6,7 +6,7 @@ import { MfaScreen } from "@/components/MfaParts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UserPlus, Mail, Lock, Loader2 } from "lucide-react";
+import { UserPlus, User, Mail, Lock, Loader2 } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import AuthLayout from "@/components/AuthLayout";
 import { authInput, authSubmit } from "@/lib/authStyles";
@@ -14,6 +14,7 @@ import { toast } from "@/components/ui/use-toast";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Register() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -53,6 +54,9 @@ export default function Register() {
       }
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+      }
+      if (fullName.trim()) {
+        await base44.auth.updateMe({ full_name: fullName.trim() });
       }
       window.location.href = safeReturnTo();
     } catch (err) {
@@ -142,7 +146,7 @@ export default function Register() {
           Already have an account?{" "}
           <Link
             to={loginPath}
-            className="text-primary font-medium hover:underline"
+            className="text-[#2d4b5e] font-semibold hover:underline"
           >
             Log in
           </Link>
@@ -156,10 +160,27 @@ export default function Register() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="full_name">Full name</Label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" aria-hidden="true" />
+            <Input
+              id="full_name"
+              type="text"
+              autoComplete="name"
+              autoFocus
+              placeholder="Jane Doe"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              className={authInput}
+              required
+            />
+          </div>
+        </div>
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" aria-hidden="true" />
             <Input
               id="email"
               type="email"
@@ -173,10 +194,10 @@ export default function Register() {
             />
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="password">Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" aria-hidden="true" />
             <Input
               id="password"
               type="password"
@@ -189,10 +210,10 @@ export default function Register() {
             />
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="confirm">Confirm Password</Label>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" aria-hidden="true" />
             <Input
               id="confirm"
               type="password"

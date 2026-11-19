@@ -52,14 +52,14 @@ export default function Login() {
           Don't have an account?{" "}
           <Link
             to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
-            className="text-primary font-medium hover:underline"
+            className="text-[#2d4b5e] font-semibold hover:underline"
           >
             Create one
           </Link>
           {" · "}
           <Link
             to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
-            className="text-primary font-medium hover:underline"
+            className="text-[#2d4b5e] font-semibold hover:underline"
           >
             Request access
           </Link>
@@ -76,7 +76,7 @@ export default function Login() {
         <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" aria-hidden="true" />
             <Input
               id="email"
               type="email"
@@ -98,7 +98,7 @@ export default function Login() {
             </Link>
           </div>
           <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#94a3b8]" aria-hidden="true" />
             <Input
               id="password"
               type="password"
