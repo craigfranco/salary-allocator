@@ -8,6 +8,8 @@
   :root {
     --font-inter: 'Inter', sans-serif;
     --font-display: 'Inter', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-heading: 'Inter', sans-serif;
 
     --background: 210 40% 98%;
     --foreground: 205 45% 16%;
@@ -88,5 +90,68 @@
   }
   body {
     @apply bg-background text-foreground font-inter;
+  }
+}
+
+@layer base {
+  :root, .dark {
+    --auth-panel: 201 47.619% 16.471%;
+    --auth-highlight: 172.6 40.9% 68.8%;
+    --auth-hover: 207.1 36.8% 22.4%;
+    --auth-placeholder: 220 8.9% 46.1%;
+    --auth-overlay: 0 0% 0%;
+    --auth-footer-border: 214.3 31.8% 91.4%;
+  }
+
+  /* The reference renders its Inter declaration with the system sans fallback.
+     Keep this local so the dashboard typography and dark theme are unchanged. */
+  .auth-shell {
+    --font-body: ui-sans-serif, system-ui, sans-serif;
+    --font-heading: ui-sans-serif, system-ui, sans-serif;
+    --background: 204 45.5% 97.8%;
+    --foreground: 205.5 52.6% 14.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 205.5 52.6% 14.9%;
+    --primary: 203.3 35.3% 27.3%;
+    --primary-foreground: 0 0% 100%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --border: 216 26.3% 92.5%;
+    --input: 207.7 25.5% 90%;
+    --ring: 203 35% 27%;
+    color-scheme: light;
+    font-feature-settings: 'tnum' 1, 'cv01' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  .auth-shell label {
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.5;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .auth-panel::before, .auth-panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .auth-panel::before {
+    background: radial-gradient(120% 90% at 20% 0%, rgba(79,125,149,0.35) 0%, rgba(22,48,62,0) 55%);
+  }
+
+  .auth-panel::after {
+    background-image: url('https://media.base44.com/images/public/6a3aac1387cca7f58c54761e/64e9faf8c_RebelTopoLines_White.png');
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.9) contrast(1.4);
+    opacity: 0.9;
+    -webkit-mask-image: radial-gradient(ellipse 72% 66% at 50% 50%, transparent 0%, transparent 45%, #000 100%);
+    mask-image: radial-gradient(ellipse 72% 66% at 50% 50%, transparent 0%, transparent 45%, #000 100%);
   }
 }

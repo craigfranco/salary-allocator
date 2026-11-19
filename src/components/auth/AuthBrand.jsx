@@ -1,32 +1,11 @@
 import React from 'react';
 
-export default function AuthBrand({ tone = 'dark' }) {
-  const isDark = tone === 'dark';
+export default function AuthBrand({ tone = 'dark', compact = false }) {
   return (
-    <div className="flex items-center gap-2.5 select-none">
-      <div
-        className={`w-9 h-9 rounded-[4px] border flex items-center justify-center text-[13px] font-extrabold tracking-tight ${
-          isDark ? 'border-white/85 text-white' : 'border-[#163240] text-[#163240]'
-        }`}
-      >
-        RB
-      </div>
-      <div className="leading-none">
-        <div
-          className={`text-[13px] font-extrabold uppercase tracking-[0.16em] ${
-            isDark ? 'text-white' : 'text-[#12293a]'
-          }`}
-        >
-          Rebel
-        </div>
-        <div
-          className={`text-[8px] font-medium uppercase tracking-[0.19em] mt-1 ${
-            isDark ? 'text-white/60' : 'text-[#64748b]'
-          }`}
-        >
-          Business Intelligence
-        </div>
-      </div>
-    </div>
+    <img
+      src="https://media.base44.com/images/public/6a3aac1387cca7f58c54761e/dd8af7569_2f08ffa4b_RBIfw1.png"
+      alt="REBEL Business Intelligence"
+      className={`${compact ? 'h-7' : 'h-20 xl:h-24'} w-auto object-contain ${tone === 'dark' ? 'brightness-0 invert opacity-90' : ''}`}
+    />
   );
 }

@@ -7,6 +7,8 @@ module.exports = {
       fontFamily: {
         inter: ['var(--font-inter)'],
         display: ['var(--font-display)'],
+        body: ['var(--font-body)'],
+        heading: ['var(--font-heading)'],
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -14,6 +16,14 @@ module.exports = {
         sm: 'calc(var(--radius) - 4px)',
       },
       colors: {
+        auth: {
+          panel: 'hsl(var(--auth-panel))',
+          highlight: 'hsl(var(--auth-highlight))',
+          hover: 'hsl(var(--auth-hover))',
+          placeholder: 'hsl(var(--auth-placeholder))',
+          overlay: 'hsl(var(--auth-overlay))',
+          'footer-border': 'hsl(var(--auth-footer-border))',
+        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
