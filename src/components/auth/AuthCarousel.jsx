@@ -28,7 +28,7 @@ export default function AuthCarousel({ label }) {
 
   return (
     <div>
-      <div className="relative rounded-xl overflow-hidden aspect-[16/10] bg-black/30">
+      <div className="relative rounded-xl overflow-hidden aspect-[16/9] bg-black/30">
         {SLIDES.map((slide, i) => (
           <img
             key={slide.src}

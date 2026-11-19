@@ -2,34 +2,52 @@ import React from "react";
 import AuthBrand from "@/components/auth/AuthBrand";
 import AuthCarousel from "@/components/auth/AuthCarousel";
 
+// Contour-line families that give the panel its topographic texture.
+const CONTOUR_A = "M-90 70C20 10 130 150 240 90s160-120 260-60";
+const CONTOUR_B = "M-90 130C10 200 120 60 230 120s170 130 280 70";
+
 export default function AuthLayout({ title, subtitle, footer, children }) {
   return (
     <div className="min-h-screen flex bg-[#f7fafc] font-inter">
       {/* Brand panel */}
-      <aside className="relative hidden lg:flex lg:w-[42%] flex-col justify-between overflow-hidden bg-[#11232d] px-10 py-10 xl:px-14 xl:py-12">
+      <aside className="relative hidden lg:flex lg:w-[40%] flex-col justify-between overflow-hidden bg-[#17303c] px-10 py-10 xl:px-14 xl:py-12">
         <svg
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]"
+          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.06]"
           viewBox="0 0 400 800"
           preserveAspectRatio="none"
           fill="none"
         >
-          <path d="M-60 120C40 60 120 200 220 140s150-120 240-60" stroke="#ffffff" strokeWidth="1" />
-          <path d="M-60 260C40 200 130 340 230 280s150-120 250-70" stroke="#ffffff" strokeWidth="1" />
-          <path d="M-60 420C50 350 130 500 240 430s150-130 250-80" stroke="#ffffff" strokeWidth="1" />
-          <path d="M-60 600C50 540 140 690 250 620s150-130 250-90" stroke="#ffffff" strokeWidth="1" />
+          {Array.from({ length: 22 }).map((_, i) => (
+            <path
+              key={`a-${i}`}
+              d={CONTOUR_A}
+              transform={`translate(0 ${i * 40 - 40})`}
+              stroke="#ffffff"
+              strokeWidth="1"
+            />
+          ))}
+          {Array.from({ length: 22 }).map((_, i) => (
+            <path
+              key={`b-${i}`}
+              d={CONTOUR_B}
+              transform={`translate(0 ${i * 40})`}
+              stroke="#ffffff"
+              strokeWidth="1"
+            />
+          ))}
         </svg>
 
         <div className="relative">
           <AuthBrand tone="dark" />
         </div>
 
-        <div className="relative max-w-[440px]">
-          <h2 className="font-display text-[32px] xl:text-[38px] font-bold leading-[1.15] tracking-tight text-white">
+        <div className="relative max-w-[400px]">
+          <h2 className="font-display text-[30px] xl:text-[36px] font-bold leading-[1.15] tracking-tight text-white">
             Your portfolio,{" "}
-            <span className="text-[#7fc6b0]">one intelligent console.</span>
+            <span className="text-[#8cc3b4]">one intelligent console.</span>
           </h2>
-          <p className="mt-5 text-[13.5px] leading-relaxed text-white/75">
+          <p className="mt-5 text-[13px] leading-[1.8] text-white/70">
             The operational console for the REBEL Hotel portfolio. High-precision market
             benchmarks, revenue management, P&amp;L performance, and data-driven forecasting,
             every property, one source of truth.
