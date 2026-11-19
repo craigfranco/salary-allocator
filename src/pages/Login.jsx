@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { LogIn, Mail, Lock, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/AuthLayout";
-import { authInput, authSubmit } from "@/lib/authStyles";
+import { authInput, authSubmit, authLink } from "@/lib/authStyles";
 import { safeReturnTo } from "@/lib/authReturnTo";
 
 export default function Login() {
@@ -56,6 +56,13 @@ export default function Login() {
           >
             Create one
           </Link>
+          {" · "}
+          <Link
+            to={"/register" + (returnTo !== "/" ? "?returnTo=" + encodeURIComponent(returnTo) : "")}
+            className="text-primary font-medium hover:underline"
+          >
+            Request access
+          </Link>
         </>
       }
     >
@@ -66,7 +73,7 @@ export default function Login() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="email">Email</Label>
           <div className="relative">
             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
@@ -83,10 +90,10 @@ export default function Login() {
             />
           </div>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link to="/forgot-password" className="text-xs text-primary hover:underline">
+            <Link to="/forgot-password" className={authLink}>
               Forgot password?
             </Link>
           </div>

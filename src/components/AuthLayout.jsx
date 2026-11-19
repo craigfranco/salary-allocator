@@ -4,12 +4,12 @@ import AuthCarousel from "@/components/auth/AuthCarousel";
 
 export default function AuthLayout({ title, subtitle, footer, children }) {
   return (
-    <div className="min-h-screen flex bg-[#f7f9fb] font-inter">
+    <div className="min-h-screen flex bg-[#f7fafc] font-inter">
       {/* Brand panel */}
-      <aside className="relative hidden lg:flex lg:w-[40%] flex-col justify-between overflow-hidden bg-[#10252e] px-10 py-10 xl:px-14 xl:py-12">
+      <aside className="relative hidden lg:flex lg:w-[42%] flex-col justify-between overflow-hidden bg-[#11232d] px-10 py-10 xl:px-14 xl:py-12">
         <svg
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.08]"
+          className="pointer-events-none absolute inset-0 h-full w-full opacity-[0.07]"
           viewBox="0 0 400 800"
           preserveAspectRatio="none"
           fill="none"
@@ -19,24 +19,20 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
           <path d="M-60 420C50 350 130 500 240 430s150-130 250-80" stroke="#ffffff" strokeWidth="1" />
           <path d="M-60 600C50 540 140 690 250 620s150-130 250-90" stroke="#ffffff" strokeWidth="1" />
         </svg>
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-40 -left-32 h-[520px] w-[520px] rounded-full bg-[#7ab8a7]/10 blur-[110px]"
-        />
 
         <div className="relative">
           <AuthBrand tone="dark" />
         </div>
 
-        <div className="relative max-w-[430px]">
+        <div className="relative max-w-[440px]">
           <h2 className="font-display text-[32px] xl:text-[38px] font-bold leading-[1.15] tracking-tight text-white">
             Your portfolio,{" "}
-            <span className="text-[#7ab8a7]">one intelligent salary view.</span>
+            <span className="text-[#7fc6b0]">one intelligent console.</span>
           </h2>
-          <p className="mt-5 text-[13.5px] leading-relaxed text-white/70">
-            The salary allocation console for the REBEL Hotel portfolio. Department payroll
-            budgets, hotel allocations and headcount benchmarks for every property, all in one
-            source of truth.
+          <p className="mt-5 text-[13.5px] leading-relaxed text-white/75">
+            The operational console for the REBEL Hotel portfolio. High-precision market
+            benchmarks, revenue management, P&amp;L performance, and data-driven forecasting,
+            every property, one source of truth.
           </p>
         </div>
 
@@ -47,7 +43,7 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
 
       {/* Form panel */}
       <main className="relative flex-1 flex flex-col items-center justify-center overflow-y-auto px-5 py-10">
-        <div className="w-full max-w-[420px]">
+        <div className="w-full max-w-[440px]">
           <div className="mb-6 flex justify-center lg:hidden">
             <AuthBrand tone="light" />
           </div>
@@ -68,14 +64,14 @@ export default function AuthLayout({ title, subtitle, footer, children }) {
           </div>
 
           {footer && (
-            <div className="mt-5 text-center text-[12.5px] text-[#64748b] [&_a]:text-[#263f4f] [&_a]:font-semibold [&_a]:hover:underline">
+            <div className="mt-5 text-center text-[12.5px] text-[#64748b] [&_a]:text-[#2d4b5e] [&_a]:font-semibold [&_a]:hover:underline">
               {footer}
             </div>
           )}
         </div>
 
         <div className="mt-10 flex items-center gap-2 sm:absolute sm:bottom-6 sm:right-6 sm:mt-0">
-          <div className="w-6 h-6 rounded-[5px] bg-[#263f4f] text-white text-[9px] font-bold flex items-center justify-center">
+          <div className="w-6 h-6 rounded-[5px] bg-[#2d4b5e] text-white text-[9px] font-bold flex items-center justify-center">
             RH
           </div>
           <span className="text-[11px] text-[#64748b]">Powered by Rebel Hotel Company</span>
