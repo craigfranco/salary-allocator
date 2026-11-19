@@ -199,29 +199,33 @@ export default function AppLayout() {
         <Outlet />
       </main>
 
-      <footer className="border-t border-border bg-muted/40 mt-8">
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-h-[24px]">
-            {me?.role === 'admin' && (
-              <>
-                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">Admin</span>
-                <Link
-                  to="/users"
-                  className={`flex items-center gap-1.5 text-xs font-medium transition-colors ${
-                    location.pathname === '/users' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  <Users className="w-3.5 h-3.5" />
-                  User Management
-                </Link>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded bg-[#2d414d] text-white text-[9px] font-bold flex items-center justify-center">
-              RH
-            </div>
-            <span className="text-xs font-medium text-foreground/80">Rebel Hotel Company</span>
+      <footer className="h-[52px] bg-card border-t border-border flex items-center px-[22px] gap-4 shrink-0 mt-8">
+        <div className="flex items-center gap-4 min-h-[24px]">
+          {me?.role === 'admin' && (
+            <>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Admin</span>
+              <Link
+                to="/users"
+                className={`flex items-center gap-1.5 text-[12.5px] font-medium transition-colors ${
+                  location.pathname === '/users' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                User Management
+              </Link>
+            </>
+          )}
+        </div>
+        <div className="flex-1" />
+        <div className="flex items-center gap-2.5">
+          <img
+            src="https://media.base44.com/images/public/6a3aac1387cca7f58c54761e/81f766e50_RBLMark-RH_Blue.png"
+            alt="Rebel Hotel Company"
+            className="w-8 h-8 object-contain"
+          />
+          <div className="leading-tight">
+            <div className="text-muted-foreground text-[11px] font-medium tracking-wide">Powered by</div>
+            <div className="text-primary text-[13px] font-bold tracking-tight">Rebel Hotel Company</div>
           </div>
         </div>
       </footer>
